@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="lavish-design" content="off">
+<title>Metadata Voice</title>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300..700;1,6..72,300..700&family=Hanken+Grotesk:wght@400;500;600;700&family=DM+Mono:wght@400;500&family=JetBrains+Mono:wght@400;500&family=Martian+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--wall:#F7F5F0;--ink:#1B1A17;--ink-2:#55514A;--ink-3:#736E66;--rule:#E4E0D7;--accent:#D2462A;
+  --serif:'Newsreader',Georgia,serif;--sans:'Hanken Grotesk',system-ui,sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#ECEAE4;color:var(--ink);font-family:var(--sans);line-height:1.5;padding:48px 16px 96px}
+.wrap{max-width:1240px;margin:0 auto}
+h1{font-family:var(--serif);font-weight:400;font-size:clamp(32px,4.5vw,50px);letter-spacing:-.025em;line-height:1}
+.lede{color:var(--ink-2);max-width:760px;margin-top:10px}
+.opts{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:18px;margin-top:32px}
+@media (max-width:1200px){.opts{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (max-width:820px){.opts{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:520px){.opts{grid-template-columns:1fr}}
+.opt{background:var(--wall);border:1px solid var(--rule);border-radius:14px;padding:16px;display:flex;flex-direction:column}
+.opt .name{font-family:var(--serif);font-size:22px;line-height:1.1}
+.opt .what{font-size:13px;color:var(--ink-2);margin-top:4px;min-height:40px}
+.demo{margin-top:14px;border-top:1px solid var(--rule);padding-top:12px}
+.sec{display:flex;justify-content:space-between;color:var(--ink-3)}
+.title{font-family:var(--serif);font-weight:350;font-size:30px;letter-spacing:-.03em;line-height:.95;margin-top:12px}
+.title u{text-decoration:none;border-bottom:2px solid var(--accent)}
+.cm{color:var(--ink-3);margin-top:6px}
+.card{margin-top:12px}
+.card i{display:block;height:96px;border-radius:4px}
+.card b{display:block;font-size:13px;font-weight:500;line-height:1.25;margin-top:6px}
+.card .m{color:var(--ink-3);margin-top:3px}
+.redisc{display:flex;gap:10px;align-items:center;margin-top:12px}
+.redisc i{width:52px;height:52px;border-radius:4px;flex:0 0 52px}
+.redisc b{font-family:var(--serif);font-weight:400;font-size:17px;line-height:1.1;display:block}
+.pick{margin-top:auto;border:1.5px solid var(--ink);background:#fff;border-radius:99px;padding:9px 14px;font:600 13px var(--sans);cursor:pointer;color:var(--ink)}
+.pick:hover{background:var(--ink);color:#fff}
+.pickwrap{margin-top:16px}
+.rec{display:inline-block;font-size:11px;font-weight:600;color:var(--accent);margin-top:6px}
+
+/* metadata styles per option */
+.m1{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.06em;text-transform:uppercase}
+.m2{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.04em;text-transform:uppercase}
+.m3{font-family:'Martian Mono',monospace;font-size:9.5px;letter-spacing:.02em;text-transform:uppercase}
+.m4{font-family:var(--sans);font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;font-variant-numeric:tabular-nums}
+.m5{font-family:var(--serif);font-style:italic;font-size:13.5px;letter-spacing:0}
+
+.g1{background:linear-gradient(135deg,#f6a35b,#e4572e 60%,#7a2e8e)}
+.g5{background:linear-gradient(135deg,#2c2f33,#5a5e63)}
+#status{margin-top:24px;font-size:13px;color:var(--ink-2)}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Metadata voice: replacing IBM Plex Mono</h1>
+<p class="lede">Same content in each column, with only the metadata style changing (section labels, counts, "14 min · YouTube"). The serif and sans stay as they are. Vermilion now appears as the accent (title underline).</p>
+
+<div class="opts" id="opts"></div>
+<div id="status">Pick one, or annotate the one you like best.</div>
+</div>
+
+<template id="tpl">
+  <div class="opt">
+    <div class="name"></div><div class="what"></div><span class="rec"></span>
+    <div class="demo">
+      <div class="sec M"><span>Rediscover</span><span>8 mo ago</span></div>
+      <div class="redisc"><i class="g5"></i><div><b>On boredom, and why it matters</b><div class="M" style="color:var(--ink-3)">11 min · Aeon</div></div></div>
+      <div class="title"><u>Design</u> inspo</div>
+      <div class="cm M">12 works · 4 img · 3 vid</div>
+      <div class="card"><i class="g1"></i><b>Swiss posters, 1955–1970</b><div class="m M">Image · pinterest.com</div></div>
+    </div>
+    <div class="pickwrap"><button class="pick" data-lavish-action>Choose this</button></div>
+  </div>
+</template>
+
+<script>
+const options = [
+  { cls:'m1', name:'DM Mono', what:'A softer, rounder mono. Keeps the "museum label" idea but less technical than Plex.' },
+  { cls:'m2', name:'JetBrains Mono', what:'Taller, a bit more engineered. Clean, but leans "code editor".' },
+  { cls:'m3', name:'Martian Mono', what:'Wide and distinctive. The most character, maybe too loud for "quiet".' },
+  { cls:'m4', name:'No mono: spaced sans caps', what:'Hanken Grotesk in small, letter-spaced caps with even-width numbers. Quieter, with one fewer font.', rec:'My recommendation' },
+  { cls:'m5', name:'No mono: serif italic', what:'Metadata in Newsreader italic, like a handwritten catalogue note. Literary and soft.' },
+];
+const host = document.getElementById('opts');
+const tpl = document.getElementById('tpl');
+options.forEach(opt => {
+  const node = tpl.content.cloneNode(true);
+  node.querySelector('.name').textContent = opt.name;
+  node.querySelector('.what').textContent = opt.what;
+  node.querySelector('.rec').textContent = opt.rec || '';
+  node.querySelectorAll('.M').forEach(el => el.classList.add(opt.cls));
+  node.querySelector('.pick').addEventListener('click', () => choose(opt.name));
+  host.appendChild(node);
+});
+function choose(name){
+  try { window.lavish.queuePrompt('Metadata voice: ' + name, { tag:'metadata-font' }); window.lavish.sendQueuedPrompts(); }
+  catch(e){ console.log('lavish unavailable', e); }
+  document.getElementById('status').textContent = 'Sent: ' + name;
+}
+</script>
+</body>
+</html>

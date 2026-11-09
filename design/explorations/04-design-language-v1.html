@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="lavish-design" content="off">
+<title>Design Language v1</title>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300..700;1,6..72,300..700&family=Hanken+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --wall:#F7F5F0; --wall-raised:#FFFFFF; --ink:#1B1A17; --ink-2:#55514A; --ink-3:#8A857B; --rule:#E4E0D7;
+  --wall-d:#161514; --wall-raised-d:#1F1E1C; --ink-d:#EDEAE3; --ink-2-d:#B4AEA3; --ink-3-d:#8C877D; --rule-d:#2C2A27;
+  --screen:#0B0B0A;
+  --serif:'Newsreader',Georgia,serif; --sans:'Hanken Grotesk',system-ui,sans-serif; --mono:'IBM Plex Mono',ui-monospace,monospace;
+  --r:4px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#ECEAE4;color:var(--ink);font-family:var(--sans);line-height:1.5;padding:48px 16px 96px}
+.wrap{max-width:1240px;margin:0 auto}
+.lede h1{font-family:var(--serif);font-weight:400;font-size:clamp(34px,5vw,56px);letter-spacing:-.025em;line-height:1}
+.lede p{color:var(--ink-2);max-width:760px;margin-top:12px;font-size:16px}
+.rules{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+.rules span{font-family:var(--mono);font-size:12px;border:1px solid var(--rule);background:var(--wall);padding:5px 10px;border-radius:99px}
+
+h2.sec{font-family:var(--mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);margin:56px 0 16px;border-top:1px solid #d6d2c8;padding-top:16px}
+
+/* tokens */
+.tokens{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+@media (max-width:860px){.tokens{grid-template-columns:1fr}}
+.surface{border-radius:12px;padding:18px;border:1px solid #0001}
+.surface h3{font-family:var(--serif);font-weight:400;font-size:26px}
+.surface p{font-size:13px;margin-top:4px}
+.sw{display:flex;gap:6px;margin-top:14px;flex-wrap:wrap}
+.sw div{flex:1 1 60px}
+.sw i{display:block;height:40px;border-radius:6px;border:1px solid #0002}
+.sw code{display:block;font-family:var(--mono);font-size:11px;margin-top:4px;opacity:.8}
+
+/* type */
+.type{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+@media (max-width:860px){.type{grid-template-columns:1fr}}
+.spec{background:var(--wall);border-radius:12px;padding:20px;border:1px solid var(--rule)}
+.spec .role{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+.spec .big{margin-top:10px}
+.spec .s1{font-family:var(--serif);font-size:48px;font-weight:350;letter-spacing:-.03em;line-height:1}
+.spec .s2{font-family:var(--sans);font-size:26px;font-weight:600;letter-spacing:-.01em}
+.spec .s3{font-family:var(--mono);font-size:15px;letter-spacing:.04em}
+.spec p{font-size:13px;color:var(--ink-2);margin-top:10px}
+
+/* phones */
+.phones{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:22px}
+@media (max-width:1180px){.phones{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:640px){.phones{grid-template-columns:1fr}}
+.cap{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);margin-bottom:8px;text-align:center}
+.phone{width:100%;max-width:280px;height:590px;border-radius:30px;border:9px solid #111;overflow:hidden;position:relative;margin:0 auto;box-shadow:0 24px 40px -24px #0007}
+.cam{position:absolute;top:9px;left:50%;transform:translateX(-50%);width:10px;height:10px;border-radius:50%;background:#000;z-index:9}
+.sb{height:28px;display:flex;justify-content:space-between;align-items:center;padding:0 16px;font-family:var(--sans);font-size:11px;font-weight:600}
+.scr{height:100%;overflow:hidden;position:relative}
+.pad{padding:6px 16px}
+.L{background:var(--wall);color:var(--ink)}
+.D{background:var(--wall-d);color:var(--ink-d)}
+.S{background:var(--screen);color:#F2EFE8}
+
+.topbar{display:flex;justify-content:space-between;align-items:center;font-size:13px;font-weight:500}
+.topbar .ic{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;border:1px solid currentColor;opacity:.5;font-size:13px}
+.hello{font-family:var(--serif);font-weight:350;font-size:34px;letter-spacing:-.03em;line-height:1;margin-top:14px}
+.label{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;opacity:.6;margin-top:18px;display:flex;justify-content:space-between}
+.strip{display:flex;gap:8px;margin-top:8px}
+.strip div{flex:0 0 76px}
+.strip i{display:block;height:98px;border-radius:var(--r)}
+.strip small{display:block;font-size:11px;line-height:1.25;margin-top:5px}
+.strip .fetch{display:grid;place-items:center;border:1px dashed currentColor;opacity:.5;font-family:var(--mono);font-size:9.5px;height:98px;border-radius:var(--r)}
+.redisc{display:flex;gap:10px;margin-top:8px;align-items:center}
+.redisc i{width:64px;height:64px;border-radius:var(--r);flex:0 0 64px}
+.redisc b{font-family:var(--serif);font-weight:400;font-size:19px;line-height:1.1;display:block}
+.redisc span{font-family:var(--mono);font-size:10px;opacity:.6;letter-spacing:.05em}
+.coll{display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--rule)}
+.D .coll{border-color:var(--rule-d)}
+.coll i{width:40px;height:40px;border-radius:var(--r);flex:0 0 40px}
+.coll b{font-family:var(--serif);font-weight:400;font-size:19px;flex:1}
+.coll span{font-family:var(--mono);font-size:11px;opacity:.6}
+
+.ctitle{font-family:var(--serif);font-weight:350;font-size:38px;letter-spacing:-.03em;line-height:.95;margin-top:10px}
+.cmeta{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;opacity:.6;margin-top:6px}
+.filters{display:flex;gap:14px;margin-top:12px;font-size:12px;font-weight:500}
+.filters span{opacity:.5}.filters span.on{opacity:1;border-bottom:1.5px solid currentColor}
+.mas{columns:2;column-gap:10px;margin-top:12px}
+.card{break-inside:avoid;margin-bottom:14px}
+.card i{display:block;border-radius:var(--r)}
+.card b{display:block;font-size:12.5px;font-weight:500;line-height:1.25;margin-top:6px}
+.card code{display:block;font-family:var(--mono);font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;opacity:.55;margin-top:3px}
+.card .q{font-family:var(--serif);font-style:italic;font-size:15px;line-height:1.3;padding:10px 0;border-top:1px solid currentColor;border-bottom:1px solid currentColor}
+.yt{position:relative}
+.yt::after{content:"";position:absolute;left:50%;top:50%;transform:translate(-40%,-50%);border-left:14px solid #fff;border-top:9px solid transparent;border-bottom:9px solid transparent;filter:drop-shadow(0 2px 4px #0006)}
+
+.feedimg{position:absolute;left:0;right:0;top:28px;height:58%}
+.feedtx{position:absolute;left:18px;right:18px;bottom:96px}
+.feedtx code{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;opacity:.6}
+.feedtx h4{font-family:var(--serif);font-weight:350;font-size:30px;letter-spacing:-.02em;line-height:1.02;margin-top:8px}
+.feedtx p{font-size:13px;opacity:.75;margin-top:8px;line-height:1.45}
+.feedact{position:absolute;left:18px;right:18px;bottom:26px;display:flex;gap:10px}
+.feedact span{flex:1;text-align:center;padding:12px;border:1px solid #fff4;border-radius:var(--r);font-size:13px;font-weight:600}
+.feedact span.main{background:#F2EFE8;color:#0B0B0A;border-color:#F2EFE8}
+.counter{position:absolute;top:36px;right:18px;font-family:var(--mono);font-size:11px;opacity:.6;z-index:2}
+
+.reader .hero{height:150px;margin:0 -16px}
+.reader code{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;opacity:.6;display:block;margin-top:16px}
+.reader h4{font-family:var(--serif);font-weight:400;font-size:28px;letter-spacing:-.02em;line-height:1.05;margin-top:6px}
+.reader .by{font-size:12px;opacity:.6;margin-top:8px}
+.reader .body{font-family:var(--serif);font-size:15.5px;line-height:1.6;margin-top:14px}
+.reader .body p+p{margin-top:10px}
+.reader .body p:first-child::first-letter{font-size:44px;float:left;line-height:.85;padding:4px 6px 0 0}
+.progress{position:absolute;top:28px;left:0;height:2px;width:34%;background:currentColor;opacity:.5}
+
+.g1{background:linear-gradient(135deg,#f6a35b,#e4572e 60%,#7a2e8e)}
+.g2{background:linear-gradient(160deg,#3a7bd5,#00d2ff)}
+.g3{background:linear-gradient(135deg,#a8e063,#56ab2f)}
+.g4{background:linear-gradient(135deg,#ffecd2,#fcb69f)}
+.g5{background:linear-gradient(135deg,#2c2f33,#5a5e63)}
+.g6{background:linear-gradient(135deg,#ff9a9e,#fad0c4)}
+.g8{background:linear-gradient(135deg,#f9d976,#f39f86)}
+
+.open{margin-top:48px;background:var(--wall);border:1px solid var(--rule);border-radius:14px;padding:20px}
+.open h3{font-family:var(--serif);font-weight:400;font-size:24px}
+.open ul{margin:10px 0 0 18px;color:var(--ink-2);font-size:14px}
+.open li+li{margin-top:4px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<section class="lede">
+  <h1>Design language, draft one</h1>
+  <p>Four decisions combined on real screens: <b>curious on a calm base</b>, <b>its own look with Android behaviors</b>, <b>a warm off-white wall that follows the system theme</b>, and <b>serif, sans and mono type</b>. Still undecided and shown as placeholders: accent color (currently none), corner shape (currently 4px), motion, and icons.</p>
+  <div class="rules"><span>quiet by default</span><span>small rewards for exploring</span><span>the content is the color</span><span>the app is the frame</span></div>
+</section>
+
+<h2 class="sec">01 · Surfaces</h2>
+<div class="tokens">
+  <div class="surface" style="background:var(--wall);color:var(--ink)"><h3>Wall · light</h3><p>Home, collections, search. A warm off-white, tuned not to look like paper.</p>
+    <div class="sw"><div><i style="background:#F7F5F0"></i><code>wall F7F5F0</code></div><div><i style="background:#FFFFFF"></i><code>raised FFF</code></div><div><i style="background:#E4E0D7"></i><code>rule E4E0D7</code></div><div><i style="background:#1B1A17"></i><code>ink 1B1A17</code></div><div><i style="background:#8A857B"></i><code>ink-3 8A857B</code></div></div></div>
+  <div class="surface" style="background:var(--wall-d);color:var(--ink-d)"><h3>Wall · dark</h3><p>Same rooms with the lights down. Soft charcoal, never pure black.</p>
+    <div class="sw"><div><i style="background:#161514"></i><code>wall 161514</code></div><div><i style="background:#1F1E1C"></i><code>raised 1F1E1C</code></div><div><i style="background:#2C2A27"></i><code>rule 2C2A27</code></div><div><i style="background:#EDEAE3"></i><code>ink EDEAE3</code></div><div><i style="background:#8C877D"></i><code>ink-3 8C877D</code></div></div></div>
+  <div class="surface" style="background:var(--screen);color:#F2EFE8"><h3>Screening room</h3><p>Swipe feed and video. Always dark, in both light and dark mode.</p>
+    <div class="sw"><div><i style="background:#0B0B0A"></i><code>screen 0B0B0A</code></div><div><i style="background:#F2EFE8"></i><code>ink F2EFE8</code></div></div></div>
+</div>
+
+<h2 class="sec">02 · Type: three voices</h2>
+<div class="type">
+  <div class="spec"><div class="role">Serif · Newsreader · names &amp; reading</div><div class="big s1">Design inspo</div><p>Collection names, item titles, and reader body text. Uses the optical-size axis: large sizes get tighter and sharper, small sizes get sturdier.</p></div>
+  <div class="spec"><div class="role">Sans · Hanken Grotesk · controls</div><div class="big s2">Read · Later · Move</div><p>Buttons, filters, short UI text, card titles at small sizes. Plain and quiet so it never competes with the serif.</p></div>
+  <div class="spec"><div class="role">Mono · IBM Plex Mono · the wall label</div><div class="big s3">09 MIN · YOUTUBE · SAVED 3D AGO</div><p>Only metadata. Every saved item gets a "museum label", which is the small reward for looking closely.</p></div>
+</div>
+
+<h2 class="sec">03 · On real screens</h2>
+<div class="phones">
+  <div><div class="cap">Home · light wall</div>
+    <div class="phone"><div class="cam"></div><div class="scr L">
+      <div class="sb"><span>9:41</span><span>▾ ▮</span></div>
+      <div class="pad">
+        <div class="topbar"><span style="font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;opacity:.6">SUN · 8 NOV</span><span class="ic">⌕</span></div>
+        <div class="hello">Good evening</div>
+        <div class="label"><span>Recently saved</span><span>6 unsorted</span></div>
+        <div class="strip">
+          <div><i class="g1"></i><small>Swiss posters</small></div>
+          <div><i class="g4"></i><small>Death of the hyperlink</small></div>
+          <div><div class="fetch">FETCHING…</div><small style="opacity:.5">youtu.be/x8…</small></div>
+        </div>
+        <div class="label"><span>Rediscover</span><span>from 8 mo ago</span></div>
+        <div class="redisc"><i class="g5"></i><div><b>On boredom, and why it matters</b><span>11 MIN · AEON</span></div></div>
+        <div class="label"><span>Collections</span><span>4</span></div>
+        <div style="margin-top:6px">
+          <div class="coll"><i class="g1"></i><b>Design inspo</b><span>12</span></div>
+          <div class="coll"><i class="g5"></i><b>Long reads</b><span>09</span></div>
+          <div class="coll"><i class="g3"></i><b>Cooking</b><span>15</span></div>
+        </div>
+      </div></div></div></div>
+
+  <div><div class="cap">Collection · light wall</div>
+    <div class="phone"><div class="cam"></div><div class="scr L">
+      <div class="sb"><span>9:41</span><span>▾ ▮</span></div>
+      <div class="pad">
+        <div class="topbar"><span>←</span><span style="font-size:12px;font-weight:600">Shuffle</span></div>
+        <div class="ctitle">Design inspo</div>
+        <div class="cmeta">12 works · 4 img · 3 vid · 5 read</div>
+        <div class="filters"><span class="on">All</span><span>Images</span><span>Videos</span><span>Reads</span><span>Posts</span></div>
+        <div class="mas">
+          <div class="card"><i class="g1" style="height:150px"></i><b>Swiss posters, 1955–1970</b><code>Image · pinterest</code></div>
+          <div class="card"><div class="q">"Good design is mostly saying no to good ideas."</div><code>Post · @someone</code></div>
+          <div class="card"><i class="g2 yt" style="height:88px"></i><b>How Pentagram designs a logo</b><code>14 min · youtube</code></div>
+          <div class="card"><i class="g4" style="height:72px"></i><b>The slow death of the hyperlink</b><code>09 min · read</code></div>
+          <div class="card"><i class="g8" style="height:110px"></i><b>Kitchen colour study</b><code>Screenshot</code></div>
+        </div>
+      </div></div></div></div>
+
+  <div><div class="cap">Swipe feed · screening room</div>
+    <div class="phone"><div class="cam"></div><div class="scr S">
+      <div class="sb"><span>9:41</span><span>▾ ▮</span></div>
+      <div class="counter">04 / 12</div>
+      <div class="feedimg g2 yt"></div>
+      <div class="feedtx"><code>YouTube · 14 min · Design inspo</code><h4>How Pentagram designs a logo</h4><p>A partner walks through three rejected routes before the one that shipped.</p></div>
+      <div class="feedact"><span class="main">Watch</span><span>Later</span><span>Move</span></div>
+    </div></div></div>
+
+  <div><div class="cap">Reader · light theme</div>
+    <div class="phone"><div class="cam"></div><div class="scr L reader">
+      <div class="sb"><span>9:41</span><span>▾ ▮</span></div>
+      <div class="progress"></div>
+      <div class="pad">
+        <div class="hero g4"></div>
+        <code>Long reads · 09 min</code>
+        <h4>The slow death of the hyperlink</h4>
+        <div class="by">By A. Writer · somesite.com</div>
+        <div class="body"><p>There was a time when the web pointed outward. Every page was a doorway, and following links was how you found the next thing worth reading.</p><p>Somewhere along the way the doors started closing.</p></div>
+      </div></div></div></div>
+</div>
+
+<h2 class="sec">04 · Same Home, lights down</h2>
+<div class="phones">
+  <div><div class="cap">Home · dark wall</div>
+    <div class="phone"><div class="cam"></div><div class="scr D">
+      <div class="sb"><span>9:41</span><span>▾ ▮</span></div>
+      <div class="pad">
+        <div class="topbar"><span style="font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;opacity:.6">SUN · 8 NOV</span><span class="ic">⌕</span></div>
+        <div class="hello">Good evening</div>
+        <div class="label"><span>Recently saved</span><span>6 unsorted</span></div>
+        <div class="strip">
+          <div><i class="g1"></i><small>Swiss posters</small></div>
+          <div><i class="g4"></i><small>Death of the hyperlink</small></div>
+          <div><i class="g2 yt"></i><small>Pentagram logo</small></div>
+        </div>
+        <div class="label"><span>Rediscover</span><span>from 8 mo ago</span></div>
+        <div class="redisc"><i class="g5"></i><div><b>On boredom, and why it matters</b><span>11 MIN · AEON</span></div></div>
+        <div class="label"><span>Collections</span><span>4</span></div>
+        <div style="margin-top:6px">
+          <div class="coll"><i class="g1"></i><b>Design inspo</b><span>12</span></div>
+          <div class="coll"><i class="g5"></i><b>Long reads</b><span>09</span></div>
+          <div class="coll"><i class="g3"></i><b>Cooking</b><span>15</span></div>
+        </div>
+      </div></div></div></div>
+  <div class="open" style="grid-column:span 3;margin-top:0">
+    <h3>What to look at</h3>
+    <ul>
+      <li>Does the <b>off-white</b> read as gallery wall, or still too warm or papery?</li>
+      <li>Do the <b>mono "museum labels"</b> feel like a nice detail, or like noise?</li>
+      <li>Is the serif <b>light enough</b> (weight 350), or should titles be heavier?</li>
+      <li>Is the near-black <b>screening room</b> right for the swipe feed, or should the feed stay on the wall color?</li>
+      <li>Next questions in the grilling: <b>accent color</b>, <b>corner shape</b>, <b>motion</b>, <b>icons</b>.</li>
+    </ul>
+  </div>
+</div>
+</div>
+</body>
+</html>

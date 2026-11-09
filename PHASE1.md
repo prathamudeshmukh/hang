@@ -1,0 +1,51 @@
+# Phase 1 — Skeleton
+
+**Goal (SPEC §8):** auth, schema, RLS, sync, plain list UI.
+**Done when:** share → item appears → syncs → survives reinstall.
+**Started:** 2026-11-09
+
+Out of scope here: the gallery (Phase 2), reader and video (Phase 3), AI enrichment, FTS.
+The UI is a plain list. It must work, it doesn't need to look like DESIGN.md yet.
+
+## Layout
+
+```
+hang/
+  app/          Expo app (SDK 58, same pinned versions as the spikes), package com.prathamesh.hang
+  supabase/     migrations, RLS tests (pgTAP), Edge Functions
+  spikes/       kept for reference, not built
+```
+
+## Progress
+
+- 2026-11-09 · Slice 1: `app/` scaffolded from the share spike (`com.prathamesh.hang`), `npm test` 6/6, typecheck clean. `git init` waits on the owner (the spikes have their own nested `.git`). Dev build not run yet.
+- 2026-11-09 · Slice 2: migration and pgTAP RLS tests written (`supabase/`). **Local `supabase test db`: 12/12 pass.** Pushed to the hosted project 2026-11-09; anon gets `42501` on all three tables.
+- 2026-11-09 · Owner setup verified: hosted project `ffofgzyudtloekityjfw` linked, Google provider enabled, `app/.env` set (publishable key, web client id), debug keystore SHA-1 `5E:8F:16:06:2E:A3:CD:2C:4A:0D:54:78:76:BA:A6:F3:8C:AB:F6:25` (release builds are signed with it too).
+
+## Slices
+
+Each slice ends tested and working. Order matters: later slices build on earlier ones.
+
+| # | Slice | Done when | Needs from owner |
+|---|---|---|---|
+| 1 | **Repo + app scaffold.** `git init`, root `.gitignore`, `app/` from the share spike: `ShareActivity` plugin, `parseShare` + tests (`node --test`) | `npm test` green; dev build launches; sharing opens the sheet | — |
+| 2 | **Server schema + RLS.** `collections`, `items`, `item_content` (SPEC §5); server-set `updated_at` trigger; soft deletes; RLS `user_id = auth.uid()` on every table; private `media` bucket with per-user folder policies | `supabase test db`: user A can't read or write user B's rows or objects | Supabase CLI installed, Docker running |
+| 3 | **Local store.** `expo-sqlite` + Drizzle mirror of the three tables, plus `outbox` and `sync_state` | Migrations run on device; repository functions unit-tested | — |
+| 4 | **Sync engine** (pure TS, injected remote). Pull per table by `updated_at` cursor; push outbox in order with backoff; idempotent upsert on `id`; user fields (`collection_id`, `read_at`, `progress`) win over server fields | Unit tests for merge rules, cursor, retry, tombstones | — |
+| 5 | **Auth.** Google sign-in (Credential Manager) → `signInWithIdToken`; session persisted; sign-out clears local data | Sign in on the phone; RLS sees the right `auth.uid()` | Supabase project (region outside India, see SPEC §10); Google Cloud OAuth clients (Web + Android with the debug and release SHA-1) |
+| 6 | **Share → local → push.** Sheet writes the item to SQLite (UUIDv7, `pending`, `shared_title`) and to the outbox, before any network. Save sets `collection_id`, swipe down leaves it in the Inbox | Item is in SQLite even when offline or if the process dies after the sheet closes | — |
+| 7 | **Plain list UI + sync triggers.** Inbox and collections as lists; create a collection; pull on foreground, pull-to-refresh, reconnect, and Realtime on `items` | Item saved on the phone shows up in the Supabase table and back in the list | — |
+| 8 | **Minimal `extract`.** Insert trigger → Edge Function → spike 0a registry (no AI, no thumbnails yet) → `status = ready`, title, site, kind | A shared HN link turns `ready` with a title | Supabase secrets set |
+| 9 | **E2E (Maestro).** Share from Chrome → appears → uninstall → reinstall → sign in → still there | Passes on the emulator and the phone | — |
+
+## Decisions made while planning
+
+- **No `expo-share-intent`.** Spike 0c's own `ShareActivity` plugin replaces it (SPEC §4 updated).
+- **Extraction in Phase 1 is minimal** (slice 8) so items don't sit at `pending` forever. AI enrichment
+  and thumbnails/palette come later.
+- **Package manager: npm for `app/`** (the spikes built with it; no hoisting surprises). The extraction code keeps pnpm.
+
+## Open questions for the owner
+
+1. Supabase region (Singapore `ap-southeast-1` is the nearest outside India).
+2. OK to `git init` now and commit per slice?

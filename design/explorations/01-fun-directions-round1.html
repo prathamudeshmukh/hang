@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="lavish-design" content="off">
+<title>Fun Directions</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,800&family=Caveat:wght@500;700&family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --page:#f4f1ec; --ink:#1d1b18; --muted:#6b655c; --line:#ddd6cb; --accent:#e4572e;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--page);color:var(--ink);font-family:Inter,system-ui,sans-serif;line-height:1.45;padding:40px 16px 80px}
+.wrap{max-width:1180px;margin:0 auto}
+header.top h1{font-family:Fraunces,serif;font-weight:800;font-size:clamp(28px,4vw,44px);letter-spacing:-.02em}
+header.top p{color:var(--muted);max-width:720px;margin-top:8px}
+.legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+.legend span{font-size:12px;border:1px solid var(--line);border-radius:99px;padding:4px 10px;background:#fff}
+
+section.dir{margin-top:56px;border-top:1px solid var(--line);padding-top:28px}
+.dir-head{display:flex;flex-wrap:wrap;gap:16px;justify-content:space-between;align-items:flex-end}
+.dir-head .tag{font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+.dir-head h2{font-family:Fraunces,serif;font-size:30px;font-weight:600;letter-spacing:-.01em}
+.dir-head p{color:var(--muted);max-width:620px;margin-top:4px;font-size:15px}
+.pick{border:1.5px solid var(--ink);background:#fff;border-radius:99px;padding:10px 18px;font:600 14px Inter;cursor:pointer}
+.pick:hover,.pick.on{background:var(--ink);color:#fff}
+.phones{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px;margin-top:24px}
+@media (max-width:980px){.phones{grid-template-columns:repeat(auto-fill,minmax(280px,1fr))}}
+.screen-label{font-size:12px;color:var(--muted);margin-bottom:8px;font-weight:500}
+.phone{width:100%;max-width:300px;height:600px;border-radius:38px;border:10px solid #111;overflow:hidden;position:relative;margin:0 auto;box-shadow:0 20px 40px -20px rgba(0,0,0,.35)}
+.phone .notch{position:absolute;top:8px;left:50%;transform:translateX(-50%);width:90px;height:24px;background:#111;border-radius:20px;z-index:5}
+.scr{height:100%;overflow:hidden;padding:44px 14px 14px;position:relative}
+.notes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:20px}
+@media (max-width:780px){.notes{grid-template-columns:1fr}}
+.notes div{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px;font-size:14px}
+.notes b{display:block;font-size:12px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}
+.good b{color:#2e7d4f}.cost b{color:#b23a3a}.feel b{color:#5a4fcf}
+
+/* ============ A: TACTILE DESK ============ */
+.A .scr{background:#efe6d6 radial-gradient(circle at 20% 10%,#f6eee0 0,transparent 60%);font-family:Fraunces,serif;color:#2a2117}
+.A h3{font-size:26px;font-weight:800;letter-spacing:-.02em}
+.A .sub{font-family:Caveat,cursive;font-size:20px;color:#8a5a2b;margin-top:-2px}
+.A .stacks{display:grid;grid-template-columns:1fr 1fr;gap:22px 14px;margin-top:22px}
+.A .stack{position:relative;height:120px}
+.A .stack i{position:absolute;inset:0;border-radius:6px;background:#fff;box-shadow:0 2px 0 rgba(0,0,0,.05),0 8px 16px -6px rgba(60,40,10,.35);padding:6px}
+.A .stack i:nth-child(1){transform:rotate(-7deg)}
+.A .stack i:nth-child(2){transform:rotate(5deg)}
+.A .stack i:nth-child(3){transform:rotate(-1deg)}
+.A .stack i span{display:block;height:72%;border-radius:3px}
+.A .stack em{position:absolute;bottom:-20px;left:0;right:0;text-align:center;font-family:Caveat,cursive;font-style:normal;font-size:20px;font-weight:700}
+.A .tape{position:absolute;top:-8px;left:50%;width:44px;height:14px;background:rgba(255,230,150,.75);transform:translateX(-50%) rotate(-4deg);z-index:3}
+.A .inbox{margin-top:36px;background:#2a2117;color:#f6eee0;border-radius:14px;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;font-size:14px;box-shadow:0 6px 0 #6b4a25}
+.A .inbox b{font-family:Caveat,cursive;font-size:22px}
+.A .masonry{columns:2;column-gap:10px;margin-top:14px}
+.A .card{break-inside:avoid;background:#fff;border-radius:6px;padding:6px;margin-bottom:10px;box-shadow:0 6px 12px -6px rgba(60,40,10,.4);font-size:11px}
+.A .card:nth-child(odd){transform:rotate(-1.2deg)}
+.A .card:nth-child(even){transform:rotate(1deg)}
+.A .card .img{border-radius:3px}
+.A .card p{padding:5px 2px 2px;line-height:1.25}
+.A .card .src{font-family:Inter;font-size:9px;color:#8a7a66;text-transform:uppercase;letter-spacing:.06em}
+.A .tweet{background:#fffdf6;border:1px dashed #cbb89a}
+.A .feedcard{position:absolute;left:18px;right:18px;top:70px;bottom:110px;background:#fff;border-radius:10px;box-shadow:0 30px 40px -20px rgba(60,40,10,.55);padding:10px;transform:rotate(-1.5deg)}
+.A .feedcard.behind{transform:rotate(4deg) translateY(10px);background:#f8f3ea}
+.A .feedcard .img{height:55%;border-radius:6px}
+.A .feedcard h4{font-size:20px;line-height:1.15;margin-top:10px;font-weight:600}
+.A .feedcard .why{font-family:Caveat,cursive;font-size:18px;color:#8a5a2b;margin-top:6px;line-height:1.1}
+.A .actions{position:absolute;bottom:26px;left:0;right:0;display:flex;justify-content:center;gap:14px}
+.A .actions span{width:54px;height:54px;border-radius:50%;background:#fff;display:grid;place-items:center;font-size:20px;box-shadow:0 5px 0 #c9b28d}
+.A .actions span.main{width:66px;height:66px;background:#e4572e;color:#fff;box-shadow:0 5px 0 #9c3417;font-family:Caveat;font-size:22px}
+.A .hint{position:absolute;top:44px;left:0;right:0;text-align:center;font-family:Caveat;font-size:18px;color:#8a5a2b}
+
+/* ============ B: EXPRESSIVE ZINE ============ */
+.B .scr{background:#fffaf0;font-family:'Bricolage Grotesque',sans-serif;color:#111}
+.B h3{font-size:34px;font-weight:800;letter-spacing:-.04em;line-height:.95}
+.B .blocks{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px}
+.B .blk{border-radius:22px;padding:12px;height:118px;position:relative;overflow:hidden;border:2px solid #111}
+.B .blk.tall{height:244px;grid-row:span 2}
+.B .blk b{font-size:20px;font-weight:800;letter-spacing:-.03em;line-height:1;display:block}
+.B .blk small{font-size:11px;font-weight:600;opacity:.75}
+.B .blk .emo{position:absolute;right:-6px;bottom:-12px;font-size:58px;transform:rotate(-12deg)}
+.B .sticker{position:absolute;top:10px;right:10px;background:#111;color:#fff;font-size:10px;font-weight:600;border-radius:99px;padding:3px 7px;transform:rotate(6deg)}
+.B .hero{border-radius:22px;padding:14px;color:#111;border:2px solid #111;background:#c6f36b}
+.B .hero b{font-size:30px;font-weight:800;letter-spacing:-.04em;line-height:.95;display:block}
+.B .hero small{font-weight:600;font-size:12px}
+.B .chips{display:flex;gap:6px;margin-top:10px;overflow:hidden}
+.B .chips span{border:2px solid #111;border-radius:99px;padding:3px 10px;font-size:11px;font-weight:600;white-space:nowrap;background:#fff}
+.B .chips span.on{background:#111;color:#fff}
+.B .masonry{columns:2;column-gap:8px;margin-top:10px}
+.B .card{break-inside:avoid;border:2px solid #111;border-radius:16px;overflow:hidden;margin-bottom:8px;background:#fff;font-size:11px}
+.B .card p{padding:7px 8px;font-weight:600;line-height:1.15;font-size:12px}
+.B .card .type{display:inline-block;background:#111;color:#fff;font-size:9px;padding:2px 6px;border-radius:99px;margin:7px 0 0 8px}
+.B .card.tw{background:#ffd7f0}
+.B .card.tw p{font-weight:400;font-size:12px}
+.B .feed{position:absolute;inset:0;padding:44px 14px 14px;background:#ff5d3a;display:flex;flex-direction:column}
+.B .feed .top{display:flex;justify-content:space-between;font-weight:700;color:#111;font-size:13px}
+.B .feed .media{flex:1;margin-top:12px;border-radius:24px;border:2px solid #111;position:relative;overflow:hidden}
+.B .feed .play{position:absolute;inset:0;display:grid;place-items:center}
+.B .feed .play span{width:70px;height:70px;border-radius:50%;background:#fffaf0;border:2px solid #111;display:grid;place-items:center;font-size:24px}
+.B .feed h4{font-size:26px;font-weight:800;letter-spacing:-.04em;line-height:.95;margin-top:12px;color:#111}
+.B .feed .meta{display:flex;gap:6px;margin-top:10px}
+.B .feed .meta span{background:#111;color:#fffaf0;border-radius:99px;padding:4px 10px;font-size:11px;font-weight:600}
+
+/* ============ D: SERENDIPITY ============ */
+.D .scr{background:#0f1020 radial-gradient(circle at 70% 0%,#2a2560 0,transparent 55%);color:#ece9ff;font-family:Inter,sans-serif}
+.D .scr::before{content:"";position:absolute;inset:0;background-image:radial-gradient(1px 1px at 20% 30%,#fff8,transparent),radial-gradient(1px 1px at 80% 60%,#fff6,transparent),radial-gradient(1px 1px at 50% 80%,#fff5,transparent),radial-gradient(1px 1px at 30% 70%,#fff4,transparent),radial-gradient(1px 1px at 90% 20%,#fff7,transparent);pointer-events:none}
+.D .eyebrow{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#a9a3e8}
+.D h3{font-family:'Instrument Serif',serif;font-weight:400;font-size:34px;line-height:1;margin-top:4px}
+.D h3 i{color:#ffb86b}
+.D .dig{margin-top:14px;border-radius:20px;background:linear-gradient(160deg,#2b2766,#1a1838);padding:12px;border:1px solid #ffffff1a;position:relative}
+.D .dig .img{height:120px;border-radius:12px}
+.D .dig h4{font-family:'Instrument Serif',serif;font-weight:400;font-size:20px;line-height:1.1;margin-top:8px}
+.D .dig .ago{display:inline-block;margin-top:6px;font-size:10px;color:#ffb86b;border:1px solid #ffb86b55;border-radius:99px;padding:2px 8px}
+.D .row{display:flex;gap:8px;margin-top:12px}
+.D .orb{flex:1;border-radius:16px;padding:10px;background:#ffffff0d;border:1px solid #ffffff14;font-size:11px}
+.D .orb b{display:block;font-family:'Instrument Serif',serif;font-weight:400;font-size:17px}
+.D .orb .dot{width:22px;height:22px;border-radius:50%;margin-bottom:6px}
+.D .masonry{columns:2;column-gap:8px;margin-top:12px}
+.D .card{break-inside:avoid;border-radius:14px;overflow:hidden;margin-bottom:8px;background:#1b1a36;border:1px solid #ffffff12;font-size:11px;position:relative}
+.D .card p{padding:7px 8px;line-height:1.2}
+.D .card.dusty{filter:sepia(.5) saturate(.6) brightness(.8)}
+.D .card.dusty::after{content:"dusty · 7mo";position:absolute;top:6px;left:6px;background:#0f1020cc;color:#ffb86b;font-size:9px;border-radius:99px;padding:2px 6px}
+.D .filters{display:flex;gap:6px;margin-top:10px}
+.D .filters span{font-size:11px;padding:4px 10px;border-radius:99px;border:1px solid #ffffff22}
+.D .filters span.on{background:#ffb86b;color:#0f1020;border-color:#ffb86b;font-weight:600}
+.D .feedwrap{position:absolute;inset:0;padding:44px 14px 14px;display:flex;flex-direction:column}
+.D .memory{font-family:'Instrument Serif',serif;font-style:italic;font-size:17px;color:#ffb86b;text-align:center;margin-top:6px}
+.D .big{flex:1;border-radius:24px;margin-top:12px;position:relative;overflow:hidden;border:1px solid #ffffff22}
+.D .big .over{position:absolute;left:0;right:0;bottom:0;padding:16px;background:linear-gradient(transparent,#0f1020ee 45%)}
+.D .big h4{font-family:'Instrument Serif',serif;font-weight:400;font-size:26px;line-height:1.05}
+.D .big p{font-size:12px;color:#c9c4f5;margin-top:6px}
+.D .bar{display:flex;justify-content:space-around;margin-top:12px;font-size:11px;color:#a9a3e8}
+.D .bar span{display:flex;flex-direction:column;align-items:center;gap:4px}
+.D .bar i{font-style:normal;width:40px;height:40px;border-radius:50%;border:1px solid #ffffff22;display:grid;place-items:center;font-size:16px}
+
+/* shared fake media */
+.g1{background:linear-gradient(135deg,#f6a35b,#e4572e 60%,#7a2e8e)}
+.g2{background:linear-gradient(160deg,#3a7bd5,#00d2ff)}
+.g3{background:linear-gradient(135deg,#a8e063,#56ab2f)}
+.g4{background:linear-gradient(135deg,#ffecd2,#fcb69f)}
+.g5{background:linear-gradient(135deg,#232526,#414345)}
+.g6{background:linear-gradient(135deg,#ff9a9e,#fad0c4)}
+.yt{position:relative}
+.yt::after{content:"▶";position:absolute;inset:0;display:grid;place-items:center;color:#fff;font-size:20px;text-shadow:0 2px 8px #0006}
+
+footer.choose{margin-top:56px;background:#fff;border:1px solid var(--line);border-radius:20px;padding:22px}
+footer.choose h2{font-family:Fraunces,serif;font-size:24px}
+footer.choose p{color:var(--muted);font-size:14px;margin-top:4px}
+.mix{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.status{margin-top:12px;font-size:13px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="top">
+  <h1>What kind of fun?</h1>
+  <p>Three directions for the link-saving app. Each one shows the same collections and items on three screens: <b>Home</b>, a <b>collection's masonry grid</b>, and the <b>swipe feed</b>. Pick one to lead, or tell me what to steal from each. The cards and colors are placeholders, so judge the <i>feeling</i>, not the content.</p>
+  <div class="legend"><span>Collections: Design inspo · Long reads · Cooking · Watch later</span><span>Item types: article · YouTube · tweet · image</span></div>
+</header>
+
+<!-- ================= A ================= -->
+<section class="dir A" id="dir-a">
+  <div class="dir-head">
+    <div><div class="tag">Direction A · leads with touch</div><h2>The Desk</h2>
+    <p>Your saves are physical things on a warm desk. Collections are stacks of polaroids with tape on them. Cards tilt a little, have weight, and spring back. You flick them to file them. Handwritten notes stand in for the AI's "why you saved this".</p></div>
+    <button class="pick" data-lavish-action onclick="pick(this,'A — The Desk (tactile, physical objects, polaroid stacks, handwritten AI notes)')">Lead with A</button>
+  </div>
+  <div class="phones">
+    <div><div class="screen-label">Home: collections as stacks</div>
+      <div class="phone"><div class="notch"></div><div class="scr">
+        <h3>My desk</h3><div class="sub">43 things worth your time</div>
+        <div class="stacks">
+          <div class="stack"><div class="tape"></div><i><span class="g6"></span></i><i><span class="g4"></span></i><i><span class="g1"></span></i><em>Design inspo</em></div>
+          <div class="stack"><div class="tape"></div><i><span class="g5"></span></i><i><span class="g2"></span></i><i><span class="g4"></span></i><em>Long reads</em></div>
+          <div class="stack"><div class="tape"></div><i><span class="g3"></span></i><i><span class="g6"></span></i><i><span class="g3"></span></i><em>Cooking</em></div>
+          <div class="stack"><div class="tape"></div><i><span class="g2"></span></i><i><span class="g1"></span></i><i><span class="g5 yt"></span></i><em>Watch later</em></div>
+        </div>
+        <div class="inbox"><span><b>Inbox</b> · 6 loose pages</span><span>flick to file →</span></div>
+      </div></div></div>
+    <div><div class="screen-label">Collection grid: pinned to a corkboard</div>
+      <div class="phone"><div class="notch"></div><div class="scr">
+        <h3>Design inspo</h3><div class="sub">12 pinned · shuffle ↻</div>
+        <div class="masonry">
+          <div class="card"><div class="img g1" style="height:110px"></div><p>Swiss posters, 1955–1970</p><div class="src">Image · Pinterest</div></div>
+          <div class="card tweet"><p>"Good design is mostly saying no to good ideas."</p><div class="src">Tweet · @someone</div></div>
+          <div class="card"><div class="img g2 yt" style="height:70px"></div><p>How Pentagram designs a logo</p><div class="src">YouTube · 14 min</div></div>
+          <div class="card"><div class="img g4" style="height:60px"></div><p>The slow death of the hyperlink</p><div class="src">Article · 9 min</div></div>
+          <div class="card"><div class="img g6" style="height:130px"></div><p>Kitchen colour study</p><div class="src">Screenshot</div></div>
+        </div>
+      </div></div></div>
+    <div><div class="screen-label">Swipe feed: a card in your hand</div>
+      <div class="phone"><div class="notch"></div><div class="scr">
+        <div class="hint">↑ toss up for next · ← → refile</div>
+        <div class="feedcard behind"></div>
+        <div class="feedcard"><div class="img g4"></div><h4>The slow death of the hyperlink</h4><div class="why">← you saved this after that chat about blogs</div></div>
+        <div class="actions"><span>📌</span><span class="main">Read</span><span>🗂️</span></div>
+      </div></div></div>
+  </div>
+  <div class="notes"><div class="feel"><b>Feels like</b>Going through a shoebox of clippings. Calm, warm, a bit nostalgic.</div><div class="good"><b>Strength</b>Gestures and haptics carry the delight, so it doesn't wear off. It also makes filing your Inbox feel good.</div><div class="cost"><b>Cost</b>The most motion work (Reanimated physics). The tilted cards fit fewer items per screen.</div></div>
+</section>
+
+<!-- ================= B ================= -->
+<section class="dir B" id="dir-b">
+  <div class="dir-head">
+    <div><div class="tag">Direction B · leads with personality</div><h2>The Zine</h2>
+    <p>Loud, colorful and chunky. Each collection is a bold block with its own color and emoji, like a sticker sheet. Cards have thick outlines and big type. The swipe feed takes on the collection's color.</p></div>
+    <button class="pick" data-lavish-action onclick="pick(this,'B — The Zine (expressive, bold color per collection, chunky type, stickers)')">Lead with B</button>
+  </div>
+  <div class="phones">
+    <div><div class="screen-label">Home: a sticker sheet of collections</div>
+      <div class="phone"><div class="notch"></div><div class="scr">
+        <h3>Your<br>stash ✦</h3>
+        <div class="blocks">
+          <div class="blk tall" style="background:#ff5d3a"><span class="sticker">3 new</span><b>Design<br>inspo</b><small>12 things</small><div class="emo">🎨</div></div>
+          <div class="blk" style="background:#7cc6fe"><b>Long<br>reads</b><small>9 things</small><div class="emo">📚</div></div>
+          <div class="blk" style="background:#c6f36b"><b>Cooking</b><small>15 things</small><div class="emo">🍜</div></div>
+          <div class="blk" style="background:#ffd23f"><b>Watch later</b><small>7 things</small><div class="emo">📺</div></div>
+          <div class="blk" style="background:#fff"><b>Inbox</b><small>6 unsorted</small><div class="emo">📥</div></div>
+        </div>
+      </div></div></div>
+    <div><div class="screen-label">Collection grid: bold cards and type chips</div>
+      <div class="phone"><div class="notch"></div><div class="scr">
+        <div class="hero" style="background:#ff5d3a"><b>Design inspo 🎨</b><small>12 things · shuffle ↻</small></div>
+        <div class="chips"><span class="on">All</span><span>Images</span><span>Videos</span><span>Reads</span><span>Posts</span></div>
+        <div class="masonry">
+          <div class="card"><div class="g1" style="height:110px"></div><span class="type">IMG</span><p>Swiss posters 1955–70</p></div>
+          <div class="card tw"><span class="type">POST</span><p>"Good design is mostly saying no to good ideas."</p></div>
+          <div class="card"><div class="g2 yt" style="height:72px"></div><span class="type">VIDEO</span><p>How Pentagram designs a logo</p></div>
+          <div class="card"><div class="g4" style="height:60px"></div><span class="type">READ · 9m</span><p>The slow death of the hyperlink</p></div>
+        </div>
+      </div></div></div>
+    <div><div class="screen-label">Swipe feed: full bleed in the collection's color</div>
+      <div class="phone"><div class="notch"></div><div class="scr" style="padding:0">
+        <div class="feed">
+          <div class="top"><span>🎨 Design inspo</span><span>4 / 12</span></div>
+          <div class="media g2"><div class="play"><span>▶</span></div></div>
+          <h4>How Pentagram designs a logo</h4>
+          <div class="meta"><span>YouTube</span><span>14 min</span><span>Watch inline</span></div>
+        </div>
+      </div></div></div>
+  </div>
+  <div class="notes"><div class="feel"><b>Feels like</b>A fun scrapbook or sticker app. Energetic and youthful, and it reads well at a glance.</div><div class="good"><b>Strength</b>The cheapest to build, since it's mostly static styling. Each collection gets a strong identity.</div><div class="cost"><b>Cost</b>Can get tiring for long reading sessions. Loud colors compete with the images you save.</div></div>
+</section>
+
+<!-- ================= D ================= -->
+<section class="dir D" id="dir-d">
+  <div class="dir-head">
+    <div><div class="tag">Direction D · leads with surprise</div><h2>The Night Sky</h2>
+    <p>The home screen isn't a list of collections. It's <i>today's dig</i>: something forgotten resurfaces each day. Untouched items gather "dust". The tone is calm and dark with a little magic, made for evening browsing.</p></div>
+    <button class="pick" data-lavish-action onclick="pick(this,'D — The Night Sky (serendipity-led, daily resurfacing, dusty items, calm dark)')">Lead with D</button>
+  </div>
+  <div class="phones">
+    <div><div class="screen-label">Home: today's dig first</div>
+      <div class="phone"><div class="notch"></div><div class="scr">
+        <div class="eyebrow">Sunday evening</div>
+        <h3>Something you <i>forgot</i> you loved</h3>
+        <div class="dig"><div class="img g1"></div><h4>Swiss posters, 1955–1970</h4><span class="ago">saved 8 months ago · Design inspo</span></div>
+        <div class="row">
+          <div class="orb"><div class="dot g1"></div><b>Design</b>12 · 3 dusty</div>
+          <div class="orb"><div class="dot g2"></div><b>Reads</b>9 · 5 dusty</div>
+          <div class="orb"><div class="dot g3"></div><b>Cooking</b>15</div>
+        </div>
+      </div></div></div>
+    <div><div class="screen-label">Collection grid: dusty items show their age</div>
+      <div class="phone"><div class="notch"></div><div class="scr">
+        <div class="eyebrow">Collection</div><h3 style="font-size:28px">Long reads</h3>
+        <div class="filters"><span class="on">Shuffle</span><span>Newest</span><span>Dustiest</span></div>
+        <div class="masonry">
+          <div class="card"><div class="g4" style="height:70px"></div><p>The slow death of the hyperlink</p></div>
+          <div class="card dusty"><div class="g5" style="height:100px"></div><p>On boredom, and why it matters</p></div>
+          <div class="card"><div class="g2 yt" style="height:72px"></div><p>A 40-min lecture on attention</p></div>
+          <div class="card dusty"><div class="g6" style="height:60px"></div><p>"Read this when you're stuck" (a post)</p></div>
+        </div>
+      </div></div></div>
+    <div><div class="screen-label">Swipe feed: framed as a memory</div>
+      <div class="phone"><div class="notch"></div><div class="scr" style="padding:0">
+        <div class="feedwrap">
+          <div class="memory">"you saved this on a rainy Tuesday in March"</div>
+          <div class="big g5"><div class="over"><h4>On boredom, and why it matters</h4><p>An essay arguing boredom is a signal, not a void. 11 min read.</p></div></div>
+          <div class="bar"><span><i>☾</i>later</span><span><i>✦</i>read</span><span><i>↻</i>shuffle</span><span><i>✕</i>let go</span></div>
+        </div>
+      </div></div></div>
+  </div>
+  <div class="notes"><div class="feel"><b>Feels like</b>Opening a time capsule. Reflective and a little magical.</div><div class="good"><b>Strength</b>Attacks the real problem with read-later apps: things you save and never open again. "Let go" makes deleting guilt-free.</div><div class="cost"><b>Cost</b>Needs history before it shines, so it's dull in week one. The dark theme limits the photo-heavy moodboard feel.</div></div>
+</section>
+
+<footer class="choose">
+  <h2>Or mix them</h2>
+  <p>My suggestion: A's touch and gestures as the base, B's color identity per collection, and D's "today's dig" and dust as features. Toggle what you want, then send.</p>
+  <div class="mix">
+    <button class="pick" data-lavish-action onclick="toggle(this,'A: tactile physics, stacks, flick-to-file')">A · touch &amp; gestures</button>
+    <button class="pick" data-lavish-action onclick="toggle(this,'A: handwritten AI notes')">A · handwritten notes</button>
+    <button class="pick" data-lavish-action onclick="toggle(this,'B: color + emoji identity per collection')">B · collection colors</button>
+    <button class="pick" data-lavish-action onclick="toggle(this,'B: chunky outlined type')">B · chunky type</button>
+    <button class="pick" data-lavish-action onclick="toggle(this,'D: today\'s dig on home')">D · today's dig</button>
+    <button class="pick" data-lavish-action onclick="toggle(this,'D: dusty items + let go')">D · dust &amp; let go</button>
+    <button class="pick" data-lavish-action onclick="toggle(this,'D: dark night-sky theme')">D · dark theme</button>
+  </div>
+  <div style="margin-top:14px"><button class="pick" data-lavish-action onclick="sendMix()" style="background:var(--accent);color:#fff;border-color:var(--accent)">Send mix to Claude</button></div>
+  <div class="status" id="status">Nothing selected yet.</div>
+</footer>
+</div>
+<script>
+const mix = new Set();
+function pick(btn, label){
+  try { window.lavish.queuePrompt('Fun direction: lead with ' + label, { tag:'direction', text: label }); window.lavish.sendQueuedPrompts(); } catch(e){ console.log('lavish unavailable', e); }
+  document.getElementById('status').textContent = 'Sent: lead with ' + label;
+}
+function toggle(btn, label){
+  mix.has(label) ? mix.delete(label) : mix.add(label);
+  btn.classList.toggle('on');
+  document.getElementById('status').textContent = mix.size ? 'Selected: ' + [...mix].join(' · ') : 'Nothing selected yet.';
+}
+function sendMix(){
+  if(!mix.size){ document.getElementById('status').textContent = 'Select at least one element first.'; return; }
+  try { window.lavish.queuePrompt('Fun direction mix: ' + [...mix].join('; '), { tag:'direction-mix' }); window.lavish.sendQueuedPrompts(); } catch(e){ console.log('lavish unavailable', e); }
+  document.getElementById('status').textContent = 'Sent mix: ' + [...mix].join(' · ');
+}
+</script>
+</body>
+</html>

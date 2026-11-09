@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="lavish-design" content="off">
+<title>Gallery Home Options</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&display=swap" rel="stylesheet">
+<style>
+:root{--page:#f5f5f3;--ink:#161616;--muted:#666;--line:#e2e2de;--accent:#3b5bfd}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--page);color:var(--ink);font-family:Inter,system-ui,sans-serif;line-height:1.45;padding:40px 16px 80px}
+.wrap{max-width:1180px;margin:0 auto}
+header.top h1{font-family:Newsreader,serif;font-weight:400;font-size:clamp(30px,4vw,44px);letter-spacing:-.02em}
+header.top p{color:var(--muted);max-width:740px;margin-top:8px}
+.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:28px;margin-top:32px}
+@media (max-width:1180px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:640px){.grid{grid-template-columns:1fr}}
+.opt h2{font-family:Newsreader,serif;font-weight:400;font-size:24px;margin-top:14px}
+.opt .tag{font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-top:2px}
+.opt p{font-size:14px;color:var(--muted);margin-top:6px}
+.opt .tr{font-size:13px;margin-top:8px}
+.opt .tr b{color:#2e7d4f}.opt .tr i{color:#b23a3a;font-style:normal;font-weight:600}
+.pick{margin-top:12px;border:1.5px solid var(--ink);background:#fff;border-radius:99px;padding:9px 16px;font:600 13px Inter;cursor:pointer;color:var(--ink)}
+.pick:hover,.pick.on{background:var(--ink);color:#fff}
+.phone{width:100%;max-width:280px;height:580px;border-radius:36px;border:10px solid #111;overflow:hidden;position:relative;margin:0 auto;box-shadow:0 20px 40px -20px rgba(0,0,0,.35);background:#fff}
+.notch{position:absolute;top:8px;left:50%;transform:translateX(-50%);width:84px;height:22px;background:#111;border-radius:20px;z-index:9}
+.scr{height:100%;overflow:hidden;padding:42px 14px 14px;position:relative;color:#111}
+.nav{display:flex;justify-content:space-between;font-size:12px;color:#888}
+.serif{font-family:Newsreader,serif;font-weight:400;letter-spacing:-.02em}
+.h{font-size:32px;line-height:1;margin-top:14px}
+.meta{font-size:11px;color:#999}
+
+.g1{background:linear-gradient(135deg,#f6a35b,#e4572e 60%,#7a2e8e)}
+.g2{background:linear-gradient(160deg,#3a7bd5,#00d2ff)}
+.g3{background:linear-gradient(135deg,#a8e063,#56ab2f)}
+.g4{background:linear-gradient(135deg,#ffecd2,#fcb69f)}
+.g5{background:linear-gradient(135deg,#232526,#414345)}
+.g6{background:linear-gradient(135deg,#ff9a9e,#fad0c4)}
+.g7{background:linear-gradient(135deg,#c3cfe2,#e8ecf3)}
+.g8{background:linear-gradient(135deg,#f9d976,#f39f86)}
+
+/* 1 Covers */
+.covers .cv{position:relative;height:118px;border-radius:10px;overflow:hidden;margin-top:10px}
+.covers .cv .t{position:absolute;left:12px;bottom:10px;color:#fff}
+.covers .cv .t b{font-size:22px;display:block;line-height:1}
+.covers .cv .t span{font-size:11px;opacity:.9}
+.covers .cv::after{content:"";position:absolute;inset:0;background:linear-gradient(transparent 40%,#0008)}
+.covers .cv .t{z-index:2}
+.inboxline{display:flex;justify-content:space-between;align-items:center;font-size:12px;border:1px solid #eee;border-radius:10px;padding:10px 12px;margin-top:12px}
+.inboxline b{font-family:Newsreader,serif;font-weight:400;font-size:16px}
+
+/* 2 Wall of mosaics */
+.wall{display:grid;grid-template-columns:1fr 1fr;gap:14px 10px;margin-top:16px}
+.mos{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:2px;aspect-ratio:1;border-radius:8px;overflow:hidden}
+.mos i:first-child{grid-row:span 2}
+.wall b{display:block;font-size:17px;margin-top:6px;line-height:1}
+.wall span{font-size:11px;color:#999}
+
+/* 3 Today + rooms */
+.strip{display:flex;gap:8px;margin-top:10px}
+.strip div{flex:0 0 74px}
+.strip i{display:block;height:94px;border-radius:6px}
+.strip small{display:block;font-size:11px;color:#555;margin-top:4px;line-height:1.2}
+.sec{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#999;margin-top:18px}
+.rooms .r{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #f0f0f0}
+.rooms .r i{width:46px;height:46px;border-radius:6px;flex:0 0 46px}
+.rooms .r b{font-size:18px;flex:1}
+.rooms .r span{font-size:11px;color:#999}
+
+/* 4 Exhibition rooms (paged) */
+.room{position:absolute;inset:0;padding:42px 16px 16px;display:flex;flex-direction:column}
+.room .wallart{flex:1;margin-top:16px;position:relative}
+.room .wallart i{position:absolute;border-radius:4px;box-shadow:0 10px 20px -10px #0005}
+.room .label{border-top:1px solid #111;padding-top:10px;margin-top:10px}
+.room .label b{font-size:30px;line-height:1;display:block}
+.room .label span{font-size:12px;color:#777}
+.pager{display:flex;justify-content:center;gap:5px;margin-top:12px}
+.pager i{width:5px;height:5px;border-radius:50%;background:#ddd}
+.pager i.on{width:16px;border-radius:3px;background:#111}
+
+footer{margin-top:44px;background:#fff;border:1px solid var(--line);border-radius:18px;padding:20px}
+footer h3{font-family:Newsreader,serif;font-weight:400;font-size:22px}
+footer p{color:var(--muted);font-size:14px;margin-top:4px}
+#status{margin-top:10px;font-size:13px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="top">
+  <h1>The Gallery: four ways to do Home</h1>
+  <p>The collection grid stays as you liked it. These are only alternatives for the <b>Home</b> screen, all in the same quiet, editorial Gallery style. Pick one, or annotate the parts you'd combine.</p>
+</header>
+
+<div class="grid">
+  <div class="opt">
+    <div class="phone"><div class="notch"></div><div class="scr covers">
+      <div class="nav"><span>Search</span><span>＋</span></div>
+      <div class="serif h">Collections</div>
+      <div class="inboxline"><b>Inbox</b><span>6 to sort →</span></div>
+      <div class="cv g1"><div class="t"><b class="serif">Design inspo</b><span>12 · updated today</span></div></div>
+      <div class="cv g5"><div class="t"><b class="serif">Long reads</b><span>9 · 2 unread</span></div></div>
+      <div class="cv g3"><div class="t"><b class="serif">Cooking</b><span>15</span></div></div>
+    </div></div>
+    <div class="tag">Option 1</div><h2>Cover stack</h2>
+    <p>Each collection is a full-width cover, using its most recent image as the cover. Scrolling feels like walking past posters.</p>
+    <div class="tr"><b>+</b> Image-led and immediate. <i>−</i> Only 3 or 4 collections fit on screen.</div>
+    <button class="pick" data-lavish-action onclick="pick('Option 1 — Cover stack')">Choose 1</button>
+  </div>
+
+  <div class="opt">
+    <div class="phone"><div class="notch"></div><div class="scr">
+      <div class="nav"><span>Inbox · 6</span><span>Search</span></div>
+      <div class="serif h">Collections</div>
+      <div class="wall">
+        <div><div class="mos"><i class="g1"></i><i class="g6"></i><i class="g4"></i></div><b class="serif">Design inspo</b><span>12</span></div>
+        <div><div class="mos"><i class="g5"></i><i class="g7"></i><i class="g2"></i></div><b class="serif">Long reads</b><span>9</span></div>
+        <div><div class="mos"><i class="g3"></i><i class="g8"></i><i class="g6"></i></div><b class="serif">Cooking</b><span>15</span></div>
+        <div><div class="mos"><i class="g2"></i><i class="g5"></i><i class="g1"></i></div><b class="serif">Watch later</b><span>7</span></div>
+      </div>
+    </div></div>
+    <div class="tag">Option 2</div><h2>Mosaic wall</h2>
+    <p>A two-column grid where each collection is a small mosaic of three of its items, like Apple Photos albums.</p>
+    <div class="tr"><b>+</b> Dense, familiar, and good with many collections. <i>−</i> The least surprising of the four.</div>
+    <button class="pick" data-lavish-action onclick="pick('Option 2 — Mosaic wall')">Choose 2</button>
+  </div>
+
+  <div class="opt">
+    <div class="phone"><div class="notch"></div><div class="scr">
+      <div class="nav"><span>Sunday, 8 Nov</span><span>Search</span></div>
+      <div class="serif h">Good evening</div>
+      <div class="sec">Recently saved</div>
+      <div class="strip">
+        <div><i class="g1"></i><small>Swiss posters</small></div>
+        <div><i class="g4"></i><small>Hyperlink essay</small></div>
+        <div><i class="g2"></i><small>Pentagram logo</small></div>
+      </div>
+      <div class="sec">Rediscover</div>
+      <div class="rooms"><div class="r"><i class="g5"></i><b class="serif">On boredom</b><span>8 mo ago</span></div></div>
+      <div class="sec">Collections</div>
+      <div class="rooms">
+        <div class="r"><i class="g1"></i><b class="serif">Design inspo</b><span>12</span></div>
+        <div class="r"><i class="g3"></i><b class="serif">Cooking</b><span>15</span></div>
+      </div>
+    </div></div>
+    <div class="tag">Option 3</div><h2>Today, then collections</h2>
+    <p>Home works like a front page: recent saves, one item to rediscover, and then your collections. The Inbox lives inside "Recently saved".</p>
+    <div class="tr"><b>+</b> Always something new at the top, and serendipity comes built in. <i>−</i> Collections sit further down the page.</div>
+    <button class="pick" data-lavish-action onclick="pick('Option 3 — Today, then collections (recent strip + rediscover + collections)')">Choose 3</button>
+  </div>
+
+  <div class="opt">
+    <div class="phone"><div class="notch"></div><div class="scr" style="padding:0">
+      <div class="room">
+        <div class="nav"><span>Inbox · 6</span><span>Search</span></div>
+        <div class="wallart">
+          <i class="g1" style="left:8%;top:6%;width:46%;height:52%"></i>
+          <i class="g4" style="left:60%;top:12%;width:32%;height:28%"></i>
+          <i class="g2" style="left:60%;top:46%;width:32%;height:22%"></i>
+          <i class="g6" style="left:16%;top:64%;width:30%;height:26%"></i>
+        </div>
+        <div class="label"><b class="serif">Design inspo</b><span>Room 1 of 4 · 12 works · swipe for next room</span></div>
+        <div class="pager"><i class="on"></i><i></i><i></i><i></i></div>
+      </div>
+    </div></div>
+    <div class="tag">Option 4</div><h2>Exhibition rooms</h2>
+    <p>Each collection fills the whole screen like a gallery room, with a few items hung on the wall. Swipe sideways to go to the next room, and tap to enter the grid.</p>
+    <div class="tr"><b>+</b> The most "fun to explore", and it fits the Gallery idea. <i>−</i> Slow to jump to a specific collection once you have many.</div>
+    <button class="pick" data-lavish-action onclick="pick('Option 4 — Exhibition rooms (one collection per screen, swipe between rooms)')">Choose 4</button>
+  </div>
+</div>
+
+<footer>
+  <h3>Or combine them</h3>
+  <p>For example: Option 3's "Recently saved" and "Rediscover" at the top, with Option 2's mosaic wall below. Annotate anything, or reply in the terminal.</p>
+  <div id="status">Nothing chosen yet.</div>
+</footer>
+</div>
+<script>
+function pick(label){
+  try { window.lavish.queuePrompt('Gallery Home: ' + label, { tag:'home' }); window.lavish.sendQueuedPrompts(); }
+  catch(e){ console.log('lavish unavailable', e); }
+  document.getElementById('status').textContent = 'Sent: ' + label;
+}
+</script>
+</body>
+</html>

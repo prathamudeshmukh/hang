@@ -1,0 +1,383 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="lavish-design" content="off">
+<title>Fun Directions II</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&family=Space+Grotesk:wght@400;500;700&family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Sans:opsz,wght@9..40,400;9..40,600;9..40,700&display=swap" rel="stylesheet">
+<style>
+:root{--page:#f5f5f3;--ink:#161616;--muted:#666;--line:#e2e2de;--accent:#3b5bfd}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--page);color:var(--ink);font-family:Inter,system-ui,sans-serif;line-height:1.45;padding:40px 16px 80px}
+.wrap{max-width:1180px;margin:0 auto}
+header.top h1{font-size:clamp(28px,4vw,42px);font-weight:700;letter-spacing:-.03em}
+header.top p{color:var(--muted);max-width:740px;margin-top:8px}
+section.dir{margin-top:56px;border-top:1px solid var(--line);padding-top:28px}
+.dir-head{display:flex;flex-wrap:wrap;gap:16px;justify-content:space-between;align-items:flex-end}
+.dir-head .tag{font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+.dir-head h2{font-size:30px;font-weight:700;letter-spacing:-.02em}
+.dir-head p{color:var(--muted);max-width:640px;margin-top:4px;font-size:15px}
+.pick{border:1.5px solid var(--ink);background:#fff;border-radius:99px;padding:10px 18px;font:600 14px Inter;cursor:pointer;color:var(--ink)}
+.pick:hover,.pick.on{background:var(--ink);color:#fff}
+.phones{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px;margin-top:24px}
+@media (max-width:980px){.phones{grid-template-columns:repeat(auto-fill,minmax(280px,1fr))}}
+.screen-label{font-size:12px;color:var(--muted);margin-bottom:8px;font-weight:500}
+.phone{width:100%;max-width:300px;height:600px;border-radius:38px;border:10px solid #111;overflow:hidden;position:relative;margin:0 auto;box-shadow:0 20px 40px -20px rgba(0,0,0,.35)}
+.phone .notch{position:absolute;top:8px;left:50%;transform:translateX(-50%);width:90px;height:24px;background:#111;border-radius:20px;z-index:9}
+.scr{height:100%;overflow:hidden;padding:44px 14px 14px;position:relative}
+.notes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:20px}
+@media (max-width:780px){.notes{grid-template-columns:1fr}}
+.notes div{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px;font-size:14px}
+.notes b{display:block;font-size:12px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}
+.good b{color:#2e7d4f}.cost b{color:#b23a3a}.feel b{color:#5a4fcf}
+.refs{font-size:13px;color:var(--muted);margin-top:8px}
+
+/* fake media */
+.g1{background:linear-gradient(135deg,#f6a35b,#e4572e 60%,#7a2e8e)}
+.g2{background:linear-gradient(160deg,#3a7bd5,#00d2ff)}
+.g3{background:linear-gradient(135deg,#a8e063,#56ab2f)}
+.g4{background:linear-gradient(135deg,#ffecd2,#fcb69f)}
+.g5{background:linear-gradient(135deg,#232526,#414345)}
+.g6{background:linear-gradient(135deg,#ff9a9e,#fad0c4)}
+.g7{background:linear-gradient(135deg,#c3cfe2,#f5f7fa)}
+.yt{position:relative}
+.yt::after{content:"▶";position:absolute;inset:0;display:grid;place-items:center;color:#fff;font-size:20px;text-shadow:0 2px 8px #0006}
+
+/* ============ E: GALLERY ============ */
+.E .scr{background:#fff;color:#111;font-family:Inter}
+.E .nav{display:flex;justify-content:space-between;font-size:12px;color:#999}
+.E h3{font-family:Newsreader,serif;font-weight:400;font-size:36px;letter-spacing:-.02em;line-height:1;margin-top:18px}
+.E .count{font-size:12px;color:#999;margin-top:6px}
+.E .list{margin-top:18px}
+.E .row{display:flex;align-items:center;gap:12px;padding:12px 0;border-top:1px solid #eee}
+.E .row .thumbs{display:flex}
+.E .row .thumbs i{width:34px;height:44px;border-radius:4px;margin-right:-14px;border:2px solid #fff}
+.E .row b{font-family:Newsreader,serif;font-weight:400;font-size:20px;flex:1;margin-left:16px}
+.E .row span{font-size:12px;color:#999}
+.E .masonry{columns:2;column-gap:10px;margin-top:16px}
+.E .card{break-inside:avoid;margin-bottom:14px}
+.E .card .img{border-radius:6px}
+.E .card p{font-size:12px;margin-top:6px;line-height:1.3}
+.E .card small{font-size:11px;color:#999;display:block;margin-top:2px}
+.E .card .quote{font-family:Newsreader,serif;font-style:italic;font-size:15px;line-height:1.3;padding:14px 4px;border-top:1px solid #111;border-bottom:1px solid #111}
+.E .detail .img{height:300px;border-radius:0;margin:-44px -14px 0}
+.E .detail h4{font-family:Newsreader,serif;font-weight:400;font-size:26px;line-height:1.1;margin-top:16px}
+.E .detail .by{font-size:12px;color:#999;margin-top:8px}
+.E .detail .sum{font-size:13px;color:#444;margin-top:12px;line-height:1.5}
+.E .dots{position:absolute;bottom:22px;left:0;right:0;display:flex;justify-content:center;gap:5px}
+.E .dots i{width:5px;height:5px;border-radius:50%;background:#ddd}
+.E .dots i.on{background:#111;width:16px;border-radius:3px}
+
+/* ============ F: CANVAS ============ */
+.F .scr{background:#f2f0ea;font-family:'Space Grotesk',sans-serif;color:#111;padding:0}
+.F .grid-bg{position:absolute;inset:0;background-image:radial-gradient(#0002 1px,transparent 1px);background-size:16px 16px}
+.F .bub{position:absolute;border-radius:50%;display:grid;place-items:center;text-align:center;box-shadow:0 10px 30px -10px #0005}
+.F .bub b{font-size:14px;font-weight:700;line-height:1.05}
+.F .bub small{display:block;font-size:11px;font-weight:500;opacity:.75}
+.F .mini{position:absolute;border-radius:8px;box-shadow:0 6px 14px -6px #0006}
+.F .hud{position:absolute;left:14px;right:14px;top:44px;display:flex;justify-content:space-between;align-items:center;z-index:3}
+.F .hud b{font-size:20px;font-weight:700}
+.F .hud span{font-size:11px;background:#111;color:#fff;border-radius:99px;padding:4px 10px}
+.F .zoom{position:absolute;right:14px;bottom:20px;display:flex;flex-direction:column;gap:6px;z-index:3}
+.F .zoom i{width:34px;height:34px;border-radius:10px;background:#fff;display:grid;place-items:center;font-style:normal;box-shadow:0 4px 10px -4px #0004}
+.F .label{position:absolute;font-size:11px;font-weight:500;background:#fff;border-radius:6px;padding:2px 6px;box-shadow:0 2px 6px -2px #0003;white-space:nowrap}
+.F .link{position:absolute;height:1.5px;background:#0003;transform-origin:left}
+.F .crumb{position:absolute;left:14px;bottom:20px;font-size:12px;background:#fff;border-radius:99px;padding:6px 12px;box-shadow:0 4px 10px -4px #0004;z-index:3}
+
+/* ============ G: SOFT GLASS ============ */
+.G .scr{background:#eef0ff;font-family:'DM Sans',sans-serif;color:#1a1a2e}
+.G .blob{position:absolute;border-radius:50%;filter:blur(40px);opacity:.75}
+.G .glass{background:rgba(255,255,255,.55);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.8);border-radius:24px;box-shadow:0 10px 30px -14px rgba(60,60,140,.35)}
+.G h3{font-size:28px;font-weight:700;letter-spacing:-.03em;position:relative}
+.G .hi{font-size:13px;color:#6b6b8a;position:relative}
+.G .carousel{position:relative;height:250px;margin-top:16px}
+.G .ccard{position:absolute;top:0;width:190px;height:240px;border-radius:28px;padding:10px;left:50%}
+.G .ccard .img{height:150px;border-radius:20px}
+.G .ccard b{display:block;font-size:17px;margin-top:10px;letter-spacing:-.02em}
+.G .ccard small{font-size:12px;color:#6b6b8a}
+.G .pills{display:flex;gap:6px;margin-top:14px;position:relative;flex-wrap:wrap}
+.G .pills span{font-size:12px;padding:6px 12px;border-radius:99px;font-weight:600}
+.G .masonry{columns:2;column-gap:8px;margin-top:12px;position:relative}
+.G .card{break-inside:avoid;margin-bottom:8px;padding:6px;border-radius:20px}
+.G .card .img{border-radius:15px}
+.G .card p{font-size:12px;font-weight:600;padding:6px 4px 2px;line-height:1.25}
+.G .card small{font-size:11px;color:#6b6b8a;padding:0 4px}
+.G .tabbar{position:absolute;left:24px;right:24px;bottom:16px;height:52px;display:flex;justify-content:space-around;align-items:center;font-size:18px;border-radius:99px}
+.G .feedmedia{position:absolute;inset:0;border-radius:0}
+.G .sheet{position:absolute;left:10px;right:10px;bottom:12px;padding:14px;border-radius:28px}
+.G .sheet h4{font-size:20px;letter-spacing:-.02em;line-height:1.15}
+.G .sheet p{font-size:12px;color:#44445e;margin-top:6px}
+.G .sheet .btns{display:flex;gap:8px;margin-top:12px}
+.G .sheet .btns span{flex:1;text-align:center;border-radius:99px;padding:10px;font-size:13px;font-weight:700;background:#fff}
+.G .sheet .btns span.main{background:#1a1a2e;color:#fff}
+.G .progress{position:absolute;top:44px;left:14px;right:14px;display:flex;gap:4px;z-index:3}
+.G .progress i{flex:1;height:3px;border-radius:2px;background:#fff8}
+.G .progress i.on{background:#fff}
+
+/* ============ H: MAGAZINE ============ */
+.H .scr{background:#f7f3ea;font-family:Inter;color:#111}
+.H .cover{position:absolute;inset:0;padding:44px 16px 16px;display:flex;flex-direction:column;color:#fff}
+.H .mast{font-family:'Playfair Display',serif;font-weight:900;font-size:56px;letter-spacing:-.03em;line-height:.85}
+.H .issue{display:flex;justify-content:space-between;font-size:11px;letter-spacing:.12em;text-transform:uppercase;margin-top:6px;border-top:1px solid #fff9;padding-top:6px}
+.H .lines{margin-top:auto}
+.H .lines p{font-family:'Playfair Display',serif;font-size:19px;line-height:1.1;margin-top:10px}
+.H .lines p i{font-style:italic}
+.H .lines small{font-size:11px;letter-spacing:.1em;text-transform:uppercase;opacity:.85}
+.H .shelf{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
+.H .mag{aspect-ratio:3/4;border-radius:4px;padding:8px;color:#fff;position:relative;box-shadow:4px 6px 0 #0002}
+.H .mag b{font-family:'Playfair Display',serif;font-weight:900;font-size:19px;line-height:.9;display:block}
+.H .mag small{position:absolute;bottom:8px;left:8px;font-size:11px;letter-spacing:.08em;text-transform:uppercase}
+.H h3{font-family:'Playfair Display',serif;font-weight:900;font-size:30px;letter-spacing:-.02em}
+.H .sub{font-size:12px;color:#777}
+.H .spread .kicker{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#c0392b;font-weight:600}
+.H .spread h4{font-family:'Playfair Display',serif;font-weight:700;font-size:24px;line-height:1.05;margin-top:6px}
+.H .spread .img{height:150px;margin-top:10px}
+.H .spread .cols{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px;border-top:1px solid #111;padding-top:10px}
+.H .spread .cols div{font-size:12px;line-height:1.3}
+.H .spread .cols b{font-family:'Playfair Display',serif;display:block;font-size:14px;margin-bottom:4px}
+.H .spread .pq{font-family:'Playfair Display',serif;font-style:italic;font-size:16px;line-height:1.2;margin-top:12px;padding-left:10px;border-left:3px solid #c0392b}
+.H .pg{position:absolute;bottom:14px;left:16px;right:16px;display:flex;justify-content:space-between;font-size:11px;color:#777}
+
+footer.choose{margin-top:56px;background:#fff;border:1px solid var(--line);border-radius:20px;padding:22px}
+footer.choose h2{font-size:24px;letter-spacing:-.02em}
+footer.choose p{color:var(--muted);font-size:14px;margin-top:4px}
+.mix{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.status{margin-top:12px;font-size:13px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="top">
+  <h1>What kind of fun? Round two</h1>
+  <p>Four directions that are nothing like the Desk or the Zine. They use the same content as before (Design inspo, Long reads, Cooking, Watch later). If none of them work, the most useful thing you can tell me is <b>which app you already enjoy opening</b>, or annotate any detail you like or hate.</p>
+</header>
+
+<!-- ================= E ================= -->
+<section class="dir E">
+  <div class="dir-head">
+    <div><div class="tag">E · fun comes from restraint</div><h2>The Gallery</h2>
+    <p>Quiet and editorial, like a museum. White space and a serif font, and your saved images and videos are the only color. It's fun the way a good gallery is: big, beautiful content and smooth, shared-element transitions as you move from the grid to an item.</p>
+    <div class="refs">In the spirit of: Are.na, Cosmos, Apple Photos memories</div></div>
+    <button class="pick" data-lavish-action onclick="pick('E — The Gallery (quiet editorial, content is the color, smooth transitions)')">Lead with E</button>
+  </div>
+  <div class="phones">
+    <div><div class="screen-label">Home: collections as fanned thumbnails</div>
+      <div class="phone"><div class="notch"></div><div class="scr">
+        <div class="nav"><span>Inbox · 6</span><span>Search</span></div>
+        <h3>Collections</h3><div class="count">43 saved · 4 collections</div>
+        <div class="list">
+          <div class="row"><div class="thumbs"><i class="g1"></i><i class="g6"></i><i class="g4"></i></div><b>Design inspo</b><span>12</span></div>
+          <div class="row"><div class="thumbs"><i class="g5"></i><i class="g7"></i><i class="g2"></i></div><b>Long reads</b><span>9</span></div>
+          <div class="row"><div class="thumbs"><i class="g3"></i><i class="g4"></i><i class="g6"></i></div><b>Cooking</b><span>15</span></div>
+          <div class="row"><div class="thumbs"><i class="g2"></i><i class="g5"></i><i class="g1"></i></div><b>Watch later</b><span>7</span></div>
+        </div>
+      </div></div></div>
+    <div><div class="screen-label">Collection grid: images do the talking</div>
+      <div class="phone"><div class="notch"></div><div class="scr">
+        <div class="nav"><span>← Collections</span><span>Shuffle</span></div>
+        <h3 style="font-size:30px">Design inspo</h3>
+        <div class="masonry">
+          <div class="card"><div class="img g1" style="height:150px"></div><p>Swiss posters, 1955–1970</p><small>pinterest.com</small></div>
+          <div class="card"><div class="quote">"Good design is mostly saying no to good ideas."</div><small>@someone on X</small></div>
+          <div class="card"><div class="img g2 yt" style="height:90px"></div><p>How Pentagram designs a logo</p><small>YouTube · 14 min</small></div>
+          <div class="card"><div class="img g4" style="height:80px"></div><p>The slow death of the hyperlink</p><small>9 min read</small></div>
+        </div>
+      </div></div></div>
+    <div><div class="screen-label">Swipe feed: full-bleed, horizontal paging</div>
+      <div class="phone"><div class="notch"></div><div class="scr detail">
+        <div class="img g1"></div>
+        <h4>Swiss posters, 1955–1970</h4>
+        <div class="by">pinterest.com · saved 3 days ago</div>
+        <div class="sum">A run of International Typographic Style posters. Grid-heavy, sans-serif type, and photography used as pure shape.</div>
+        <div class="dots"><i></i><i class="on"></i><i></i><i></i><i></i></div>
+      </div></div></div>
+  </div>
+  <div class="notes"><div class="feel"><b>Feels like</b>A beautiful personal museum. Grown-up and calm.</div><div class="good"><b>Strength</b>Ages well, never competes with your content, and matches the "beautiful reader" naturally.</div><div class="cost"><b>Cost</b>"Fun" depends entirely on motion polish. A static screenshot looks plain.</div></div>
+</section>
+
+<!-- ================= F ================= -->
+<section class="dir F">
+  <div class="dir-head">
+    <div><div class="tag">F · fun comes from exploring space</div><h2>The Canvas</h2>
+    <p>Your saves live on an infinite, zoomable map. Collections are clusters you pinch into, and items float as tiles you can drag around. Related items sit close together (AI places them by topic). Exploring is literally moving through space.</p>
+    <div class="refs">In the spirit of: Apple Freeform, Kosmik, a map app for your interests</div></div>
+    <button class="pick" data-lavish-action onclick="pick('F — The Canvas (infinite zoomable map, collections as clusters, spatial exploration)')">Lead with F</button>
+  </div>
+  <div class="phones">
+    <div><div class="screen-label">Home: zoomed out, collections as clusters</div>
+      <div class="phone"><div class="notch"></div><div class="scr">
+        <div class="grid-bg"></div>
+        <div class="hud"><b>Everything</b><span>43 saves</span></div>
+        <div class="bub" style="width:130px;height:130px;left:20px;top:110px;background:#ff8a5c"><div><b>Design<br>inspo</b><small>12</small></div></div>
+        <div class="bub" style="width:105px;height:105px;left:160px;top:150px;background:#8fb8ff"><div><b>Long<br>reads</b><small>9</small></div></div>
+        <div class="bub" style="width:140px;height:140px;left:110px;top:290px;background:#a6e07a"><div><b>Cooking</b><small>15</small></div></div>
+        <div class="bub" style="width:90px;height:90px;left:22px;top:330px;background:#ffd36b"><div><b>Watch<br>later</b><small>7</small></div></div>
+        <div class="bub" style="width:60px;height:60px;left:200px;top:460px;background:#fff;border:2px dashed #111"><div><b style="font-size:12px">Inbox</b><small>6</small></div></div>
+        <div class="zoom"><i>+</i><i>−</i></div>
+      </div></div></div>
+    <div><div class="screen-label">Pinched into a collection: items float by topic</div>
+      <div class="phone"><div class="notch"></div><div class="scr">
+        <div class="grid-bg"></div>
+        <div class="hud"><b>Design inspo</b><span>pinch out ⤢</span></div>
+        <div class="link" style="left:80px;top:180px;width:110px;transform:rotate(18deg)"></div>
+        <div class="link" style="left:90px;top:200px;width:120px;transform:rotate(70deg)"></div>
+        <div class="mini g1" style="left:24px;top:110px;width:100px;height:130px"></div>
+        <div class="label" style="left:24px;top:246px">Swiss posters</div>
+        <div class="mini g2 yt" style="left:160px;top:190px;width:110px;height:70px"></div>
+        <div class="label" style="left:160px;top:264px">Pentagram logo</div>
+        <div class="mini" style="left:120px;top:310px;width:150px;height:72px;background:#fff;padding:8px;font-size:11px;line-height:1.3">"Good design is mostly saying no to good ideas."</div>
+        <div class="mini g4" style="left:20px;top:330px;width:86px;height:100px"></div>
+        <div class="label" style="left:20px;top:436px">Hyperlink essay</div>
+        <div class="mini g6" style="left:170px;top:420px;width:80px;height:80px"></div>
+        <div class="crumb">Everything › Design inspo</div>
+      </div></div></div>
+    <div><div class="screen-label">Swipe feed: a "tour" path through the cluster</div>
+      <div class="phone"><div class="notch"></div><div class="scr">
+        <div class="grid-bg"></div>
+        <div class="hud"><b>Tour · 2 of 12</b><span>exit</span></div>
+        <div class="mini g1" style="left:-40px;top:140px;width:90px;height:110px;opacity:.5"></div>
+        <div class="mini g2 yt" style="left:30px;top:120px;width:220px;height:150px;box-shadow:0 24px 40px -14px #0007"></div>
+        <div style="position:absolute;left:30px;right:30px;top:285px">
+          <div style="font-size:20px;font-weight:700;line-height:1.1">How Pentagram designs a logo</div>
+          <div style="font-size:12px;color:#555;margin-top:6px">YouTube · 14 min · near "Swiss posters" because both are about grid systems</div>
+        </div>
+        <div class="mini g6" style="right:-30px;top:420px;width:80px;height:80px;opacity:.5"></div>
+        <div style="position:absolute;left:30px;right:30px;bottom:24px;display:flex;gap:8px">
+          <span style="flex:1;text-align:center;background:#111;color:#fff;border-radius:12px;padding:10px;font-size:13px;font-weight:700">Watch</span>
+          <span style="flex:1;text-align:center;background:#fff;border-radius:12px;padding:10px;font-size:13px;font-weight:700">Next →</span>
+        </div>
+      </div></div></div>
+  </div>
+  <div class="notes"><div class="feel"><b>Feels like</b>Wandering through a map of your own brain. Genuinely different from anything else.</div><div class="good"><b>Strength</b>The most "explore" of all the options. Topic connections from the AI become visible and fun.</div><div class="cost"><b>Cost</b>Hardest to build (canvas, gestures, layout). Less efficient for quickly scanning a long list.</div></div>
+</section>
+
+<!-- ================= G ================= -->
+<section class="dir G">
+  <div class="dir-head">
+    <div><div class="tag">G · fun comes from bounce and polish</div><h2>Soft Glass</h2>
+    <p>Modern and premium, with a native feel. Frosted glass, soft color blobs that shift with each collection's palette, and a springy 3D carousel of collections. The feed works like Stories: tap to advance, with a glass sheet at the bottom.</p>
+    <div class="refs">In the spirit of: Arc Search, Things 3, Apple's own apps, Instagram Stories</div></div>
+    <button class="pick" data-lavish-action onclick="pick('G — Soft Glass (frosted glass, springy carousel, Stories-style feed)')">Lead with G</button>
+  </div>
+  <div class="phones">
+    <div><div class="screen-label">Home: springy collection carousel</div>
+      <div class="phone"><div class="notch"></div><div class="scr">
+        <div class="blob" style="width:200px;height:200px;background:#ff9a7a;left:-60px;top:60px"></div>
+        <div class="blob" style="width:200px;height:200px;background:#8fa8ff;right:-60px;top:260px"></div>
+        <h3>Good evening</h3><div class="hi">6 new saves waiting in Inbox</div>
+        <div class="carousel">
+          <div class="ccard glass" style="transform:translateX(-118%) scale(.82) rotate(-6deg);opacity:.7"><div class="img g5"></div></div>
+          <div class="ccard glass" style="transform:translateX(18%) scale(.82) rotate(6deg);opacity:.7"><div class="img g3"></div></div>
+          <div class="ccard glass" style="transform:translateX(-50%);z-index:2"><div class="img g1"></div><b>Design inspo</b><small>12 saves · 3 new</small></div>
+        </div>
+        <div class="pills"><span class="glass">✦ Shuffle all</span><span class="glass">Inbox 6</span><span class="glass">Search</span></div>
+        <div class="tabbar glass"><span>⌂</span><span>◎</span><span>＋</span><span>☰</span></div>
+      </div></div></div>
+    <div><div class="screen-label">Collection grid: glass cards on a tinted backdrop</div>
+      <div class="phone"><div class="notch"></div><div class="scr">
+        <div class="blob" style="width:220px;height:220px;background:#ff9a7a;left:-50px;top:20px"></div>
+        <div class="blob" style="width:180px;height:180px;background:#ffc46b;right:-50px;top:330px"></div>
+        <h3>Design inspo</h3><div class="hi">12 saves · 4 images · 3 videos · 5 reads</div>
+        <div class="masonry">
+          <div class="card glass"><div class="img g1" style="height:120px"></div><p>Swiss posters</p><small>Image</small></div>
+          <div class="card glass"><p style="font-weight:400;font-size:13px">"Good design is mostly saying no to good ideas."</p><small>@someone</small></div>
+          <div class="card glass"><div class="img g2 yt" style="height:70px"></div><p>Pentagram logo</p><small>14 min</small></div>
+          <div class="card glass"><div class="img g4" style="height:60px"></div><p>Death of the hyperlink</p><small>9 min read</small></div>
+        </div>
+      </div></div></div>
+    <div><div class="screen-label">Swipe feed: Stories-style with a glass sheet</div>
+      <div class="phone"><div class="notch"></div><div class="scr" style="padding:0">
+        <div class="feedmedia g4"></div>
+        <div class="progress"><i class="on"></i><i class="on"></i><i></i><i></i><i></i></div>
+        <div class="sheet glass"><h4>The slow death of the hyperlink</h4><p>Why the web stopped linking out, and what we lost. 9 min read · Long reads</p>
+          <div class="btns"><span class="main">Read</span><span>Later</span><span>Move</span></div></div>
+      </div></div></div>
+  </div>
+  <div class="notes"><div class="feel"><b>Feels like</b>A polished modern iOS app. Smooth, bouncy, satisfying.</div><div class="good"><b>Strength</b>Familiar patterns (carousel, Stories) make it easy to use. Expo can do blur via expo-blur.</div><div class="cost"><b>Cost</b>Glass is trendy and can look generic. Blur is costly on older Android devices.</div></div>
+</section>
+
+<!-- ================= H ================= -->
+<section class="dir H">
+  <div class="dir-head">
+    <div><div class="tag">H · fun comes from ritual</div><h2>The Issue</h2>
+    <p>Each collection publishes itself as a magazine. Every week (or on demand) the app assembles your new saves into an "issue" with a generated cover, headlines and a pull quote. Browsing a collection means flipping through its back issues.</p>
+    <div class="refs">In the spirit of: Flipboard, The New Yorker app, a personal Sunday paper</div></div>
+    <button class="pick" data-lavish-action onclick="pick('H — The Issue (each collection becomes a weekly magazine with generated covers)')">Lead with H</button>
+  </div>
+  <div class="phones">
+    <div><div class="screen-label">Home: this week's issue cover</div>
+      <div class="phone"><div class="notch"></div><div class="scr" style="padding:0">
+        <div class="cover g5">
+          <div class="mast">Long<br>Reads</div>
+          <div class="issue"><span>No. 12</span><span>Week of 8 Nov</span><span>5 stories</span></div>
+          <div class="lines">
+            <small>Inside</small>
+            <p>The slow <i>death</i> of the hyperlink</p>
+            <p>On boredom, and why it matters</p>
+            <p>A 40-minute lecture on <i>attention</i></p>
+          </div>
+        </div>
+      </div></div></div>
+    <div><div class="screen-label">Collections: a shelf of magazines</div>
+      <div class="phone"><div class="notch"></div><div class="scr">
+        <h3>Your shelf</h3><div class="sub">4 titles · next issues Sunday</div>
+        <div class="shelf">
+          <div class="mag g1"><b>Design<br>Inspo</b><small>No. 8</small></div>
+          <div class="mag g5"><b>Long<br>Reads</b><small>No. 12</small></div>
+          <div class="mag g3"><b>Cooking</b><small>No. 15</small></div>
+          <div class="mag g2"><b>Watch<br>Later</b><small>No. 4</small></div>
+        </div>
+      </div></div></div>
+    <div><div class="screen-label">Inside the issue: a spread, not a list</div>
+      <div class="phone"><div class="notch"></div><div class="scr spread">
+        <div class="kicker">Long reads · No. 12</div>
+        <h4>The slow death of the hyperlink</h4>
+        <div class="img g4"></div>
+        <div class="pq">"The web stopped pointing outward, and we stopped wandering."</div>
+        <div class="cols">
+          <div><b>Also inside</b>On boredom, and why it matters · 11 min</div>
+          <div><b>Watch</b>A lecture on attention · 40 min ▶</div>
+        </div>
+        <div class="pg"><span>← prev</span><span>2 / 5</span><span>next →</span></div>
+      </div></div></div>
+  </div>
+  <div class="notes"><div class="feel"><b>Feels like</b>Getting your own Sunday paper made from things you chose. A weekly ritual.</div><div class="good"><b>Strength</b>Strong reason to come back, and it uses the AI summaries well. Very distinctive.</div><div class="cost"><b>Cost</b>Layout generation for mixed content is tricky. Less suited to quick visual collections like Design inspo.</div></div>
+</section>
+
+<footer class="choose">
+  <h2>Pick, mix, or none of these</h2>
+  <p>These can combine. For example: Gallery styling plus Issue as a weekly feature, or Soft Glass plus a Canvas view for exploring.</p>
+  <div class="mix">
+    <button class="pick" data-lavish-action onclick="toggle(this,'E Gallery styling')">E · Gallery look</button>
+    <button class="pick" data-lavish-action onclick="toggle(this,'F Canvas map view')">F · Canvas map</button>
+    <button class="pick" data-lavish-action onclick="toggle(this,'F AI topic tour')">F · topic tour</button>
+    <button class="pick" data-lavish-action onclick="toggle(this,'G Soft Glass look')">G · Glass look</button>
+    <button class="pick" data-lavish-action onclick="toggle(this,'G Stories-style feed')">G · Stories feed</button>
+    <button class="pick" data-lavish-action onclick="toggle(this,'H weekly Issue per collection')">H · weekly issue</button>
+  </div>
+  <div style="margin-top:14px"><button class="pick" data-lavish-action onclick="sendMix()" style="background:var(--accent);color:#fff;border-color:var(--accent)">Send mix to Claude</button></div>
+  <div class="status" id="status">Nothing selected yet.</div>
+</footer>
+</div>
+<script>
+const mix = new Set();
+const statusEl = () => document.getElementById('status');
+function send(prompt, tag){
+  try { window.lavish.queuePrompt(prompt, { tag }); window.lavish.sendQueuedPrompts(); }
+  catch(e){ console.log('lavish unavailable', e); }
+}
+function pick(label){ send('Fun direction round 2: lead with ' + label, 'direction'); statusEl().textContent = 'Sent: lead with ' + label; }
+function toggle(btn, label){
+  mix.has(label) ? mix.delete(label) : mix.add(label);
+  btn.classList.toggle('on');
+  statusEl().textContent = mix.size ? 'Selected: ' + [...mix].join(' · ') : 'Nothing selected yet.';
+}
+function sendMix(){
+  if(!mix.size){ statusEl().textContent = 'Select at least one element first.'; return; }
+  send('Fun direction round 2 mix: ' + [...mix].join('; '), 'direction-mix');
+  statusEl().textContent = 'Sent mix: ' + [...mix].join(' · ');
+}
+</script>
+</body>
+</html>

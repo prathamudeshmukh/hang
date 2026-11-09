@@ -1,0 +1,28 @@
+# SAMPLE links: a stand-in for the real test set.
+# The spike's pass bar (≥ 85%) should be judged on ~30 links YOU actually saved recently.
+# Put them in my-links.txt and run: pnpm spike my-links.txt
+# Format: url  # expected-kind   (article | video | post | image | link)
+
+# video
+https://www.youtube.com/watch?v=jNQXAC9IVRw          # video
+https://youtu.be/dQw4w9WgXcQ                          # video
+https://vimeo.com/76979871                            # video
+https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4   # video
+
+# post
+https://x.com/jack/status/20                          # post
+
+# article
+https://paulgraham.com/greatwork.html                 # article
+https://martinfowler.com/articles/microservices.html  # article
+https://danluu.com/web-bloat/                         # article
+https://en.wikipedia.org/wiki/International_Typographic_Style   # article
+https://overreacted.io/a-complete-guide-to-useeffect/ # article
+https://jvns.ca/blog/2016/10/10/what-even-is-a-container/       # article
+
+# image
+https://upload.wikimedia.org/wikipedia/commons/a/a9/Example.jpg # image
+
+# link
+https://github.com/mozilla/readability                # link
+https://news.ycombinator.com/                         # link
