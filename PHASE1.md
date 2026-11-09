@@ -18,7 +18,7 @@ hang/
 
 ## Progress
 
-- 2026-11-09 · Slice 1: `app/` scaffolded from the share spike (`com.prathamesh.hang`), `npm test` 6/6, typecheck clean. `git init` waits on the owner (the spikes have their own nested `.git`). Dev build not run yet.
+- 2026-11-09 · Slice 1: `app/` scaffolded from the share spike (`com.prathamesh.hang`), `npm test` 6/6, typecheck clean. Root git repo created 2026-11-09 (nested spike repos removed, owner chose option A). Dev build not run yet.
 - 2026-11-09 · Slice 2: migration and pgTAP RLS tests written (`supabase/`). **Local `supabase test db`: 12/12 pass.** Pushed to the hosted project 2026-11-09; anon gets `42501` on all three tables.
 - 2026-11-09 · Owner setup verified: hosted project `ffofgzyudtloekityjfw` linked, Google provider enabled, `app/.env` set (publishable key, web client id), debug keystore SHA-1 `5E:8F:16:06:2E:A3:CD:2C:4A:0D:54:78:76:BA:A6:F3:8C:AB:F6:25` (release builds are signed with it too).
 
@@ -48,4 +48,3 @@ Each slice ends tested and working. Order matters: later slices build on earlier
 ## Open questions for the owner
 
 1. Supabase region (Singapore `ap-southeast-1` is the nearest outside India).
-2. OK to `git init` now and commit per slice?

@@ -9,7 +9,7 @@ Guidance for Claude Code when working in this project.
 | Spec | [SPEC.md](./SPEC.md) |
 | Design language | [DESIGN.md](./DESIGN.md) · [design/design-language.html](./design/design-language.html) |
 | Design explorations | [design/explorations/](./design/explorations/) |
-| Repo | — (not yet a git repo) |
+| Repo | local git, `main` (no remote yet) |
 | Supabase project | — |
 | Play Console / internal testing | — |
 | Kanban board | — |
