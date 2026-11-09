@@ -1,6 +1,10 @@
 import { useEffect, useState } from 'react';
 import { FlatList, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { db } from '@/db/client';
+import { createOutboxRepository } from '@/db/outboxRepository';
+import { systemClock } from '@/db/types';
+import { useDatabaseReady } from '@/db/useDatabaseReady';
 import { type ReceivedShare, subscribe } from '@/share/store';
 import { COLOR, FONT } from '@/share/tokens';
 
@@ -17,6 +21,14 @@ function ShareRow({ entry }: { readonly entry: ReceivedShare }) {
   );
 }
 
+function DatabaseStatus() {
+  const state = useDatabaseReady();
+  if (state.status === 'failed') return <Text style={styles.note}>Local database failed to open: {state.error.message}</Text>;
+  if (state.status === 'migrating') return <Text style={styles.note}>Opening local database…</Text>;
+  const queued = createOutboxRepository({ db, clock: systemClock }).list().length;
+  return <Text style={styles.note} testID="db-status">Local database ready · {queued} change(s) waiting to sync</Text>;
+}
+
 export default function Received() {
   const insets = useSafeAreaInsets();
   const [shares, setShares] = useState<readonly ReceivedShare[]>([]);
@@ -25,6 +37,7 @@ export default function Received() {
   return (
     <View style={[styles.wall, { paddingTop: insets.top + 24 }]}>
       <Text style={styles.title}>Share spike</Text>
+      <DatabaseStatus />
       <Text style={styles.note}>Share a link from Chrome, YouTube or X and pick “Hang”. Shares received while this process lives appear below.</Text>
       <FlatList data={shares} keyExtractor={(entry) => String(entry.receivedAt)} renderItem={({ item }) => <ShareRow entry={item} />} contentContainerStyle={{ paddingBottom: insets.bottom + 40 }} />
     </View>

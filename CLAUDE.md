@@ -46,6 +46,19 @@ pnpm spike hn-links.txt   # main test set: 30 links from the HN front page (2026
 `links.txt` format: one URL per line, optional expected kind after `#`
 (`https://youtu.be/abc  # video`). Blank lines and lines starting with `#` are ignored.
 
+## App — commands
+
+```bash
+cd app
+npm test               # node --test, all src/**/*.test.ts (Node 22.18+ strips types)
+npm run test:coverage  # 80% threshold
+npm run typecheck
+npm run db:generate    # after changing src/db/schema.ts: new SQLite migration in src/db/migrations
+```
+
+Local store tests use better-sqlite3 with the real migrations (`src/db/testing/testDb.ts`); the device
+uses expo-sqlite. Both are synchronous Drizzle drivers, typed as `HangDb`.
+
 ## Architecture notes
 
 - Imports use explicit `.ts` extensions (`allowImportingTsExtensions`) so the same files run in Deno;

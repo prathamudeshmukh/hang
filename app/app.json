@@ -26,7 +26,8 @@
     },
     "plugins": [
       "expo-router",
-      "./plugins/withShareActivity.js"
+      "./plugins/withShareActivity.js",
+      "expo-sqlite"
     ],
     "experiments": {
       "typedRoutes": true,
