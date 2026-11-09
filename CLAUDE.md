@@ -9,14 +9,36 @@ Guidance for Claude Code when working in this project.
 | Spec | [SPEC.md](./SPEC.md) |
 | Design language | [DESIGN.md](./DESIGN.md) · [design/design-language.html](./design/design-language.html) |
 | Design explorations | [design/explorations/](./design/explorations/) |
-| Repo | local git, `main` (no remote yet) |
-| Supabase project | — |
+| Repo | [github.com/prathamudeshmukh/hang](https://github.com/prathamudeshmukh/hang) (public), `main` |
+| Supabase project | `ffofgzyudtloekityjfw` (hosted, linked; `npx supabase … --remote`) |
 | Play Console / internal testing | — |
-| Kanban board | — |
+| Kanban board | [GitHub Project #4 "Hang"](https://github.com/users/prathamudeshmukh/projects/4) |
 | Error tracking | — |
 | Analytics | — |
 
 Secrets never go in this table. API keys live in env vars / Supabase secrets only.
+
+## Backlog and work status
+
+The **GitHub Project board is the source of truth** for what's planned, next, in progress and done.
+Every work item is an issue in this repo, on the board, with a `phase-N` label (`follow-up` for things
+found while building).
+
+- Status columns: **Backlog → Ready → In progress → Done**.
+- Starting work: move the issue to *In progress*. Finishing: commit with `Closes #N` (or close it) and
+  move it to *Done*.
+- New work found while building: open an issue (`follow-up` + phase label) and add it to the board
+  instead of leaving a note in a doc.
+- When a phase starts, break its epic issue into slice issues.
+- `PHASE1.md` keeps the slice design and decisions; status lives on the board.
+
+```bash
+gh project item-list 4 --owner prathamudeshmukh          # board contents
+gh project item-add 4 --owner prathamudeshmukh --url <issue-url>
+# set status: gh project item-edit --project-id PVT_kwHOAfqYg84Bq0OP --id <item-id> \
+#   --field-id PVTSSF_lAHOAfqYg84Bq0OPzhpJmpk --single-select-option-id <option>
+# options: Backlog 6d5d489a · Ready f494413b · In progress 6d3f082b · Done d214da76
+```
 
 ## What this is
 
