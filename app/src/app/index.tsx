@@ -1,39 +1,62 @@
-import { FlatList, StyleSheet, Text, View } from 'react-native';
+import { Link, type Href } from 'expo-router';
+import { Pressable, RefreshControl, ScrollView, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AccountPanel } from '@/auth/AccountPanel';
-import type { RecentItemRow } from '@/home/recentItems';
-import { useRecentItems } from '@/home/useRecentItems';
-import { COLOR, FONT } from '@/share/tokens';
+import { appListSources } from '@/home/appListSources';
+import { readHome, type CollectionRow } from '@/home/homeLists';
+import { ItemRowView } from '@/home/ItemRowView';
+import { listStyles, RIPPLE } from '@/home/listStyles';
+import { NewCollectionRow } from '@/home/NewCollectionRow';
+import { SyncProblem } from '@/home/SyncProblem';
+import { useLiveQuery } from '@/home/useLiveQuery';
+import { useRefresh } from '@/home/useRefresh';
+import { COLOR } from '@/share/tokens';
 
-function ItemRow({ row }: { readonly row: RecentItemRow }) {
+const HOME_KEY = 'home';
+const readAppHome = () => readHome(appListSources);
+
+function PlaceRow({ href, name, count, testID }: { readonly href: Href; readonly name: string; readonly count: number; readonly testID?: string }) {
   return (
-    <View style={styles.row}>
-      <Text style={styles.rowTitle} numberOfLines={2}>{row.title}</Text>
-      <Text style={styles.note} numberOfLines={1}>{row.url}</Text>
-      <Text style={styles.note}>{`${row.place} · ${row.status} · ${row.queued ? 'waiting to sync' : 'synced'}`}</Text>
-    </View>
+    <Link href={href} asChild>
+      <Pressable testID={testID} accessibilityRole="link" android_ripple={RIPPLE} style={[listStyles.row, listStyles.rowLine]}>
+        <Text style={listStyles.rowTitle}>{name}</Text>
+        <Text style={listStyles.count}>{count}</Text>
+      </Pressable>
+    </Link>
   );
 }
 
-/** Phase 1 home: a plain list of what's on the device. Slice 7 replaces it with the Inbox and collections. */
+const collectionRow = (collection: CollectionRow) => (
+  <PlaceRow key={collection.id} href={{ pathname: '/collection/[id]', params: { id: collection.id } }} name={collection.name} count={collection.count} />
+);
+
+/** Home in the owner's shape (SPEC #16) as plain lists: Recently saved, then collections. Rediscover comes in Phase 2. */
 export default function Home() {
   const insets = useSafeAreaInsets();
-  const rows = useRecentItems();
+  const home = useLiveQuery(readAppHome, HOME_KEY);
+  const { refreshing, onRefresh } = useRefresh();
 
   return (
-    <View style={[styles.wall, { paddingTop: insets.top + 24 }]}>
-      <Text style={styles.title}>Hang</Text>
-      <AccountPanel />
-      <Text style={styles.note}>Share a link from Chrome, YouTube or X and pick “Hang”.</Text>
-      <FlatList data={rows} keyExtractor={(row) => row.id} renderItem={({ item }) => <ItemRow row={item} />} contentContainerStyle={{ paddingBottom: insets.bottom + 40 }} />
-    </View>
+    <ScrollView
+      style={listStyles.wall}
+      contentContainerStyle={[listStyles.content, { paddingTop: insets.top + 24, paddingBottom: insets.bottom + 40 }]}
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[COLOR.accent]} />}
+    >
+      <Text style={listStyles.title}>Hang</Text>
+      <SyncProblem />
+
+      <Text style={listStyles.section}>Recently saved</Text>
+      {home.recent.length === 0 && <Text style={listStyles.note}>Share a link from Chrome, YouTube or X and pick “Hang”.</Text>}
+      {home.recent.map((row) => <ItemRowView key={row.id} row={row} markInbox />)}
+      <PlaceRow href="/inbox" name="Inbox" count={home.inboxCount} testID="inbox" />
+
+      <Text style={listStyles.section}>Collections</Text>
+      {home.collections.map(collectionRow)}
+      <NewCollectionRow />
+
+      <View style={{ marginTop: 40 }}>
+        <AccountPanel />
+      </View>
+    </ScrollView>
   );
 }
-
-const styles = StyleSheet.create({
-  wall: { flex: 1, backgroundColor: COLOR.wall, paddingHorizontal: 16 },
-  title: { fontFamily: FONT.serif, fontSize: 40, color: COLOR.ink, letterSpacing: -1 },
-  note: { fontFamily: FONT.serif, fontStyle: 'italic', fontSize: 13, color: COLOR.ink3, marginTop: 4 },
-  row: { borderTopWidth: StyleSheet.hairlineWidth, borderColor: COLOR.rule, paddingVertical: 14, marginTop: 14 },
-  rowTitle: { fontFamily: FONT.serif, fontSize: 18, color: COLOR.ink },
-});

@@ -19,7 +19,7 @@ function confirmDiscard(unsynced: number): Promise<boolean> {
   });
 }
 
-/** Phase 1 stand-in: who is signed in, how the last sync went, and sign-out. */
+/** Phase 1 stand-in: who is signed in, how the last sync went, and sign-out. Pull down on a list to sync. */
 export function AccountPanel() {
   const { status, lastSync } = useAuth();
   const [busy, setBusy] = useState(false);
@@ -42,9 +42,6 @@ export function AccountPanel() {
       <Text style={styles.note} testID="account-email">Signed in as {user?.email ?? 'unknown'}</Text>
       <Text style={styles.note} testID="last-sync">{lastSyncLabel(lastSync)}</Text>
       <View style={styles.actions}>
-        <Pressable accessibilityRole="button" onPress={() => void authSession.sync()} disabled={busy}>
-          <Text style={styles.link}>Sync now</Text>
-        </Pressable>
         <Pressable accessibilityRole="button" testID="sign-out" onPress={signOut} disabled={busy}>
           <Text style={styles.link}>{busy ? 'Signing out…' : 'Sign out'}</Text>
         </Pressable>

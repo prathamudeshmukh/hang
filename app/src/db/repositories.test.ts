@@ -43,6 +43,17 @@ describe('collections repository', () => {
     assert.throws(() => repo.collections.create({ id: 'c1', name: 'x'.repeat(81) }), /name/i);
     assert.equal(repo.outbox.list().length, 0);
   });
+
+  it('refuses a name already in use, ignoring case and spaces', () => {
+    repo.collections.create({ id: 'c1', name: 'Reading' });
+    assert.throws(() => repo.collections.create({ id: 'c2', name: ' reading ' }), /already have “Reading”/);
+    assert.equal(repo.collections.list().length, 1);
+  });
+
+  it('treats composed and decomposed accents as the same name', () => {
+    repo.collections.create({ id: 'c1', name: 'Caf\u00e9' });
+    assert.throws(() => repo.collections.create({ id: 'c2', name: 'Cafe\u0301' }), /already have/);
+  });
 });
 
 describe('items repository', () => {
@@ -120,6 +131,17 @@ describe('items repository', () => {
     repo.items.remove('i3');
     assert.deepEqual(repo.items.listRecent(5).map((i) => i.id), ['i2', 'i1']);
     assert.deepEqual(repo.items.listRecent(1).map((i) => i.id), ['i2']);
+  });
+
+  it('counts live items per collection, with the Inbox under null', () => {
+    repo.collections.create({ id: 'c1', name: 'Reading' });
+    ['i1', 'i2', 'i3', 'i4'].forEach((id, n) => repo.items.save({ id, sourceUrl: URL, collectionId: n < 2 ? 'c1' : null }));
+    repo.items.remove('i4');
+    assert.deepEqual(repo.items.countByCollection(), new Map([[null, 1], ['c1', 2]]));
+  });
+
+  it('has no counts on a new device', () => {
+    assert.equal(repo.items.countByCollection().size, 0);
   });
 
   it('breaks same-millisecond ties by the time-ordered id, newest first', () => {

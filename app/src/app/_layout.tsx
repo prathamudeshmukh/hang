@@ -7,6 +7,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { authSession } from '@/auth/appSession';
 import { useAuth } from '@/auth/useAuth';
 import { useDatabaseReady } from '@/db/useDatabaseReady';
+import { syncTriggers } from '@/sync/syncWiring';
 import { COLOR, FONT } from '@/share/tokens';
 
 void SplashScreen.preventAutoHideAsync();
@@ -34,6 +35,13 @@ export default function RootLayout() {
     if (settled) SplashScreen.hide();
   }, [settled]);
 
+  // Only the main app syncs on foreground, reconnect, Realtime and retries; the share sheet syncs once on close.
+  useEffect(() => {
+    if (status.kind !== 'signedIn') return;
+    syncTriggers.start();
+    return () => syncTriggers.stop();
+  }, [status.kind]);
+
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <StatusBar style="dark" />
@@ -43,6 +51,8 @@ export default function RootLayout() {
         <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: COLOR.wall } }}>
           <Stack.Protected guard={signedIn}>
             <Stack.Screen name="index" />
+            <Stack.Screen name="inbox" />
+            <Stack.Screen name="collection/[id]" />
           </Stack.Protected>
           <Stack.Protected guard={!signedIn}>
             <Stack.Screen name="sign-in" />

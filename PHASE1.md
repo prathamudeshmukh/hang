@@ -29,6 +29,7 @@ slices 1–9). This log keeps what each slice actually delivered.
 - 2026-11-09 · Slice 4 ✅: `app/src/sync/`: engine with an injected `SyncRemote` (the Supabase implementation comes with auth). Push first, strictly in order, 2 s → 5 min backoff; permanent errors set aside as `failed` (a failed create takes the row's later changes with it). Pull per table by an `(updated_at, id)` cursor with a 5 s overlap window (catches rows that commit late); pulled rows validated with Zod. Un-pushed local fields win over pulled ones; tombstones purge. A `sync()` during a run gets one follow-up run. New server migration: soft-deleting an item tombstones its `item_content` (local `supabase test db` 14/14; pushed to the hosted project 2026-11-09). `npm test` 59/59.
 - 2026-11-11 · Slice 5 ✅: `app/src/auth/`: Google sign-in (`@react-native-google-signin`, no nonce) → `signInWithIdToken`; session in SecureStore (unreadable = signed out); `allowBackup: false`; main app behind `Stack.Protected`. `device_owner` table: first sign-in claims rows, same user resumes, a different user wipes first. Sign-out: one sync (≤ 5 s), warning if the outbox isn't empty, wipe in one transaction, local sign-out. `src/sync/supabaseRemote.ts`: PostgREST `SyncRemote` (0-row PATCH and other 4xx permanent; network, 401, 408, 429, 5xx, `PGRST204/205` retry; creates ignore duplicates); 30 s request timeout; one sync after sign-in and at launch. `npm test` 121/121 (coverage 99.7% lines), `npm run test:integration` 5/5 against the local stack (incl. user B can't read or overwrite user A's row). **Signed in on the phone: the Google account is in hosted `auth.users`.** The hosted row check (`user_id` = the signed-in user) moves to slice 6, since the share sheet doesn't write to SQLite until then. Failed outbox entries have no UI yet (#14).
 - 2026-11-11 · Slice 6 ✅: `src/share/shareCapture.ts` saves a shared link to SQLite + outbox when the sheet opens; Save files it; closing runs `authSession.start()` + `sync()` (lazy-loaded). Chips are the device's collections. Sheet exits are first-wins, so a back press during Save's slide-out can't drop the filing. Home is a throwaway list of local items (`src/home/`). `npm test` 153/153 (99.7% lines). **Emulator:** item saved signed-out and offline; survives `force-stop` with the sheet still open; text-only share saves nothing. **Phone (owner, 2026-11-11):** signed-in share lands in hosted `items` with the right `user_id`; Save's `collection_id` arrives.
+- 2026-11-11 · Slice 7 (built, phone check pending): Home as plain lists (Recently saved + Inbox row → collections, inline "New collection" with duplicate names blocked), `/inbox` and `/collection/[id]`, pull-to-refresh everywhere; rows open in a Custom Tab. `src/sync/syncTriggers.ts` (foreground ≥ 30 s apart, reconnect via NetInfo, Realtime as a 1 s debounced signal, backoff timer; reconnect and refresh clear the backoff wait; reconnect also reopens a Realtime channel closed by an error). "Sync now" is gone from the account panel (pull to refresh instead). Realtime gotcha: `SUBSCRIBED` comes before the channel is attached to Postgres; changes flow only after the *"Subscribed to PostgreSQL"* system message (the foreground sync covers that gap). `npm test` 204/204 (99.8% lines); `npm run test:integration` 6/6, incl. user A's Realtime channel never carrying user B's rows. **Emulator:** new dev build (NetInfo) launches; it has no Google account, so the signed-in screens weren't seen there. Share sheet counting as a foreground: #20.
 
 ## Slices
 
@@ -90,6 +91,28 @@ Each slice ends tested and working. Order matters: later slices build on earlier
   and the item stays in the Inbox. Logs never carry the URL.
 - **`src/share/shareCapture.ts`** holds the logic (plain TS); `shareSession.ts` wires it; the sheet only renders.
   The spike's in-memory `store.ts` is gone; Home is a throwaway list of local items until slice 7.
+
+### Slice 7 (list UI + sync triggers), agreed 2026-11-11
+
+- **The remote half of #7 shipped in slice 5** (`supabaseRemote.ts`); this slice is the UI and the triggers.
+- **The owner's Home shape (SPEC #16, DESIGN §1–2) as plain lists:** Recently saved (latest 12 by `created_at`,
+  Inbox items marked, an "Inbox (n)" row) → collections (name, count). No Rediscover yet. Routes `/inbox` and
+  `/collection/[id]`; Phase 2 restyles them and keeps the routes and queries.
+- **New collection inline** at the end of the list; Enter creates, empty or blur cancels. Duplicate names are
+  blocked locally, case-insensitively (the server allows them; the sheet's chips would be ambiguous).
+  No rename, reorder, delete or item actions (build step 12).
+- **Item rows:** title, host, and status only when it's worth saying (pending, failed, waiting to sync).
+  Newest first. Tap opens the link in a Custom Tab (`expo-web-browser`) until the reader exists.
+- **`src/sync/syncTriggers.ts`**, plain TS with injected ports, started by `_layout.tsx` while signed in and
+  never by the share sheet:
+  - foreground → `sync()`, at most once per 30 s;
+  - offline → online (`@react-native-community/netinfo`) and pull-to-refresh clear the backoff wait on
+    retryable outbox entries (attempts kept, `failed` untouched), then `sync()`;
+  - one timer, while in the foreground, at the earliest `nextAttemptAt`;
+  - Realtime on `items` is only a signal: any change → `sync()` debounced 1 s; subscribed while signed in and in
+    the foreground; the echo of our own pushes is accepted; a channel error is logged, not retried in a loop.
+- **Tests:** triggers with fake ports; list queries on better-sqlite3; an integration test that user A's Realtime
+  channel never sees user B's rows.
 
 ## Open questions for the owner
 

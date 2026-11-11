@@ -25,14 +25,26 @@ export function enqueue(tx: HangDb, entry: NewOutboxEntry, clock: Clock): void {
 export function createOutboxRepository({ db }: RepositoryDeps) {
   const bySeq = (seq: number) => eq(outbox.seq, seq);
 
+  /** The oldest entry still to push. Entries are replayed strictly in order. */
+  function nextPending(): OutboxEntry | undefined {
+    return db.select().from(outbox).where(eq(outbox.status, 'pending')).orderBy(asc(outbox.seq)).limit(1).get();
+  }
+
   return {
     list(): readonly OutboxEntry[] {
       return db.select().from(outbox).orderBy(asc(outbox.seq)).all();
     },
 
-    /** The oldest entry still to push. Entries are replayed strictly in order. */
-    nextPending(): OutboxEntry | undefined {
-      return db.select().from(outbox).where(eq(outbox.status, 'pending')).orderBy(asc(outbox.seq)).limit(1).get();
+    nextPending,
+
+    /** When the head of the queue may be pushed again, or null when nothing is pending. Pushes are in order, so only the head counts. */
+    nextRetryAt(): number | null {
+      return nextPending()?.nextAttemptAt ?? null;
+    },
+
+    /** Reconnecting or a pull-to-refresh shouldn't wait out a backoff meant for a struggling server. Attempts are kept. */
+    retryNow(): void {
+      db.update(outbox).set({ nextAttemptAt: 0 }).where(eq(outbox.status, 'pending')).run();
     },
 
     complete(seq: number): void {

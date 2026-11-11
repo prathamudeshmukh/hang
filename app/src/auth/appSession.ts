@@ -24,7 +24,7 @@ function required(name: string, value: string | undefined): string {
 const SESSION_STORAGE_KEY = 'hang-session';
 const sessionStorage = createSecureSessionStorage(SecureStore);
 
-const supabase = createClient(
+export const supabase = createClient(
   required('EXPO_PUBLIC_SUPABASE_URL', process.env.EXPO_PUBLIC_SUPABASE_URL),
   required('EXPO_PUBLIC_SUPABASE_ANON_KEY', process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY),
   {

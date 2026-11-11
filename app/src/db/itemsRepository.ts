@@ -1,4 +1,4 @@
-import { and, desc, eq, isNull, type SQL } from 'drizzle-orm';
+import { and, count, desc, eq, isNull, type SQL } from 'drizzle-orm';
 import { enqueue } from './outboxRepository.ts';
 import { toServerShape } from './rowShape.ts';
 import { collections, items, type Item } from './schema.ts';
@@ -86,6 +86,12 @@ export function createItemsRepository({ db, clock }: RepositoryDeps) {
 
     listInCollection(collectionId: string): readonly Item[] {
       return listWhere(eq(items.collectionId, collectionId));
+    },
+
+    /** Live items per collection id; the Inbox counts under `null`. Collections with no items are absent. */
+    countByCollection(): ReadonlyMap<string | null, number> {
+      const rows = db.select({ collectionId: items.collectionId, total: count() }).from(items).where(live).groupBy(items.collectionId).all();
+      return new Map(rows.map(({ collectionId, total }) => [collectionId, total]));
     },
 
     listRecent(limit: number): readonly Item[] {
