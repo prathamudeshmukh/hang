@@ -18,7 +18,8 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": true,
-      "package": "com.prathamesh.hang"
+      "package": "com.prathamesh.hang",
+      "allowBackup": false
     },
     "web": {
       "output": "server",
@@ -27,7 +28,8 @@
     "plugins": [
       "expo-router",
       "./plugins/withShareActivity.js",
-      "expo-sqlite"
+      "expo-sqlite",
+      "expo-secure-store"
     ],
     "experiments": {
       "typedRoutes": true,

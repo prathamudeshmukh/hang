@@ -64,7 +64,7 @@ back to a generic link card (Open Graph image, title, site), never to a broken s
 | 1 | Audience | Personal first; path to public kept open |
 | 2 | Platform | **Expo, Android primary.** iOS later, if ever |
 | 3 | Backend | Thin Supabase backend: Postgres, Auth, Storage, Edge Functions |
-| 4 | Auth | Supabase Auth + **Google sign-in** (Credential Manager → `signInWithIdToken`); RLS on every table |
+| 4 | Auth | Supabase Auth + **Google sign-in** (`@react-native-google-signin` free tier → `signInWithIdToken`); RLS on every table |
 | 5 | Filing | **Inbox + one home collection per item.** No tags (as a user-facing concept) in v1 |
 | 6 | Share flow | Translucent bottom sheet over the source app; last-used collection pre-selected; AI pick replaces it if ready in under ~1.5s; swipe down leaves it in the Inbox |
 | 7 | Browsing | Home → collection **masonry grid** → full-screen **swipe feed** → reader. Shuffle on every collection |

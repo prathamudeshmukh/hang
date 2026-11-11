@@ -4,6 +4,8 @@
   "main": "index.ts",
   "dependencies": {
     "@expo/ui": "~58.0.27",
+    "@react-native-google-signin/google-signin": "^17.0.0",
+    "@supabase/supabase-js": "^2.119.0",
     "drizzle-orm": "^0.45.4",
     "expo": "~58.0.23",
     "expo-constants": "~58.0.15",
@@ -13,6 +15,7 @@
     "expo-image": "~58.0.18",
     "expo-linking": "~58.0.16",
     "expo-router": "~58.0.30",
+    "expo-secure-store": "~58.0.2",
     "expo-splash-screen": "~58.0.13",
     "expo-sqlite": "~58.0.15",
     "expo-status-bar": "~58.0.4",
@@ -50,7 +53,8 @@
     "test": "node --test 'src/**/*.test.ts'",
     "typecheck": "tsc --noEmit",
     "test:coverage": "node --test --experimental-test-coverage --test-coverage-include='src/**/*.ts' --test-coverage-exclude='src/**/*.test.ts' --test-coverage-exclude='src/**/testing/**' --test-coverage-lines=80 --test-coverage-branches=80 --test-coverage-functions=80 'src/**/*.test.ts'",
-    "db:generate": "drizzle-kit generate"
+    "db:generate": "drizzle-kit generate",
+    "test:integration": "sh scripts/test-integration.sh"
   },
   "private": true
 }

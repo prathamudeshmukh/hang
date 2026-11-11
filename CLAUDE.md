@@ -74,9 +74,13 @@ pnpm spike hn-links.txt   # main test set: 30 links from the HN front page (2026
 cd app
 npm test               # node --test, all src/**/*.test.ts (Node 22.18+ strips types)
 npm run test:coverage  # 80% threshold
+npm run test:integration  # src/**/*.integration.ts against the local stack (`npx supabase start` first)
 npm run typecheck
 npm run db:generate    # after changing src/db/schema.ts: new SQLite migration in src/db/migrations
 ```
+
+Auth (`src/auth/`): `authSession.ts` is plain TS with injected ports (Google, Supabase auth, local account,
+sync); `appSession.ts` wires the real ones and is the only file that imports native modules.
 
 Local store tests use better-sqlite3 with the real migrations (`src/db/testing/testDb.ts`); the device
 uses expo-sqlite. Both are synchronous Drizzle drivers, typed as `HangDb`.

@@ -1,11 +1,12 @@
 import { index, integer, real, sqliteTable, text } from 'drizzle-orm/sqlite-core';
 
 /**
- * Local mirror of the server tables (supabase/migrations, SPEC §5), plus `outbox` and `sync_state`.
+ * Local mirror of the server tables (supabase/migrations, SPEC §5), plus `outbox`, `sync_state` and
+ * `device_owner`.
  *
  * Timestamps are kept as the server's ISO strings, untouched, so a pull cursor is compared exactly as
  * Postgres wrote it (microseconds included). `updated_at` is null on rows that haven't synced yet.
- * `user_id` isn't mirrored: everything on the device belongs to the signed-in user.
+ * `user_id` isn't mirrored: everything on the device belongs to the user in `device_owner`.
  */
 
 export interface Palette {
@@ -114,6 +115,14 @@ export const syncState = sqliteTable('sync_state', {
   tableName: text('table_name').$type<SyncTableName>().primaryKey(),
   cursorUpdatedAt: text('cursor_updated_at').notNull(),
   cursorId: text('cursor_id').notNull(),
+});
+
+/**
+ * Whose data is on the device: at most one row. No row means nobody has signed in yet, and whatever
+ * was shared meanwhile is unclaimed; the first sign-in claims it.
+ */
+export const deviceOwner = sqliteTable('device_owner', {
+  userId: text('user_id').primaryKey(),
 });
 
 export const SYNC_TABLES = { collections, items, item_content: itemContent } as const;
