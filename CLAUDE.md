@@ -68,6 +68,23 @@ pnpm spike hn-links.txt   # main test set: 30 links from the HN front page (2026
 `links.txt` format: one URL per line, optional expected kind after `#`
 (`https://youtu.be/abc  # video`). Blank lines and lines starting with `#` are ignored.
 
+## Edge Functions — commands
+
+```bash
+cd supabase/functions
+deno task test              # unit tests (Deno; @std/expect)
+deno task test:coverage     # coverage report
+deno task test:integration  # extract against the local stack (`npx supabase start` first); serves the
+                            # function, points local Vault at it, secret in supabase/functions/.env
+deno task check             # typecheck the entry point
+deno lint
+```
+
+`_shared/extraction/` is the spike 0a registry, moved here (the spike folder stays frozen). `extract/handler.ts`
+is plain TS with injected ports; `extract/index.ts` is the only file that reads env or Deno globals.
+Deno is installed with `npm i -g deno` (Homebrew builds it from source). Don't run `deno fmt`: its style
+differs from the repo's.
+
 ## App — commands
 
 ```bash

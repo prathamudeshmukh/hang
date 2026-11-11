@@ -1,0 +1,31 @@
+{
+  "imports": {
+    "@mozilla/readability": "npm:@mozilla/readability@0.6.0",
+    "@supabase/supabase-js": "npm:@supabase/supabase-js@2.119.0",
+    "@std/expect": "jsr:@std/expect@1.0.20",
+    "@std/testing/bdd": "jsr:@std/testing@1.0.21/bdd",
+    "linkedom": "npm:linkedom@0.18.15",
+    "zod": "npm:zod@4.6.7"
+  },
+  "compilerOptions": {
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "lib": [
+      "deno.ns",
+      "deno.window",
+      "dom",
+      "dom.iterable"
+    ]
+  },
+  "tasks": {
+    "test": "deno test --allow-read=.",
+    "test:coverage": "rm -rf coverage && deno test --allow-read=. --coverage=coverage && deno coverage coverage --exclude='(test|scripts)/|index\\.ts$|supabaseItemStore\\.ts$|consoleLogger\\.ts$'",
+    "test:integration": "sh scripts/test-integration.sh",
+    "check": "deno check extract/index.ts"
+  },
+  "test": {
+    "include": [
+      "**/*.test.ts"
+    ]
+  }
+}

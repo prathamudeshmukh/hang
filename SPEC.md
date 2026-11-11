@@ -134,8 +134,9 @@ back to a generic link card (Open Graph image, title, site), never to a broken s
    (`EXTRA_SUBJECT`, or the text before the URL in `EXTRA_TEXT`, which Chrome and most apps send),
    it's stored as `shared_title`. The sheet uses it right away for the preview instead of
    *"reading it now…"*. (Added after Spike 0a.)
-3. If online, the outbox pushes the row (an idempotent upsert on `id`). A database trigger enqueues
-   `extract` for it (via `pg_net`, or a Database Webhook).
+3. If online, the outbox pushes the row (an idempotent upsert on `id`). An `AFTER INSERT` trigger on
+   pending items calls `extract` through `pg_net` with only the item id; the function URL and a shared
+   secret come from Vault.
 4. The sheet subscribes to that row over Realtime. If `ai_collection_id` arrives within
    ~1.5s and the user hasn't touched a chip, it replaces the last-used pre-selection.
 5. **Save** sets `collection_id`. **Swipe down** leaves it in the Inbox. Either way the sheet closes
@@ -236,7 +237,7 @@ items (
   thumb_w, thumb_h int,              -- masonry aspect ratio
   palette         jsonb,             -- { dominant, muted, onDominant }
   post            jsonb,             -- post snapshot: author, handle, avatar, text, media[], posted_at
-  embed           jsonb,             -- { provider, videoId, playable_inline }
+  embed           jsonb,             -- { provider, video_id, playable_inline }
 
   ai_collection_id uuid,             -- suggestion, never applied silently after the sheet closes
   ai_confidence    real,
@@ -336,8 +337,9 @@ notifications, widgets, import from other apps (Pocket/Raindrop export), web app
 
 - RLS on every table and the storage bucket: `user_id = auth.uid()`.
 - No service keys or API keys in the app bundle; the app ships only the anon key.
-- The Edge Function validates the JWT, and fetches only `http(s)` URLs with private IP ranges
-  blocked (SSRF guard), a 10s timeout and a 5 MB body cap.
+- The Edge Function is called by a DB trigger, not by clients: it checks a shared secret (`EXTRACT_SECRET`,
+  also in Vault) in constant time instead of a JWT. It fetches only `http(s)` URLs with private IP ranges
+  blocked on every redirect hop (SSRF guard), a 10s timeout and a 5 MB body cap.
 - Reader HTML is sanitised server-side (allow-list of tags and attributes, no scripts or iframes), and
   the WebView runs with JavaScript limited to our own injected bridge.
 - Never log URLs together with user identity; log only item ids.
@@ -385,5 +387,6 @@ proving it falls back to `generic`.
 | Shared-element transitions janky on Android | Confirmed for native SET | Spike 0b: native Reanimated SET doesn't fly on Android (4.7, experimental). v1 uses the hand-built hero (boarding → flying → settling) |
 | Translucent share activity is hard in Expo | Retired (Spike 0c) | A ~150-line config plugin adds `ShareActivity`; no third-party share library needed |
 | YouTube iframe autoplay restrictions in WebView | Medium | Muted autoplay only; tap to unmute; poster frame fallback |
+| DNS rebinding past the SSRF guard | Low | The guard resolves the host (`Deno.resolveDns`), then `fetch` resolves it again through the system resolver (hosts file, search domains); Edge Functions can't pin the IP. Accepted for a one-user app; revisit if `extract` moves to a worker service |
 | Edge Function limits (CPU time, memory) on large pages | Low–Med | 5 MB cap; stream parsing; move `extract` to a small worker service if needed |
 | Storage growth from uploads | Low | Downscale uploads to 2048px long edge; originals not kept in v1 |

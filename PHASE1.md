@@ -30,6 +30,7 @@ slices 1–9). This log keeps what each slice actually delivered.
 - 2026-11-11 · Slice 5 ✅: `app/src/auth/`: Google sign-in (`@react-native-google-signin`, no nonce) → `signInWithIdToken`; session in SecureStore (unreadable = signed out); `allowBackup: false`; main app behind `Stack.Protected`. `device_owner` table: first sign-in claims rows, same user resumes, a different user wipes first. Sign-out: one sync (≤ 5 s), warning if the outbox isn't empty, wipe in one transaction, local sign-out. `src/sync/supabaseRemote.ts`: PostgREST `SyncRemote` (0-row PATCH and other 4xx permanent; network, 401, 408, 429, 5xx, `PGRST204/205` retry; creates ignore duplicates); 30 s request timeout; one sync after sign-in and at launch. `npm test` 121/121 (coverage 99.7% lines), `npm run test:integration` 5/5 against the local stack (incl. user B can't read or overwrite user A's row). **Signed in on the phone: the Google account is in hosted `auth.users`.** The hosted row check (`user_id` = the signed-in user) moves to slice 6, since the share sheet doesn't write to SQLite until then. Failed outbox entries have no UI yet (#14).
 - 2026-11-11 · Slice 6 ✅: `src/share/shareCapture.ts` saves a shared link to SQLite + outbox when the sheet opens; Save files it; closing runs `authSession.start()` + `sync()` (lazy-loaded). Chips are the device's collections. Sheet exits are first-wins, so a back press during Save's slide-out can't drop the filing. Home is a throwaway list of local items (`src/home/`). `npm test` 153/153 (99.7% lines). **Emulator:** item saved signed-out and offline; survives `force-stop` with the sheet still open; text-only share saves nothing. **Phone (owner, 2026-11-11):** signed-in share lands in hosted `items` with the right `user_id`; Save's `collection_id` arrives.
 - 2026-11-11 · Slice 7 ✅: Home as plain lists (Recently saved + Inbox row → collections, inline "New collection" with duplicate names blocked), `/inbox` and `/collection/[id]`, pull-to-refresh everywhere; rows open in a Custom Tab. `src/sync/syncTriggers.ts` (foreground ≥ 30 s apart, reconnect via NetInfo, Realtime as a 1 s debounced signal, backoff timer; reconnect and refresh clear the backoff wait; reconnect also reopens a Realtime channel closed by an error). "Sync now" is gone from the account panel (pull to refresh instead). Realtime gotcha: `SUBSCRIBED` comes before the channel is attached to Postgres; changes flow only after the *"Subscribed to PostgreSQL"* system message (the foreground sync covers that gap). `npm test` 204/204 (99.8% lines); `npm run test:integration` 6/6, incl. user A's Realtime channel never carrying user B's rows. **Emulator:** new dev build (NetInfo) launches; it has no Google account, so the signed-in screens weren't seen there. Share sheet counting as a foreground: #20. **Phone (owner, 2026-11-11):** first launch caught `Link asChild` rejecting a style array (fixed); then all five checks passed: share lands in hosted `items` and the list, a dashboard edit to `title` shows up live (Realtime), an airplane-mode share pushes on reconnect, pull-to-refresh on every list, a new collection appears as a share-sheet chip and a duplicate name is refused. No `[sync]` warnings in logcat.
+- 2026-11-11 · Slice 8 ✅: `supabase/functions/extract` + `_shared/extraction` (spike 0a registry moved, Deno tests, SSRF guard rewritten as pure TS CIDR matching + `Deno.resolveDns`); insert trigger → `pg_net` → shared secret from Vault. Blocked pages end `ready` as link cards titled by `shared_title`. `deno task test` 95 steps (98.7% lines), pgTAP 21/21, `deno task test:integration` 3/3; app 204/204 and 6/6 unchanged. Security review: pass; four more IPv6 ranges blocked; email sign-up turned off on the hosted project (the trigger makes any account a URL fetcher). **Hosted:** owner set `EXTRACT_SECRET` + Vault, deployed and pushed; backfill turned the 3 stuck items `ready` (DNS works in the hosted runtime). **Phone (owner, 2026-11-11):** a shared HN link turns `ready` with its title. Stuck-row sweep: #21.
 
 ## Slices
 
@@ -113,6 +114,53 @@ Each slice ends tested and working. Order matters: later slices build on earlier
     the foreground; the echo of our own pushes is accepted; a channel error is logged, not retried in a loop.
 - **Tests:** triggers with fake ports; list queries on better-sqlite3; an integration test that user A's Realtime
   channel never sees user B's rows.
+
+### Slice 8 (minimal `extract`), agreed 2026-11-11
+
+- **The spike 0a registry moved** to `supabase/functions/_shared/extraction/` with its tests, now `deno test` with
+  `@std/expect`. The spike folder stays frozen as the record of what 0a measured.
+- **Trigger:** `AFTER INSERT` on `items` when `status = 'pending'` → `net.http_post` with only `{ item_id }`. URL and
+  secret come from Vault (`extract_url`, `extract_secret`); missing → a warning, the insert still succeeds.
+- **Auth:** `verify_jwt = false`; the function checks `EXTRACT_SECRET` in constant time and writes with the
+  service-role client, every write scoped to one id. SPEC §7 updated.
+- **Writes** every derived column the registry fills: status, kind, adapter, canonical_url (tracking stripped),
+  raw_title, title (extracted → `shared_title` → host), site_name, author, duration_s, reading_min, `embed` and
+  `post` in snake_case (SPEC §5 `embed` now says `video_id`). Unknowns are written as null so a rerun overwrites.
+  No `item_content` (needs the sanitiser, Phase 3), no thumbnail/palette.
+- **Lifecycle:** claim = `pending → extracting` in one conditional update (nothing claimed → 200, no-op). A blocked
+  page still ends `ready` as a link card (`shared_title` is now passed to adapters as a hint). `failed` only for our
+  own crashes, with `extract_error = 'internal'`. Logs carry item ids and adapter names, never URLs or messages.
+- **Stuck rows:** a backfill snippet now (below); a `pg_cron` sweep is #21.
+- **SSRF guard ported** as pure TS CIDR matching with `Deno.resolveDns` (A + AAAA) behind a `Lookup` port. The
+  DNS-rebinding gap is in SPEC §10.
+- **Tests:** Deno unit tests; pgTAP for the trigger; an integration test where private addresses must end `ready`
+  as link cards (proves the plumbing and the live guard, no internet).
+
+**Hosted setup (owner).** Generate the secret and set it in both places, without pasting it anywhere else:
+
+```bash
+SECRET=$(openssl rand -hex 32)
+npx supabase secrets set EXTRACT_SECRET="$SECRET"
+echo "$SECRET" | pbcopy   # then paste it into the SQL below, in the dashboard SQL editor
+```
+
+```sql
+select vault.create_secret('https://ffofgzyudtloekityjfw.supabase.co/functions/v1/extract', 'extract_url');
+select vault.create_secret('<paste the secret>', 'extract_secret');
+-- to change one later: select vault.update_secret(id, '<new value>') from vault.secrets where name = 'extract_secret';
+```
+
+**Backfill** (re-sends every live `pending` item; safe to rerun, the claim makes duplicates no-ops):
+
+```sql
+select net.http_post(
+  url := (select decrypted_secret from vault.decrypted_secrets where name = 'extract_url'),
+  body := jsonb_build_object('item_id', id),
+  headers := jsonb_build_object('content-type', 'application/json', 'authorization',
+    'Bearer ' || (select decrypted_secret from vault.decrypted_secrets where name = 'extract_secret')),
+  timeout_milliseconds := 60000)
+from public.items where status = 'pending' and deleted_at is null;
+```
 
 ## Open questions for the owner
 
