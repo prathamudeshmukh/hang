@@ -1,0 +1,20 @@
+# Phone only: leave the owner's install signed out of the test account.
+appId: com.prathamesh.hang
+name: Sign out of the test account
+---
+- launchApp:
+    stopApp: false
+- back
+- extendedWaitUntil:
+    visible:
+      id: inbox
+    timeout: 10000
+- scrollUntilVisible:
+    element:
+      id: sign-out
+- tapOn:
+    id: sign-out
+- extendedWaitUntil:
+    visible:
+      id: sign-in-google
+    timeout: 30000

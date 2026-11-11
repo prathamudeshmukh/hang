@@ -31,6 +31,7 @@ slices 1–9). This log keeps what each slice actually delivered.
 - 2026-11-11 · Slice 6 ✅: `src/share/shareCapture.ts` saves a shared link to SQLite + outbox when the sheet opens; Save files it; closing runs `authSession.start()` + `sync()` (lazy-loaded). Chips are the device's collections. Sheet exits are first-wins, so a back press during Save's slide-out can't drop the filing. Home is a throwaway list of local items (`src/home/`). `npm test` 153/153 (99.7% lines). **Emulator:** item saved signed-out and offline; survives `force-stop` with the sheet still open; text-only share saves nothing. **Phone (owner, 2026-11-11):** signed-in share lands in hosted `items` with the right `user_id`; Save's `collection_id` arrives.
 - 2026-11-11 · Slice 7 ✅: Home as plain lists (Recently saved + Inbox row → collections, inline "New collection" with duplicate names blocked), `/inbox` and `/collection/[id]`, pull-to-refresh everywhere; rows open in a Custom Tab. `src/sync/syncTriggers.ts` (foreground ≥ 30 s apart, reconnect via NetInfo, Realtime as a 1 s debounced signal, backoff timer; reconnect and refresh clear the backoff wait; reconnect also reopens a Realtime channel closed by an error). "Sync now" is gone from the account panel (pull to refresh instead). Realtime gotcha: `SUBSCRIBED` comes before the channel is attached to Postgres; changes flow only after the *"Subscribed to PostgreSQL"* system message (the foreground sync covers that gap). `npm test` 204/204 (99.8% lines); `npm run test:integration` 6/6, incl. user A's Realtime channel never carrying user B's rows. **Emulator:** new dev build (NetInfo) launches; it has no Google account, so the signed-in screens weren't seen there. Share sheet counting as a foreground: #20. **Phone (owner, 2026-11-11):** first launch caught `Link asChild` rejecting a style array (fixed); then all five checks passed: share lands in hosted `items` and the list, a dashboard edit to `title` shows up live (Realtime), an airplane-mode share pushes on reconnect, pull-to-refresh on every list, a new collection appears as a share-sheet chip and a duplicate name is refused. No `[sync]` warnings in logcat.
 - 2026-11-11 · Slice 8 ✅: `supabase/functions/extract` + `_shared/extraction` (spike 0a registry moved, Deno tests, SSRF guard rewritten as pure TS CIDR matching + `Deno.resolveDns`); insert trigger → `pg_net` → shared secret from Vault. Blocked pages end `ready` as link cards titled by `shared_title`. `deno task test` 95 steps (98.7% lines), pgTAP 21/21, `deno task test:integration` 3/3; app 204/204 and 6/6 unchanged. Security review: pass; four more IPv6 ranges blocked; email sign-up turned off on the hosted project (the trigger makes any account a URL fetcher). **Hosted:** owner set `EXTRACT_SECRET` + Vault, deployed and pushed; backfill turned the 3 stuck items `ready` (DNS works in the hosted runtime). **Phone (owner, 2026-11-11):** a shared HN link turns `ready` with its title. Stuck-row sweep: #21.
+- 2026-11-11 · Slice 9 ◐: `app/e2e/run.sh` + Maestro flows; rows carry `testID="item:<url>"`. **Emulator:** passed twice in a row (~1.5 min a run); the assertion fails on a partial match, a `pending` meta line and another run's id. Found on the way: the release build had never worked: `web.output: "server"` (scaffold leftover) made the Android bundle also export a server manifest, which runs the app in Node and crashes in `expo-secure-store`; now `"single"`. Maestro's tap retry closes Chrome's ⋮ menu (it opens after the "did it change?" check), so that tap has `retryTapIfNoChange: false`. Emulator DNS (`10.0.2.3`) went dead; started with `-dns-server 8.8.8.8,1.1.1.1`. **Phone:** owner to run `run.sh phone --i-know`.
 
 ## Slices
 
@@ -161,6 +162,29 @@ select net.http_post(
   timeout_milliseconds := 60000)
 from public.items where status = 'pending' and deleted_at is null;
 ```
+
+### Slice 9 (E2E with Maestro), agreed 2026-11-11
+
+- **Real Google sign-in** with a dedicated test Google account, added to each device by hand once. Maestro taps
+  `sign-in-google`, then the account in Google's picker. Sign-in is its own subflow (`sign-in.google.yaml`) so a
+  local email sign-in can replace it later.
+- **Share through Chrome's real UI** (⋮ → Share → Hang); one subflow per device (stock Android emulator, Samsung
+  share sheet on the phone), picked by the `DEVICE` env.
+- **Real uninstall/reinstall** in `app/e2e/run.sh`: clean install → `01-share.yaml` → `adb uninstall` + `install`
+  → `02-after-reinstall.yaml`. Maestro's `clearState` isn't a reinstall.
+- **Each run shares `https://example.com/?e2e=<runId>`**; rows carry `testID="item:<url>"`. Both flows wait in
+  Inbox until that row's meta line is exactly `example.com`: `ready` (only the server's `extract` sets it) and
+  nothing left in the outbox, so it went up and came back.
+- **Release APK** (`assembleRelease`, arm64, debug keystore whose SHA-1 is registered): no Metro, no dev-client
+  launcher after a reinstall.
+- **Phone runs need `--i-know`**: uninstalling drops anything not yet synced, and the run ends signed out of the
+  test account (`03-sign-out.yaml`) so the owner signs back in.
+- **Test rows stay** on the hosted project; the run id keeps them from causing a false pass.
+- **Sign in first, then share.** Sharing signed out (the claim path) end to end is a possible follow-up.
+- **Maestro 2.12.1** from the pinned GitHub release zip into `~/.maestro` (Homebrew needed a newer Xcode and wanted
+  to upgrade 29 formulae).
+- **Not in CI**: a CI emulator can't sign in to Google reliably. Needs a local email sign-in subflow and a CI Chrome
+  subflow; noted on #22.
 
 ## Open questions for the owner
 

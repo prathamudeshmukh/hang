@@ -1,0 +1,16 @@
+# Fresh install: sign in, share URL from Chrome, then wait until the server has it.
+# Env (from run.sh): URL, URL_PATTERN, ACCOUNT, DEVICE.
+appId: com.prathamesh.hang
+name: Share from Chrome, then synced
+---
+- launchApp
+- runFlow: sign-in.google.yaml
+- runFlow:
+    when:
+      true: ${DEVICE == 'emulator'}
+    file: share-from-chrome.emulator.yaml
+- runFlow:
+    when:
+      true: ${DEVICE == 'phone'}
+    file: share-from-chrome.phone.yaml
+- runFlow: wait-until-synced.yaml

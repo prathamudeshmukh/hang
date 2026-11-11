@@ -1,0 +1,24 @@
+# Stock Android 11 emulator: Chrome's ⋮ menu → Share… → the system share sheet → Hang.
+appId: com.android.chrome
+---
+- openLink:
+    link: ${URL}
+    browser: true
+- runFlow: chrome-first-run.yaml
+- extendedWaitUntil:
+    visible: Example Domain
+    timeout: 30000
+# No retry: the menu pops up after Maestro's "did the screen change?" check, so a retry closes it again.
+- tapOn:
+    id: com.android.chrome:id/menu_button
+    retryTapIfNoChange: false
+# Exact text: Chrome also shows a "Share via <last app>" shortcut, which skips the system sheet.
+- extendedWaitUntil:
+    visible: Share…|Share
+    timeout: 10000
+- tapOn: Share…|Share
+- extendedWaitUntil:
+    visible: Hang
+    timeout: 10000
+- tapOn: Hang
+- runFlow: leave-in-inbox.yaml

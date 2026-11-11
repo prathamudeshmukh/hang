@@ -1,0 +1,12 @@
+# Chrome's first-run and sign-in prompts, if any. All optional.
+appId: com.android.chrome
+---
+- tapOn:
+    text: Accept & continue
+    optional: true
+- tapOn:
+    text: Use without an account
+    optional: true
+- tapOn:
+    text: No thanks
+    optional: true

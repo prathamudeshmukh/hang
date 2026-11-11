@@ -1,0 +1,8 @@
+# After uninstall + reinstall: allowBackup is off, so the item can only come back through sync.
+# Env (from run.sh): URL_PATTERN, ACCOUNT.
+appId: com.prathamesh.hang
+name: Still there after reinstall
+---
+- launchApp
+- runFlow: sign-in.google.yaml
+- runFlow: wait-until-synced.yaml

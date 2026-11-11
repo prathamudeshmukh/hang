@@ -9,7 +9,7 @@ const INBOX_MARK = 'Inbox';
 export function ItemRowView({ row, markInbox = false }: { readonly row: ItemRow; readonly markInbox?: boolean }) {
   const meta = [row.host, markInbox && row.inInbox ? INBOX_MARK : null, row.note].filter(Boolean).join(' · ');
   return (
-    <Pressable accessibilityRole="link" android_ripple={RIPPLE} onPress={() => void openLink(row.url)} style={listStyles.row}>
+    <Pressable testID={`item:${row.url}`} accessibilityRole="link" android_ripple={RIPPLE} onPress={() => void openLink(row.url)} style={listStyles.row}>
       <Text style={listStyles.rowTitle} numberOfLines={2}>{row.title}</Text>
       <Text style={listStyles.note} numberOfLines={1}>{meta}</Text>
     </Pressable>

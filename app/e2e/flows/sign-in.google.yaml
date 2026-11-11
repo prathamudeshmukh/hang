@@ -1,0 +1,14 @@
+# Real Google sign-in with the test account already on the device.
+# Swap this file for an email sign-in subflow to run against a local stack (see #22).
+appId: com.prathamesh.hang
+---
+- tapOn:
+    id: sign-in-google
+- extendedWaitUntil:
+    visible: ${ACCOUNT}
+    timeout: 20000
+- tapOn: ${ACCOUNT}
+- extendedWaitUntil:
+    visible:
+      id: inbox
+    timeout: 30000

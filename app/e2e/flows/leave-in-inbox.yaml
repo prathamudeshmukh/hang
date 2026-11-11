@@ -1,0 +1,10 @@
+# The share sheet saves on open; back closes it into Inbox and starts the push.
+# Then bring Hang to the front without restarting it, so the pushed row is seen as it comes back.
+appId: com.prathamesh.hang
+---
+- extendedWaitUntil:
+    visible: Where does it hang\?|Saved.*|.*Inbox.*
+    timeout: 10000
+- back
+- launchApp:
+    stopApp: false

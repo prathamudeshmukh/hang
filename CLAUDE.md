@@ -102,6 +102,21 @@ sync); `appSession.ts` wires the real ones and is the only file that imports nat
 Local store tests use better-sqlite3 with the real migrations (`src/db/testing/testDb.ts`); the device
 uses expo-sqlite. Both are synchronous Drizzle drivers, typed as `HangDb`.
 
+## E2E — commands
+
+```bash
+cd app
+HANG_E2E_ACCOUNT=<test account email> e2e/run.sh emulator        # builds the release APK, runs both flows
+HANG_E2E_ACCOUNT=<test account email> e2e/run.sh phone --i-know  # uninstalls your install; sign back in after
+# --skip-build reuses android/app/build/outputs/apk/release/app-release.apk
+```
+
+Maestro 2.12.1 lives in `~/.maestro` (pinned GitHub release zip, `cli-2.12.1`; Homebrew's tap needs a newer
+Xcode). One-time per device: add the test Google account in Settings → Accounts. Flows are in `app/e2e/flows/`;
+the numbered ones are entry points, the rest are subflows. The run uninstalls Hang and writes rows to the hosted
+project as the test account. If Google's "Checking info" hangs on
+the emulator, its DNS proxy has died: start it with `emulator -avd Pixel_6_API_30 -dns-server 8.8.8.8,1.1.1.1`.
+
 ## Architecture notes
 
 - Imports use explicit `.ts` extensions (`allowImportingTsExtensions`) so the same files run in Deno;

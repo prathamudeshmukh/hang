@@ -1,0 +1,22 @@
+# Opens Inbox and waits until the shared row's meta line is just its host:
+# that means status `ready` (set only by the server's extract) and nothing left in the outbox.
+appId: com.prathamesh.hang
+---
+- tapOn:
+    id: inbox
+- repeat:
+    times: 12
+    while:
+      notVisible:
+        id: ${URL_PATTERN}
+        containsChild:
+          text: example\.com
+    commands:
+      - swipe:
+          direction: DOWN
+      - waitForAnimationToEnd:
+          timeout: 5000
+- assertVisible:
+    id: ${URL_PATTERN}
+    containsChild:
+      text: example\.com
