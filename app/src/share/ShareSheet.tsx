@@ -1,12 +1,14 @@
 import { Image } from 'expo-image';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
 import Animated from 'react-native-reanimated';
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { parseShare, type ShareIntentProps } from './parseShare';
-import { JS_BOOTED_AT, recordShare } from './store';
-import { COLLECTIONS, COLOR, FONT, SHEET } from './tokens';
+import type { CollectionChoice, ShareOpening } from './shareCapture';
+import { createAppShareCapture } from './shareSession';
+import { sheetHint, sheetNote } from './sheetNote';
+import { COLOR, FONT, SHEET } from './tokens';
 import { useSheetMotion } from './useSheetMotion';
 
 export interface ShareSheetProps extends ShareIntentProps {
@@ -22,57 +24,84 @@ function hostOf(url: string | undefined): string {
   }
 }
 
-function Sheet({ openedAt: nativeOpenedAt, ...intent }: ShareSheetProps) {
-  const insets = useSafeAreaInsets();
-  const [openedAt] = useState(() => nativeOpenedAt ?? Date.now());
-  const share = useMemo(() => parseShare(intent), [intent]);
-  const [collection, setCollection] = useState<string>(COLLECTIONS[0]);
-  const [openMs, setOpenMs] = useState<number | null>(null);
-  const coldStart = openedAt < JS_BOOTED_AT;
+interface ChipsProps {
+  readonly choices: readonly CollectionChoice[];
+  readonly selected: string | null;
+  readonly onSelect: (collectionId: string) => void;
+}
 
-  const record = useCallback(
-    (target: string | null) => recordShare({ share, collection: target, openMs: openMs ?? 0, coldStart, receivedAt: Date.now() }),
-    [share, openMs, coldStart],
+function CollectionChips({ choices, selected, onSelect }: ChipsProps) {
+  return (
+    <>
+      <Text style={styles.prompt}>Where does it hang?</Text>
+      <View style={styles.chips}>
+        {choices.map(({ id, name }) => (
+          <Pressable key={id} onPress={() => onSelect(id)} style={[styles.chip, id === selected && styles.chipOn]}>
+            <Text style={[styles.chipLabel, id === selected && styles.chipLabelOn]}>{name}</Text>
+          </Pressable>
+        ))}
+      </View>
+    </>
   );
-  const toInbox = useCallback(() => record(null), [record]);
-  const { close, pan, sheetStyle, scrimStyle } = useSheetMotion(toInbox);
+}
 
-  const title = share.sharedTitle ?? hostOf(share.url);
-  const unsupported = share.kind === 'unsupported';
+function choicesOf(opening: ShareOpening | null): readonly CollectionChoice[] {
+  return opening?.kind === 'saved' ? opening.collections : [];
+}
+
+function Sheet({ openedAt, ...intent }: ShareSheetProps) {
+  const insets = useSafeAreaInsets();
+  const [share] = useState(() => parseShare(intent));
+  const [capture] = useState(createAppShareCapture);
+  const [opening, setOpening] = useState<ShareOpening | null>(null);
+  const [selected, setSelected] = useState<string | null>(null);
+
+  useEffect(() => {
+    void capture.open(share).then(setOpening);
+  }, [capture, share]);
+
+  const leaveInInbox = useCallback(() => void capture.close(), [capture]);
+  const { close, isClosing, pan, sheetStyle, scrimStyle } = useSheetMotion(leaveInInbox);
+
+  /** Files before the slide-out starts, so the choice is on disk even if the process dies mid-animation. */
+  const save = () => {
+    if (opening?.kind !== 'saved' || selected === null || isClosing()) return;
+    capture.file(opening.itemId, selected);
+    close(leaveInInbox);
+  };
+
+  const choices = choicesOf(opening);
+  const host = hostOf(share.url);
 
   return (
     <View style={StyleSheet.absoluteFill}>
       <Animated.View style={[StyleSheet.absoluteFill, styles.scrim, scrimStyle]}>
-        <Pressable style={StyleSheet.absoluteFill} onPress={() => close(toInbox)} accessibilityLabel="Leave it in Inbox" />
+        <Pressable style={StyleSheet.absoluteFill} onPress={() => close(leaveInInbox)} accessibilityLabel="Leave it in Inbox" />
       </Animated.View>
       <GestureDetector gesture={pan}>
         <Animated.View
           style={[styles.sheet, { paddingBottom: insets.bottom + 20 }, sheetStyle]}
-          onLayout={() => setOpenMs((ms) => ms ?? Date.now() - openedAt)}
+          onLayout={() => {
+            if (__DEV__ && openedAt) console.info(`Share sheet laid out ${Date.now() - openedAt} ms after ShareActivity started`);
+          }}
         >
           <View style={styles.handle} />
           <View style={styles.preview}>
             {share.imageUri ? <Image source={share.imageUri} style={styles.print} contentFit="cover" /> : <View style={[styles.print, styles.printEmpty]} />}
             <View style={styles.previewText}>
-              <Text style={styles.previewTitle} numberOfLines={2}>{title}</Text>
-              <Text style={styles.note}>{unsupported ? 'nothing to hang here' : `${hostOf(share.url)} · reading it now…`}</Text>
+              <Text style={styles.previewTitle} numberOfLines={2}>{share.sharedTitle ?? (share.kind === 'unsupported' ? 'No link in this share' : host)}</Text>
+              <Text style={styles.note}>{sheetNote(opening, host)}</Text>
             </View>
           </View>
-          <Text style={styles.prompt}>Where does it hang?</Text>
-          <View style={styles.chips}>
-            {COLLECTIONS.map((name) => (
-              <Pressable key={name} onPress={() => setCollection(name)} style={[styles.chip, name === collection && styles.chipOn]}>
-                <Text style={[styles.chipLabel, name === collection && styles.chipLabelOn]}>{name}</Text>
-              </Pressable>
-            ))}
-          </View>
+          {choices.length > 0 && <CollectionChips choices={choices} selected={selected} onSelect={setSelected} />}
           <View style={styles.footer}>
-            <Text style={styles.note}>Swipe down to leave it in Inbox</Text>
-            <Pressable disabled={unsupported} onPress={() => close(() => record(collection))} style={[styles.save, unsupported && styles.saveOff]}>
-              <Text style={styles.saveLabel}>Save</Text>
-            </Pressable>
+            <Text style={styles.note}>{sheetHint(opening)}</Text>
+            {choices.length > 0 && (
+              <Pressable disabled={selected === null} onPress={save} style={[styles.save, selected === null && styles.saveOff]}>
+                <Text style={styles.saveLabel}>Save</Text>
+              </Pressable>
+            )}
           </View>
-          <Text style={styles.debug}>{openMs === null ? '…' : `opened in ${openMs} ms · ${coldStart ? 'cold' : 'warm'} JS`}</Text>
         </Animated.View>
       </GestureDetector>
     </View>
@@ -111,5 +140,4 @@ const styles = StyleSheet.create({
   save: { backgroundColor: COLOR.accent, borderRadius: 99, paddingHorizontal: 22, paddingVertical: 11 },
   saveOff: { opacity: 0.4 },
   saveLabel: { color: '#fff', fontWeight: '600', fontSize: 14 },
-  debug: { fontSize: 11, color: COLOR.ink3, marginTop: 12, textAlign: 'center' },
 });

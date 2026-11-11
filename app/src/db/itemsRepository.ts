@@ -36,8 +36,13 @@ export function createItemsRepository({ db, clock }: RepositoryDeps) {
     });
   }
 
+  function newestFirst(condition: SQL | undefined) {
+    // Ids are UUIDv7, so they break same-millisecond ties in time order.
+    return db.select().from(items).where(and(live, condition)).orderBy(desc(items.createdAt), desc(items.id));
+  }
+
   function listWhere(condition: SQL | undefined): readonly Item[] {
-    return db.select().from(items).where(and(live, condition)).orderBy(desc(items.createdAt)).all();
+    return newestFirst(condition).all();
   }
 
   return {
@@ -81,6 +86,10 @@ export function createItemsRepository({ db, clock }: RepositoryDeps) {
 
     listInCollection(collectionId: string): readonly Item[] {
       return listWhere(eq(items.collectionId, collectionId));
+    },
+
+    listRecent(limit: number): readonly Item[] {
+      return newestFirst(undefined).limit(limit).all();
     },
   };
 }

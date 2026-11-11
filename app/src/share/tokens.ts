@@ -29,5 +29,3 @@ export const SHEET = {
 
 export const FONT = { serif: 'serif' } as const;
 
-/** Stand-in collections; the real app reads them from SQLite. First = last used. */
-export const COLLECTIONS = ['Long reads', 'Design inspo', 'Cooking', 'Watch later'] as const;

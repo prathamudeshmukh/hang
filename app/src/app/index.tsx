@@ -1,34 +1,31 @@
-import { useEffect, useState } from 'react';
 import { FlatList, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AccountPanel } from '@/auth/AccountPanel';
-import { type ReceivedShare, subscribe } from '@/share/store';
+import type { RecentItemRow } from '@/home/recentItems';
+import { useRecentItems } from '@/home/useRecentItems';
 import { COLOR, FONT } from '@/share/tokens';
 
-function ShareRow({ entry }: { readonly entry: ReceivedShare }) {
-  const { share } = entry;
+function ItemRow({ row }: { readonly row: RecentItemRow }) {
   return (
     <View style={styles.row}>
-      <Text style={styles.rowTitle} numberOfLines={2}>{share.sharedTitle ?? share.url ?? share.imageUri ?? '(nothing)'}</Text>
-      <Text style={styles.note} numberOfLines={1}>{share.url ?? share.imageUri}</Text>
-      <Text style={styles.note}>
-        {entry.collection ?? 'Inbox'} · {share.kind} · opened in {entry.openMs} ms ({entry.coldStart ? 'cold' : 'warm'})
-      </Text>
+      <Text style={styles.rowTitle} numberOfLines={2}>{row.title}</Text>
+      <Text style={styles.note} numberOfLines={1}>{row.url}</Text>
+      <Text style={styles.note}>{`${row.place} · ${row.status} · ${row.queued ? 'waiting to sync' : 'synced'}`}</Text>
     </View>
   );
 }
 
-export default function Received() {
+/** Phase 1 home: a plain list of what's on the device. Slice 7 replaces it with the Inbox and collections. */
+export default function Home() {
   const insets = useSafeAreaInsets();
-  const [shares, setShares] = useState<readonly ReceivedShare[]>([]);
-  useEffect(() => subscribe(setShares), []);
+  const rows = useRecentItems();
 
   return (
     <View style={[styles.wall, { paddingTop: insets.top + 24 }]}>
       <Text style={styles.title}>Hang</Text>
       <AccountPanel />
-      <Text style={styles.note}>Share a link from Chrome, YouTube or X and pick “Hang”. Shares received while this process lives appear below.</Text>
-      <FlatList data={shares} keyExtractor={(entry) => String(entry.receivedAt)} renderItem={({ item }) => <ShareRow entry={item} />} contentContainerStyle={{ paddingBottom: insets.bottom + 40 }} />
+      <Text style={styles.note}>Share a link from Chrome, YouTube or X and pick “Hang”.</Text>
+      <FlatList data={rows} keyExtractor={(row) => row.id} renderItem={({ item }) => <ItemRow row={item} />} contentContainerStyle={{ paddingBottom: insets.bottom + 40 }} />
     </View>
   );
 }

@@ -54,7 +54,7 @@ const syncEngine = createSyncEngine({
   clock: systemClock,
 });
 
-/** One per process. The share sheet never imports this: it only writes locally. */
+/** One per process, shared by the main app and the share sheet (same JS runtime). */
 export const authSession = createAuthSession({
   backend: createSupabaseAuthBackend({ client: supabase, storage: sessionStorage, storageKey: SESSION_STORAGE_KEY }),
   google: createGoogleIdTokenProvider({

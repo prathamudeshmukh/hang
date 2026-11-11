@@ -110,4 +110,21 @@ describe('items repository', () => {
     assert.deepEqual(repo.items.listInbox().map((i) => i.id), ['i2', 'i1']);
     assert.deepEqual(repo.items.listInCollection('c1').map((i) => i.id), ['i3']);
   });
+
+  it('lists the most recent live items across the Inbox and collections', () => {
+    repo.collections.create({ id: 'c1', name: 'Reading' });
+    ['i1', 'i2', 'i3'].forEach((id) => {
+      repo.items.save({ id, sourceUrl: URL, collectionId: id === 'i2' ? 'c1' : null });
+      repo.clock.advance(1000);
+    });
+    repo.items.remove('i3');
+    assert.deepEqual(repo.items.listRecent(5).map((i) => i.id), ['i2', 'i1']);
+    assert.deepEqual(repo.items.listRecent(1).map((i) => i.id), ['i2']);
+  });
+
+  it('breaks same-millisecond ties by the time-ordered id, newest first', () => {
+    repo.items.save({ id: '01a1-a', sourceUrl: URL });
+    repo.items.save({ id: '01a1-b', sourceUrl: URL });
+    assert.deepEqual(repo.items.listRecent(5).map((i) => i.id), ['01a1-b', '01a1-a']);
+  });
 });

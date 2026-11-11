@@ -10,10 +10,12 @@ const OFFSCREEN = 2000;
 /**
  * Sheet slides up on mount; every exit (Save, swipe down, scrim tap, back) slides it out first and
  * then finishes ShareActivity via BackHandler.exitApp() → invokeDefaultOnBackPressed() → finish().
+ * The first exit wins: later ones (and drags) during the slide-out are ignored, so its `afterClose` runs.
  */
 export function useSheetMotion(onDismissToInbox: () => void) {
   const offset = useSharedValue(OFFSCREEN);
   const scrim = useSharedValue(0);
+  const closing = useSharedValue(false);
 
   useEffect(() => {
     offset.set(withTiming(0, { duration: MOTION.sheetInMs, easing: MOTION.easing }));
@@ -22,6 +24,8 @@ export function useSheetMotion(onDismissToInbox: () => void) {
 
   const close = useCallback(
     (afterClose?: () => void) => {
+      if (closing.get()) return;
+      closing.set(true);
       const finish = () => {
         afterClose?.();
         BackHandler.exitApp();
@@ -33,7 +37,7 @@ export function useSheetMotion(onDismissToInbox: () => void) {
         }),
       );
     },
-    [offset, scrim],
+    [offset, scrim, closing],
   );
 
   useEffect(() => {
@@ -46,9 +50,11 @@ export function useSheetMotion(onDismissToInbox: () => void) {
 
   const pan = Gesture.Pan()
     .onChange((event) => {
+      if (closing.get()) return;
       offset.set(Math.max(0, offset.get() + event.changeY));
     })
     .onEnd((event) => {
+      if (closing.get()) return;
       if (offset.get() > SHEET.dismissDistance || event.velocityY > SHEET.dismissVelocity) {
         scheduleOnRN(close, onDismissToInbox);
       } else {
@@ -59,5 +65,7 @@ export function useSheetMotion(onDismissToInbox: () => void) {
   const sheetStyle = useAnimatedStyle(() => ({ transform: [{ translateY: offset.value }] }));
   const scrimStyle = useAnimatedStyle(() => ({ opacity: scrim.value }));
 
-  return { close, pan, sheetStyle, scrimStyle };
+  const isClosing = useCallback(() => closing.get(), [closing]);
+
+  return { close, isClosing, pan, sheetStyle, scrimStyle };
 }

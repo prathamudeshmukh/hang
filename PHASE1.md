@@ -28,6 +28,7 @@ slices 1–9). This log keeps what each slice actually delivered.
 - 2026-11-09 · Slice 3 ✅: `app/src/db/`: Drizzle schema mirroring the server tables (no `user_id`; timestamps kept as the server's strings), `outbox`, `sync_state`; migrations from `npm run db:generate` (drizzle-kit, `driver: 'expo'`). Collections and items repositories write the local row and its outbox entry in one transaction. Tests run the real migrations on better-sqlite3 in Node. **Migrations ran on the emulator** (dev build, `hang.db` has all five tables).
 - 2026-11-09 · Slice 4 ✅: `app/src/sync/`: engine with an injected `SyncRemote` (the Supabase implementation comes with auth). Push first, strictly in order, 2 s → 5 min backoff; permanent errors set aside as `failed` (a failed create takes the row's later changes with it). Pull per table by an `(updated_at, id)` cursor with a 5 s overlap window (catches rows that commit late); pulled rows validated with Zod. Un-pushed local fields win over pulled ones; tombstones purge. A `sync()` during a run gets one follow-up run. New server migration: soft-deleting an item tombstones its `item_content` (local `supabase test db` 14/14; pushed to the hosted project 2026-11-09). `npm test` 59/59.
 - 2026-11-11 · Slice 5 ✅: `app/src/auth/`: Google sign-in (`@react-native-google-signin`, no nonce) → `signInWithIdToken`; session in SecureStore (unreadable = signed out); `allowBackup: false`; main app behind `Stack.Protected`. `device_owner` table: first sign-in claims rows, same user resumes, a different user wipes first. Sign-out: one sync (≤ 5 s), warning if the outbox isn't empty, wipe in one transaction, local sign-out. `src/sync/supabaseRemote.ts`: PostgREST `SyncRemote` (0-row PATCH and other 4xx permanent; network, 401, 408, 429, 5xx, `PGRST204/205` retry; creates ignore duplicates); 30 s request timeout; one sync after sign-in and at launch. `npm test` 121/121 (coverage 99.7% lines), `npm run test:integration` 5/5 against the local stack (incl. user B can't read or overwrite user A's row). **Signed in on the phone: the Google account is in hosted `auth.users`.** The hosted row check (`user_id` = the signed-in user) moves to slice 6, since the share sheet doesn't write to SQLite until then. Failed outbox entries have no UI yet (#14).
+- 2026-11-11 · Slice 6 (code done, phone check pending): `src/share/shareCapture.ts` saves a shared link to SQLite + outbox when the sheet opens; Save files it; closing runs `authSession.start()` + `sync()` (lazy-loaded). Chips are the device's collections. Sheet exits are first-wins, so a back press during Save's slide-out can't drop the filing. Home is a throwaway list of local items (`src/home/`). `npm test` 153/153 (99.7% lines). **Emulator:** item saved signed-out and offline; survives `force-stop` with the sheet still open; text-only share saves nothing. Still to do on the phone: signed-in share lands in hosted `items` with the right `user_id`, and Save's `collection_id` arrives.
 
 ## Slices
 
@@ -73,6 +74,22 @@ Each slice ends tested and working. Order matters: later slices build on earlier
 - **Tests:** unit tests with an injected `fetch`; `npm run test:integration` against local `supabase start` with
   two email/password users (local config only) for the round trip and RLS.
 - **Gate:** `src/auth/` is plain TS exposed through `useAuth()`; `Stack.Protected` in expo-router.
+
+### Slice 6 (share → local → push), agreed 2026-11-11
+
+- **Saved when the sheet opens**, to the Inbox, so it survives the process dying mid-choice. Save adds a
+  `file()` patch; swipe down adds nothing. There is no cancel.
+- **Only links are saved.** Image files and text without a URL show a note and save nothing (images: #17).
+- **Chips are the device's collections.** None → no chips and no Save. No pre-selection: Save is disabled
+  until a chip is tapped (last-used: #18).
+- **The sheet pushes on close**: it awaits the migration before writing, then `authSession.start()` +
+  `sync()` after closing. Signed out or offline, the entry waits in the outbox.
+- **Duplicates allowed** (#19).
+- **UUIDv7 from `uuid`** with `expo-crypto` random bytes passed in (no global polyfill).
+- **Failures:** on open, the sheet shows *"Couldn't save this: …"* and saves nothing; on Save, it closes
+  and the item stays in the Inbox. Logs never carry the URL.
+- **`src/share/shareCapture.ts`** holds the logic (plain TS); `shareSession.ts` wires it; the sheet only renders.
+  The spike's in-memory `store.ts` is gone; Home is a throwaway list of local items until slice 7.
 
 ## Open questions for the owner
 
