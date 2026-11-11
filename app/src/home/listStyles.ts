@@ -12,7 +12,15 @@ export const listStyles = StyleSheet.create({
   note: { fontFamily: FONT.serif, fontStyle: 'italic', fontSize: 13, color: COLOR.ink3, marginTop: 4 },
   row: { borderTopWidth: StyleSheet.hairlineWidth, borderColor: COLOR.rule, paddingVertical: 14 },
   rowTitle: { fontFamily: FONT.serif, fontSize: 18, color: COLOR.ink },
-  rowLine: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline' },
+  /** One style object: expo-router's `Link asChild` rejects style arrays. */
+  placeRow: {
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderColor: COLOR.rule,
+    paddingVertical: 14,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'baseline',
+  },
   count: { fontSize: 14, color: COLOR.ink3 },
   error: { fontFamily: FONT.serif, fontSize: 14, color: COLOR.accent, marginTop: 4 },
   input: { fontFamily: FONT.serif, fontSize: 18, color: COLOR.ink, padding: 0 },

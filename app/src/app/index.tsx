@@ -18,7 +18,7 @@ const readAppHome = () => readHome(appListSources);
 function PlaceRow({ href, name, count, testID }: { readonly href: Href; readonly name: string; readonly count: number; readonly testID?: string }) {
   return (
     <Link href={href} asChild>
-      <Pressable testID={testID} accessibilityRole="link" android_ripple={RIPPLE} style={[listStyles.row, listStyles.rowLine]}>
+      <Pressable testID={testID} accessibilityRole="link" android_ripple={RIPPLE} style={listStyles.placeRow}>
         <Text style={listStyles.rowTitle}>{name}</Text>
         <Text style={listStyles.count}>{count}</Text>
       </Pressable>
