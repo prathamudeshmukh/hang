@@ -280,7 +280,7 @@ Storage bucket `media` (private): `{user_id}/thumbs/{item_id}.webp` and
   item qualifies, the section is hidden.
 - **Collection tint** = the most common muted palette color across the collection's last 10 items,
   adjusted to ≥ 3:1 contrast against the wall in both themes. Recomputed on item change.
-- **Shuffle** = a seeded random order, stable for the session.
+- **Shuffle** = a seeded random order, stable while you're looking at it (a fresh seed each time it's turned on; #42).
 
 ---
 
