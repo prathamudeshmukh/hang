@@ -62,6 +62,8 @@ export const SPACE = {
   tight: 4,
   caption: 6,
   inset: 12,
+  /** Between chips in a row. */
+  chip: 8,
   /** Above a screen's title and below its last item, past the system bars. */
   screenTop: 24,
   screenBottom: 40,
