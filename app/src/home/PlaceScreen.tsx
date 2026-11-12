@@ -1,37 +1,42 @@
-import { FlatList, RefreshControl, Text } from 'react-native';
+import { FlatList, RefreshControl } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { COLOR } from '@/share/tokens';
+import { NameText, NoteText } from '@/theme/Text';
+import { useTheme } from '@/theme/theme';
 import { appListSources } from './appListSources';
 import { readPlace, type Place } from './homeLists';
 import { ItemRowView } from './ItemRowView';
-import { listStyles } from './listStyles';
+import { useListStyles } from './listStyles';
 import { SyncProblem } from './SyncProblem';
 import { useLiveQuery } from './useLiveQuery';
 import { useRefresh } from './useRefresh';
 
 const placeKey = (place: Place) => (place.kind === 'inbox' ? 'inbox' : `collection:${place.id}`);
+const TOP_GAP = 24;
+const BOTTOM_GAP = 40;
 
-/** The Inbox or one collection, newest first. Phase 2 swaps the list for the masonry grid. */
+/** The Inbox or one collection, newest first. Slice 4 swaps the list for the masonry grid. */
 export function PlaceScreen({ place }: { readonly place: Place }) {
   const insets = useSafeAreaInsets();
+  const styles = useListStyles();
+  const { color } = useTheme();
   const list = useLiveQuery(() => readPlace(appListSources, place), placeKey(place));
   const { refreshing, onRefresh } = useRefresh();
 
   return (
     <FlatList
-      style={listStyles.wall}
-      contentContainerStyle={[listStyles.content, { paddingTop: insets.top + 24, paddingBottom: insets.bottom + 40 }]}
+      style={styles.wall}
+      contentContainerStyle={[styles.content, { paddingTop: insets.top + TOP_GAP, paddingBottom: insets.bottom + BOTTOM_GAP }]}
       data={list?.rows ?? []}
       keyExtractor={(row) => row.id}
       renderItem={({ item }) => <ItemRowView row={item} />}
       ListHeaderComponent={
         <>
-          <Text style={listStyles.title}>{list?.title ?? 'Gone'}</Text>
+          <NameText token="display">{list?.title ?? 'Gone'}</NameText>
           <SyncProblem />
         </>
       }
-      ListEmptyComponent={<Text style={listStyles.note}>{list ? 'Nothing here yet.' : 'This collection isn’t on this device any more.'}</Text>}
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[COLOR.accent]} />}
+      ListEmptyComponent={<NoteText style={styles.section}>{list ? 'An empty wall. Share anything from another app to hang it here.' : 'This collection isn’t on this device any more.'}</NoteText>}
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[color.ink]} progressBackgroundColor={color.raised} />}
     />
   );
 }

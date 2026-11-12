@@ -1,9 +1,17 @@
 import { useState } from 'react';
-import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
-import { COLOR, FONT } from '@/share/tokens';
+import { Alert, Pressable, View } from 'react-native';
+import { ActionText, NoteText } from '@/theme/Text';
+import { makeStyles } from '@/theme/theme';
+import { SPACE } from '@/theme/tokens';
 import { authSession } from './appSession';
 import { lastSyncLabel } from './lastSyncLabel';
 import { useAuth } from './useAuth';
+
+const useStyles = makeStyles(() => ({
+  panel: { marginTop: 8, gap: 4 },
+  actions: { flexDirection: 'row', gap: 20, marginTop: 8 },
+  action: { minHeight: SPACE.touch, justifyContent: 'center' },
+}));
 
 function confirmDiscard(unsynced: number): Promise<boolean> {
   return new Promise((resolve) => {
@@ -22,6 +30,7 @@ function confirmDiscard(unsynced: number): Promise<boolean> {
 /** Phase 1 stand-in: who is signed in, how the last sync went, and sign-out. Pull down on a list to sync. */
 export function AccountPanel() {
   const { status, lastSync } = useAuth();
+  const styles = useStyles();
   const [busy, setBusy] = useState(false);
   const user = status.kind === 'signedIn' || status.kind === 'signingOut' ? status.user : null;
 
@@ -39,20 +48,13 @@ export function AccountPanel() {
 
   return (
     <View style={styles.panel}>
-      <Text style={styles.note} testID="account-email">Signed in as {user?.email ?? 'unknown'}</Text>
-      <Text style={styles.note} testID="last-sync">{lastSyncLabel(lastSync)}</Text>
+      <NoteText testID="account-email">Signed in as {user?.email ?? 'unknown'}</NoteText>
+      <NoteText testID="last-sync">{lastSyncLabel(lastSync)}</NoteText>
       <View style={styles.actions}>
-        <Pressable accessibilityRole="button" testID="sign-out" onPress={signOut} disabled={busy}>
-          <Text style={styles.link}>{busy ? 'Signing out…' : 'Sign out'}</Text>
+        <Pressable accessibilityRole="button" testID="sign-out" onPress={signOut} disabled={busy} style={styles.action}>
+          <ActionText token="action">{busy ? 'Signing out…' : 'Sign out'}</ActionText>
         </Pressable>
       </View>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  panel: { marginTop: 8 },
-  note: { fontFamily: FONT.serif, fontStyle: 'italic', fontSize: 13, color: COLOR.ink3, marginTop: 4 },
-  actions: { flexDirection: 'row', gap: 20, marginTop: 8 },
-  link: { fontSize: 14, fontWeight: '600', color: COLOR.accent },
-});

@@ -1,31 +1,47 @@
 import { Stack } from 'expo-router';
+import { NavigationBar } from 'expo-navigation-bar';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import * as SystemUI from 'expo-system-ui';
+import { View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { authSession } from '@/auth/appSession';
 import { useAuth } from '@/auth/useAuth';
 import { useDatabaseReady } from '@/db/useDatabaseReady';
 import { syncTriggers } from '@/sync/syncWiring';
-import { COLOR, FONT } from '@/share/tokens';
+import { NoteText } from '@/theme/Text';
+import { makeStyles, useTheme } from '@/theme/theme';
 
 void SplashScreen.preventAutoHideAsync();
 
+const useStyles = makeStyles(({ color }) => ({
+  root: { flex: 1, backgroundColor: color.wall },
+  centered: { flex: 1, justifyContent: 'center', padding: 24 },
+}));
+
 function DatabaseFailed({ error }: { readonly error: Error }) {
+  const styles = useStyles();
   return (
     <View style={styles.centered}>
-      <Text style={styles.note}>{`Hang couldn't open its local database: ${error.message}`}</Text>
+      <NoteText token="prompt">{`Hang couldn't open its local database: ${error.message}`}</NoteText>
     </View>
   );
 }
 
 /** The splash stays up until the stored session is restored, so a signed-in user never sees the sign-in screen. */
 export default function RootLayout() {
+  const styles = useStyles();
+  const theme = useTheme();
   const database = useDatabaseReady();
   const { status } = useAuth();
   const signedIn = status.kind === 'signedIn' || status.kind === 'signingOut';
   const settled = database.status === 'failed' || status.kind !== 'restoring';
+
+  // The window behind every screen, so a transition never flashes the other theme's color.
+  useEffect(() => {
+    void SystemUI.setBackgroundColorAsync(theme.color.wall);
+  }, [theme.color.wall]);
 
   useEffect(() => {
     if (database.status === 'ready') void authSession.start();
@@ -43,12 +59,14 @@ export default function RootLayout() {
   }, [status.kind]);
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <StatusBar style="dark" />
+    <GestureHandlerRootView style={styles.root}>
+      {/* Both bars are transparent (edge-to-edge, no contrast scrim); their icons follow the theme. */}
+      <StatusBar style="auto" />
+      <NavigationBar style="auto" />
       {database.status === 'failed' ? (
         <DatabaseFailed error={database.error} />
       ) : (
-        <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: COLOR.wall } }}>
+        <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: theme.color.wall } }}>
           <Stack.Protected guard={signedIn}>
             <Stack.Screen name="index" />
             <Stack.Screen name="inbox" />
@@ -62,8 +80,3 @@ export default function RootLayout() {
     </GestureHandlerRootView>
   );
 }
-
-const styles = StyleSheet.create({
-  centered: { flex: 1, justifyContent: 'center', padding: 24, backgroundColor: COLOR.wall },
-  note: { fontFamily: FONT.serif, fontStyle: 'italic', fontSize: 15, color: COLOR.ink3 },
-});

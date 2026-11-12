@@ -1,6 +1,6 @@
 import { Image } from 'expo-image';
 import { useCallback, useEffect, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import { GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
 import Animated from 'react-native-reanimated';
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -8,7 +8,11 @@ import { parseShare, type ShareIntentProps } from './parseShare';
 import type { CollectionChoice, ShareOpening } from './shareCapture';
 import { createAppShareCapture } from './shareSession';
 import { sheetHint, sheetNote } from './sheetNote';
-import { COLOR, FONT, SHEET } from './tokens';
+import { Pill } from '@/theme/Pill';
+import { ActionText, NameText, NoteText } from '@/theme/Text';
+import { makeStyles, useTheme } from '@/theme/theme';
+import { RADIUS, SPACE } from '@/theme/tokens';
+import { SHEET } from './tokens';
 import { useSheetMotion } from './useSheetMotion';
 
 export interface ShareSheetProps extends ShareIntentProps {
@@ -31,13 +35,22 @@ interface ChipsProps {
 }
 
 function CollectionChips({ choices, selected, onSelect }: ChipsProps) {
+  const styles = useStyles();
+  const { color } = useTheme();
   return (
     <>
-      <Text style={styles.prompt}>Where does it hang?</Text>
+      <NoteText token="prompt" color="ink" style={styles.prompt}>Where does it hang?</NoteText>
       <View style={styles.chips}>
         {choices.map(({ id, name }) => (
-          <Pressable key={id} onPress={() => onSelect(id)} style={[styles.chip, id === selected && styles.chipOn]}>
-            <Text style={[styles.chipLabel, id === selected && styles.chipLabelOn]}>{name}</Text>
+          <Pressable
+            key={id}
+            accessibilityRole="button"
+            accessibilityState={{ selected: id === selected }}
+            android_ripple={{ color: color.ripple }}
+            onPress={() => onSelect(id)}
+            style={[styles.chip, id === selected && styles.chipOn]}
+          >
+            <ActionText token="actionS" style={id === selected ? { color: color.wall } : null}>{name}</ActionText>
           </Pressable>
         ))}
       </View>
@@ -50,6 +63,7 @@ function choicesOf(opening: ShareOpening | null): readonly CollectionChoice[] {
 }
 
 function Sheet({ openedAt, ...intent }: ShareSheetProps) {
+  const styles = useStyles();
   const insets = useSafeAreaInsets();
   const [share] = useState(() => parseShare(intent));
   const [capture] = useState(createAppShareCapture);
@@ -89,18 +103,14 @@ function Sheet({ openedAt, ...intent }: ShareSheetProps) {
           <View style={styles.preview}>
             {share.imageUri ? <Image source={share.imageUri} style={styles.print} contentFit="cover" /> : <View style={[styles.print, styles.printEmpty]} />}
             <View style={styles.previewText}>
-              <Text style={styles.previewTitle} numberOfLines={2}>{share.sharedTitle ?? (share.kind === 'unsupported' ? 'No link in this share' : host)}</Text>
-              <Text style={styles.note}>{sheetNote(opening, host)}</Text>
+              <NameText token="titleS" numberOfLines={2}>{share.sharedTitle ?? (share.kind === 'unsupported' ? 'No link in this share' : host)}</NameText>
+              <NoteText>{sheetNote(opening, host)}</NoteText>
             </View>
           </View>
           {choices.length > 0 && <CollectionChips choices={choices} selected={selected} onSelect={setSelected} />}
           <View style={styles.footer}>
-            <Text style={styles.note}>{sheetHint(opening)}</Text>
-            {choices.length > 0 && (
-              <Pressable disabled={selected === null} onPress={save} style={[styles.save, selected === null && styles.saveOff]}>
-                <Text style={styles.saveLabel}>Save</Text>
-              </Pressable>
-            )}
+            <NoteText style={styles.hint}>{sheetHint(opening)}</NoteText>
+            {choices.length > 0 && <Pill kind="accent" label="Save" disabled={selected === null} onPress={save} />}
           </View>
         </Animated.View>
       </GestureDetector>
@@ -111,7 +121,7 @@ function Sheet({ openedAt, ...intent }: ShareSheetProps) {
 /** Root component for ShareActivity ("ShareSheet" in AppRegistry). */
 export function ShareSheetRoot(props: ShareSheetProps) {
   return (
-    <GestureHandlerRootView style={styles.root}>
+    <GestureHandlerRootView style={ROOT}>
       <SafeAreaProvider>
         <Sheet {...props} />
       </SafeAreaProvider>
@@ -119,25 +129,22 @@ export function ShareSheetRoot(props: ShareSheetProps) {
   );
 }
 
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: 'transparent' },
-  scrim: { backgroundColor: COLOR.scrim },
-  sheet: { position: 'absolute', left: 0, right: 0, bottom: 0, backgroundColor: COLOR.wall, borderTopLeftRadius: SHEET.radius, borderTopRightRadius: SHEET.radius, paddingHorizontal: 16, paddingTop: 10 },
-  handle: { alignSelf: 'center', width: 32, height: 4, borderRadius: 2, backgroundColor: COLOR.rule, marginBottom: 14 },
+const ROOT = { flex: 1, backgroundColor: 'transparent' } as const;
+const HANDLE = { width: 32, height: 4 } as const;
+const CHIP_PADDING_X = 14;
+
+const useStyles = makeStyles(({ color }) => ({
+  scrim: { backgroundColor: color.scrim },
+  sheet: { position: 'absolute', left: 0, right: 0, bottom: 0, backgroundColor: color.wall, borderTopLeftRadius: RADIUS.sheet, borderTopRightRadius: RADIUS.sheet, paddingHorizontal: SPACE.margin, paddingTop: 10 },
+  handle: { alignSelf: 'center', ...HANDLE, borderRadius: RADIUS.print, backgroundColor: color.rule, marginBottom: SPACE.rhythm },
   preview: { flexDirection: 'row', gap: 12, alignItems: 'center' },
-  print: { width: SHEET.printSize, height: SHEET.printSize, borderRadius: SHEET.printRadius },
-  printEmpty: { borderWidth: 1, borderStyle: 'dashed', borderColor: COLOR.ink3 },
-  previewText: { flex: 1 },
-  previewTitle: { fontFamily: FONT.serif, fontSize: 17, lineHeight: 20, color: COLOR.ink },
-  note: { fontFamily: FONT.serif, fontStyle: 'italic', fontSize: 13, color: COLOR.ink3, marginTop: 2 },
-  prompt: { fontFamily: FONT.serif, fontSize: 15, color: COLOR.ink, marginTop: 18 },
+  print: { width: SHEET.printSize, height: SHEET.printSize, borderRadius: RADIUS.print },
+  printEmpty: { borderWidth: 1, borderStyle: 'dashed', borderColor: color.ink3 },
+  previewText: { flex: 1, gap: 2 },
+  prompt: { marginTop: 18 },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 10 },
-  chip: { minHeight: 40, justifyContent: 'center', borderRadius: 99, borderWidth: 1, borderColor: COLOR.rule, backgroundColor: COLOR.raised, paddingHorizontal: 14 },
-  chipOn: { backgroundColor: COLOR.ink, borderColor: COLOR.ink },
-  chipLabel: { fontSize: 13, fontWeight: '600', color: COLOR.ink },
-  chipLabelOn: { color: COLOR.wall },
-  footer: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 20 },
-  save: { backgroundColor: COLOR.accent, borderRadius: 99, paddingHorizontal: 22, paddingVertical: 11 },
-  saveOff: { opacity: 0.4 },
-  saveLabel: { color: '#fff', fontWeight: '600', fontSize: 14 },
-});
+  chip: { minHeight: SPACE.touch, justifyContent: 'center', borderRadius: RADIUS.pill, borderWidth: 1, borderColor: color.rule, backgroundColor: color.raised, paddingHorizontal: CHIP_PADDING_X, overflow: 'hidden' },
+  chipOn: { backgroundColor: color.ink, borderColor: color.ink },
+  footer: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 20, gap: 12 },
+  hint: { flex: 1 },
+}));
