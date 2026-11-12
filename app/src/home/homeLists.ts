@@ -3,6 +3,7 @@ import type { ItemsRepository } from '../db/itemsRepository.ts';
 import type { OutboxRepository } from '../db/outboxRepository.ts';
 import type { Item } from '../db/schema.ts';
 import type { ThumbStore } from '../thumbs/thumbStore.ts';
+import { toCardModel, type CardModel } from '../grid/cardModel.ts';
 import { toItemRow, type ItemRow } from './itemRow.ts';
 
 /** SPEC §5 "Recently saved": the latest 12 items by created_at. */
@@ -26,7 +27,7 @@ export type Place = { readonly kind: 'inbox' } | { readonly kind: 'collection'; 
 
 export interface PlaceList {
   readonly title: string;
-  readonly rows: readonly ItemRow[];
+  readonly cards: readonly CardModel[];
 }
 
 export interface ListSources {
@@ -52,10 +53,15 @@ export function readHome(sources: ListSources): HomeLists {
   };
 }
 
+function toCards(sources: ListSources, items: readonly Item[]): readonly CardModel[] {
+  const thumbs = sources.thumbs.fileUris();
+  return items.map((item) => toCardModel(item, thumbs.get(item.id) ?? null));
+}
+
 /** Null when the collection isn't on the device (deleted elsewhere, or a stale link). */
 export function readPlace(sources: ListSources, place: Place): PlaceList | null {
-  if (place.kind === 'inbox') return { title: INBOX_TITLE, rows: toRows(sources, sources.items.listInbox()) };
+  if (place.kind === 'inbox') return { title: INBOX_TITLE, cards: toCards(sources, sources.items.listInbox()) };
   const collection = sources.collections.list().find(({ id }) => id === place.id);
   if (!collection) return null;
-  return { title: collection.name, rows: toRows(sources, sources.items.listInCollection(collection.id)) };
+  return { title: collection.name, cards: toCards(sources, sources.items.listInCollection(collection.id)) };
 }

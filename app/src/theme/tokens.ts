@@ -16,11 +16,13 @@ export interface Palette {
   readonly screenInk: string;
   /** Behind the share sheet. */
   readonly scrim: string;
+  /** Disc behind the play icon on a video card, so it reads over any thumbnail. */
+  readonly veil: string;
   /** Touch ripple: ink at 8% (DESIGN.md §2). */
   readonly ripple: string;
 }
 
-const SCREEN = { screen: '#0B0B0A', screenInk: '#F2EFE8', scrim: 'rgba(0,0,0,0.4)' } as const;
+const SCREEN = { screen: '#0B0B0A', screenInk: '#F2EFE8', scrim: 'rgba(0,0,0,0.4)', veil: 'rgba(11,11,10,0.45)' } as const;
 
 export const PALETTES: Readonly<Record<Scheme, Palette>> = {
   light: {
@@ -50,7 +52,20 @@ export const PALETTES: Readonly<Record<Scheme, Palette>> = {
 export const RADIUS = { print: 2, sheet: 24, pill: 999 } as const;
 
 /** Grid and screen rhythm (DESIGN.md §8). */
-export const SPACE = { margin: 16, gutter: 10, rhythm: 14, touch: 48 } as const;
+export const SPACE = {
+  margin: 16,
+  gutter: 10,
+  rhythm: 14,
+  touch: 48,
+  /** Inside a card: note under title, caption under media, padding of a text card. */
+  hair: 2,
+  tight: 4,
+  caption: 6,
+  inset: 12,
+  /** Above a screen's title and below its last item, past the system bars. */
+  screenTop: 24,
+  screenBottom: 40,
+} as const;
 
 export const MOTION = {
   quickMs: 180,

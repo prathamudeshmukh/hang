@@ -32,6 +32,8 @@ export const TYPE_SCALE = {
   note: { voice: 'note', font: FONT_FILE.textItalic, size: 13, leading: 1.35, tracking: 0 },
   /** Share sheet prompt (DESIGN.md §8): prompts are notes (§4). */
   prompt: { voice: 'note', font: FONT_FILE.textItalic, size: 15, leading: 1.3, tracking: 0 },
+  /** Post text on a card (#29): the post is the content, so it's set as a name in the italic cut. */
+  post: { voice: 'name', font: FONT_FILE.textItalic, size: 15, leading: 1.35, tracking: 0 },
   action: { voice: 'action', font: FONT_FILE.sansSemiBold, size: 15, leading: 1.2, tracking: 0 },
   actionS: { voice: 'action', font: FONT_FILE.sansSemiBold, size: 13, leading: 1.2, tracking: 0 },
   card: { voice: 'action', font: FONT_FILE.sansMedium, size: 13, leading: 1.25, tracking: 0 },

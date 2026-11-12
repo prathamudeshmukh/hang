@@ -1,5 +1,6 @@
-# Opens Inbox and waits until the shared row's meta line is just its host:
-# that means status `ready` (set only by the server's extract) and nothing left in the outbox.
+# Opens Inbox and waits until the shared card's note is just its host: that means status `ready`,
+# set only by the server's extract, so the item made the round trip (pending cards say "fetching…").
+# An article read of the page would add its minutes, hence the optional `N min · `.
 appId: com.prathamesh.hang
 ---
 # Home lists Recently saved above the Inbox row, so with enough test rows it's below the fold.
@@ -14,7 +15,7 @@ appId: com.prathamesh.hang
       notVisible:
         id: ${URL_PATTERN}
         containsChild:
-          text: example\.com
+          text: (\d+ min · )?example\.com
     commands:
       - swipe:
           direction: DOWN
@@ -23,4 +24,4 @@ appId: com.prathamesh.hang
 - assertVisible:
     id: ${URL_PATTERN}
     containsChild:
-      text: example\.com
+      text: (\d+ min · )?example\.com

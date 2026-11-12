@@ -4,6 +4,8 @@ import { beforeEach, describe, it } from 'node:test';
 import { createCollectionsRepository } from '../db/collectionsRepository.ts';
 import { createItemsRepository } from '../db/itemsRepository.ts';
 import { createOutboxRepository } from '../db/outboxRepository.ts';
+import { eq } from 'drizzle-orm';
+import { items } from '../db/schema.ts';
 import { createTestDeps } from '../db/testing/testDb.ts';
 import { createThumbStore } from '../thumbs/thumbStore.ts';
 import { readHome, readPlace, RECENT_LIMIT } from './homeLists.ts';
@@ -22,8 +24,9 @@ function setup() {
     sources.items.save({ id, sourceUrl: URL, collectionId });
     deps.clock.advance(1000);
   };
-  const syncAll = () => sources.outbox.list().forEach((entry) => sources.outbox.complete(entry.seq));
-  return { ...sources, sources, save, syncAll };
+  const markReady = (id: string, thumb: { readonly thumbW: number; readonly thumbH: number }) =>
+    deps.db.update(items).set({ status: 'ready', ...thumb }).where(eq(items.id, id)).run();
+  return { ...sources, sources, save, markReady };
 }
 
 describe('readHome', () => {
@@ -71,36 +74,31 @@ describe('readPlace', () => {
     s = setup();
   });
 
-  it('lists the Inbox as rows ready to show', () => {
+  it('lists the Inbox as cards ready to draw', () => {
     s.items.save({ id: 'i1', sourceUrl: URL, sharedTitle: 'On boredom' });
-    assert.deepEqual(readPlace(s.sources, { kind: 'inbox' }), {
-      title: 'Inbox',
-      rows: [{ id: 'i1', title: 'On boredom', host: 'aeon.co', url: URL, note: 'pending · waiting to sync', inInbox: true, thumbUri: null }],
-    });
+    const place = readPlace(s.sources, { kind: 'inbox' });
+    assert.equal(place?.title, 'Inbox');
+    assert.deepEqual(place?.cards.map(({ id, variant, title, note }) => ({ id, variant, title, note })), [
+      { id: 'i1', variant: 'pending', title: 'On boredom', note: 'fetching…' },
+    ]);
   });
 
-  it('gives each row its downloaded thumbnail, if any', () => {
-    s.save('with');
-    s.save('without');
+  it('gives each card its downloaded thumbnail, if any', () => {
+    s.items.save({ id: 'with', sourceUrl: URL });
+    s.markReady('with', { thumbW: 100, thumbH: 100 });
     s.thumbs.record('with', 'file:///thumbs/with.webp');
-    const rows = readPlace(s.sources, { kind: 'inbox' })?.rows ?? [];
-    assert.deepEqual(rows.map(({ id, thumbUri }) => [id, thumbUri]), [['without', null], ['with', 'file:///thumbs/with.webp']]);
+    const cards = readPlace(s.sources, { kind: 'inbox' })?.cards ?? [];
+    assert.deepEqual(cards[0].media, { ratio: 1, uri: 'file:///thumbs/with.webp' });
   });
 
-  it('lists one collection, falling back to the URL for a title', () => {
+  it('lists one collection, newest first', () => {
     s.collections.create({ id: 'c1', name: 'Reading' });
     s.save('i1', 'c1');
-    s.save('i2');
-    s.syncAll();
+    s.save('i2', 'c1');
+    s.save('i3');
     const place = readPlace(s.sources, { kind: 'collection', id: 'c1' });
     assert.equal(place?.title, 'Reading');
-    assert.deepEqual(place?.rows.map(({ id, title, note }) => ({ id, title, note })), [{ id: 'i1', title: URL, note: 'pending' }]);
-  });
-
-  it('does not call an item whose push failed for good "waiting to sync"', () => {
-    s.save('i1');
-    s.outbox.markFailed(s.outbox.list()[0], 'check constraint');
-    assert.equal(readPlace(s.sources, { kind: 'inbox' })?.rows[0].note, 'pending');
+    assert.deepEqual(place?.cards.map(({ id }) => id), ['i2', 'i1']);
   });
 
   it('is null for a collection that is not on the device', () => {

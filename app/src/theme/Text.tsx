@@ -3,7 +3,7 @@ import { useTheme } from './theme';
 import type { Palette } from './tokens';
 import { textStyle, type TypeToken } from './typeScale';
 
-type NameToken = 'display' | 'titleL' | 'title' | 'titleS' | 'bodyRead';
+type NameToken = 'display' | 'titleL' | 'title' | 'titleS' | 'bodyRead' | 'post';
 type ActionToken = 'action' | 'actionS' | 'card';
 type InkColor = keyof Pick<Palette, 'ink' | 'ink2' | 'ink3' | 'accent' | 'screenInk'>;
 
