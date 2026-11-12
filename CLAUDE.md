@@ -12,6 +12,7 @@ Guidance for Claude Code when working in this project.
 | Repo | [github.com/prathamudeshmukh/hang](https://github.com/prathamudeshmukh/hang) (public), `main` |
 | Supabase project | `ffofgzyudtloekityjfw` (hosted, linked; `npx supabase … --remote`) |
 | Play Console / internal testing | — |
+| CI | [Actions](https://github.com/prathamudeshmukh/hang/actions) · `.github/workflows/ci.yml` |
 | Kanban board | [GitHub Project #4 "Hang"](https://github.com/users/prathamudeshmukh/projects/4) |
 | Error tracking | — |
 | Analytics | — |
@@ -116,6 +117,19 @@ Xcode). One-time per device: add the test Google account in Settings → Account
 the numbered ones are entry points, the rest are subflows. The run uninstalls Hang and writes rows to the hosted
 project as the test account. If Google's "Checking info" hangs on
 the emulator, its DNS proxy has died: start it with `emulator -avd Pixel_6_API_30 -dns-server 8.8.8.8,1.1.1.1`.
+
+## CI and deploys
+
+`.github/workflows/ci.yml` runs on every push to `main` and on PRs: app typecheck, lint, coverage; functions
+check, lint, coverage (80% threshold); then `supabase start` for pgTAP and both integration suites. On `main`,
+once that passes, it deploys only what changed: `supabase/migrations/**` → `db push --dry-run` then `db push`;
+`supabase/functions/**` (not tests/scripts) → `functions deploy`, after migrations, never after a failed push.
+Migrations are forward-only: fix a bad one with a new migration.
+
+- Credentials live in the GitHub Environment `production` (deploys from `main` only, no approval):
+  `SUPABASE_ACCESS_TOKEN`, `SUPABASE_DB_PASSWORD`. Runtime secrets (`EXTRACT_SECRET`, Vault) stay manual.
+- Versions are pinned in the workflow's `env`: Node 22, Deno 2.9.6, Supabase CLI 3.1.0.
+- Not in CI: E2E (#24), Android build (#25), `spikes/`.
 
 ## Architecture notes
 

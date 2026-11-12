@@ -19,7 +19,7 @@
   },
   "tasks": {
     "test": "deno test --allow-read=.",
-    "test:coverage": "rm -rf coverage && deno test --allow-read=. --coverage=coverage && deno coverage coverage --exclude='(test|scripts)/|index\\.ts$|supabaseItemStore\\.ts$|consoleLogger\\.ts$'",
+    "test:coverage": "rm -rf coverage && deno test --allow-read=. --coverage=coverage && deno coverage coverage --exclude='(test|scripts)/|index\\.ts$|supabaseItemStore\\.ts$|consoleLogger\\.ts$' --threshold=80",
     "test:integration": "sh scripts/test-integration.sh",
     "check": "deno check extract/index.ts"
   },

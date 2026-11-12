@@ -185,7 +185,7 @@ from public.items where status = 'pending' and deleted_at is null;
 - **Maestro 2.12.1** from the pinned GitHub release zip into `~/.maestro` (Homebrew needed a newer Xcode and wanted
   to upgrade 29 formulae).
 - **Not in CI**: a CI emulator can't sign in to Google reliably. Needs a local email sign-in subflow and a CI Chrome
-  subflow; noted on #22.
+  subflow; parked on #24 (decided 2026-11-12 with #22).
 
 ## Open questions for the owner
 
