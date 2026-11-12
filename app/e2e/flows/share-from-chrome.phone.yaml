@@ -1,25 +1,40 @@
 # Galaxy S23 Ultra (One UI): Chrome's ⋮ menu → Share → Samsung's share sheet → Hang.
+# Unfinished (#23): Hang is in the sheet's More → Apps grid, which this doesn't reach yet.
 appId: com.android.chrome
 ---
 - openLink:
     link: ${URL}
     browser: true
 - runFlow: chrome-first-run.yaml
+# This Chrome doesn't expose page text to Maestro; wait for its toolbar and for the page to settle.
 - extendedWaitUntil:
-    visible: Example Domain
+    visible:
+      id: com.android.chrome:id/menu_button
     timeout: 30000
-# No retry: the menu pops up after Maestro's "did the screen change?" check, so a retry closes it again.
-- tapOn:
-    id: com.android.chrome:id/menu_button
-    retryTapIfNoChange: false
-# Exact text: Chrome also shows a "Share via <last app>" shortcut, which skips the system sheet.
-- extendedWaitUntil:
-    visible: Share…|Share
+- waitForAnimationToEnd:
     timeout: 10000
-- tapOn: Share…|Share
-- scrollUntilVisible:
-    element: Hang
-    direction: RIGHT
-    timeout: 15000
+- runFlow: open-chrome-share.yaml
+# Samsung's sheet: the bottom app row scrolls sideways and ends in "More", which opens the full Apps grid.
+# Coordinates, not `from: <element>`: swiping from an icon didn't move the row. y = the row on the S23 Ultra.
+- extendedWaitUntil:
+    visible: Quick Share
+    timeout: 10000
+- repeat:
+    times: 4
+    while:
+      notVisible: Hang|More
+    commands:
+      - swipe:
+          start: 90%, 83%
+          end: 10%, 83%
+- runFlow:
+    when:
+      notVisible: Hang
+    commands:
+      - tapOn: More
+      - scrollUntilVisible:
+          element: Hang
+          direction: DOWN
+          timeout: 15000
 - tapOn: Hang
 - runFlow: leave-in-inbox.yaml

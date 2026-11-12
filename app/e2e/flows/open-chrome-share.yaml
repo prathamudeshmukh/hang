@@ -1,0 +1,16 @@
+# Chrome's ⋮ menu → Share. The menu tap sometimes doesn't take, so re-tap until Share shows (up to 3 times).
+# No tap retry: the menu pops up after Maestro's "did the screen change?" check, so a retry closes it again.
+# Exact text: Chrome also shows a "Share via <last app>" shortcut, which skips the system sheet.
+appId: com.android.chrome
+---
+- repeat:
+    times: 3
+    while:
+      notVisible: Share…|Share
+    commands:
+      - tapOn:
+          id: com.android.chrome:id/menu_button
+          retryTapIfNoChange: false
+      - waitForAnimationToEnd:
+          timeout: 3000
+- tapOn: Share…|Share

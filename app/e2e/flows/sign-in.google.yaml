@@ -1,14 +1,29 @@
 # Real Google sign-in with the test account already on the device.
 # Swap this file for an email sign-in subflow to run against a local stack (see #22).
+# On the phone a tap right after a fresh install's launch can be lost (no picker, no error; a cancelled
+# picker looks the same), so let the app settle and re-tap until the account shows.
 appId: com.prathamesh.hang
 ---
-- tapOn:
-    id: sign-in-google
-- extendedWaitUntil:
-    visible: ${ACCOUNT}
-    timeout: 20000
-- tapOn: ${ACCOUNT}
 - extendedWaitUntil:
     visible:
+      id: sign-in-google
+    timeout: 20000
+- waitForAnimationToEnd:
+    timeout: 5000
+- repeat:
+    times: 3
+    while:
+      notVisible: ${ACCOUNT}
+    commands:
+      - tapOn:
+          id: sign-in-google
+      - extendedWaitUntil:
+          visible: ${ACCOUNT}
+          timeout: 10000
+          optional: true
+- tapOn: ${ACCOUNT}
+# Home: the Inbox row can be below the fold once Recently saved fills up.
+- scrollUntilVisible:
+    element:
       id: inbox
     timeout: 30000

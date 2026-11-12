@@ -36,6 +36,21 @@ build_apk() {
   (cd "$APP_DIR/android" && ./gradlew assembleRelease -PreactNativeArchitectures=arm64-v8a -q)
 }
 
+# Screen timeouts lock the device mid-flow; keep it awake while plugged in, then put the setting back.
+keep_awake() {
+  local previous
+  previous="$(adb -s "$SERIAL" shell settings get global stay_on_while_plugged_in | tr -d '\r')"
+  trap 'adb -s "$SERIAL" shell settings put global stay_on_while_plugged_in "'"$previous"'"' EXIT
+  adb -s "$SERIAL" shell svc power stayon true
+}
+
+require_unlocked() {
+  adb -s "$SERIAL" shell input keyevent KEYCODE_WAKEUP
+  if adb -s "$SERIAL" shell dumpsys window | grep -q 'isKeyguardShowing=true'; then
+    fail "$DEVICE is locked: unlock it and keep the screen on (a long screen timeout helps)"
+  fi
+}
+
 reinstall() {
   adb -s "$SERIAL" uninstall "$PACKAGE" >/dev/null 2>&1 || true
   adb -s "$SERIAL" install "$APK" >/dev/null
@@ -78,6 +93,8 @@ echo "e2e: $DEVICE ($SERIAL), $URL"
 [[ "$SKIP_BUILD" == true ]] || build_apk
 [[ -f "$APK" ]] || fail "no release APK at $APK"
 
+require_unlocked
+keep_awake
 reinstall
 run_flow 01-share.yaml
 reinstall

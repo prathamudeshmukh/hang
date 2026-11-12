@@ -2,6 +2,10 @@
 # that means status `ready` (set only by the server's extract) and nothing left in the outbox.
 appId: com.prathamesh.hang
 ---
+# Home lists Recently saved above the Inbox row, so with enough test rows it's below the fold.
+- scrollUntilVisible:
+    element:
+      id: inbox
 - tapOn:
     id: inbox
 - repeat:
