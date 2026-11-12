@@ -1,31 +1,28 @@
-import { StyleSheet } from 'react-native';
-import { COLOR, FONT } from '@/share/tokens';
+import { makeStyles } from '@/theme/theme';
+import { RADIUS, SPACE } from '@/theme/tokens';
+import { textStyle } from '@/theme/typeScale';
 
-export const RIPPLE = { color: 'rgba(27,26,23,0.08)' } as const;
+const THUMB_SIZE = 56;
+const SECTION_GAP = 32;
 
-/** Phase 1 plain lists; Phase 2 restyles them from DESIGN.md. */
-export const listStyles = StyleSheet.create({
-  wall: { flex: 1, backgroundColor: COLOR.wall },
-  content: { paddingHorizontal: 16 },
-  title: { fontFamily: FONT.serif, fontSize: 40, color: COLOR.ink, letterSpacing: -1 },
-  section: { fontFamily: FONT.serif, fontSize: 22, color: COLOR.ink, marginTop: 32, marginBottom: 4 },
-  note: { fontFamily: FONT.serif, fontStyle: 'italic', fontSize: 13, color: COLOR.ink3, marginTop: 4 },
-  row: { borderTopWidth: StyleSheet.hairlineWidth, borderColor: COLOR.rule, paddingVertical: 14, flexDirection: 'row', gap: 12 },
-  rowText: { flex: 1 },
+/** Phase 1 plain lists on the Phase 2 foundations; slices 4–5 replace the layout. */
+export const useListStyles = makeStyles(({ color }) => ({
+  wall: { flex: 1, backgroundColor: color.wall },
+  content: { paddingHorizontal: SPACE.margin },
+  section: { marginTop: SECTION_GAP, marginBottom: 4 },
+  row: { borderTopWidth: 1, borderColor: color.rule, paddingVertical: SPACE.rhythm, flexDirection: 'row', gap: 12 },
+  rowText: { flex: 1, gap: 4 },
   /** DESIGN.md §5: content has square corners (2px `print`). */
-  thumb: { width: 56, height: 56, borderRadius: 2, backgroundColor: COLOR.rule },
-  rowTitle: { fontFamily: FONT.serif, fontSize: 18, color: COLOR.ink },
+  thumb: { width: THUMB_SIZE, height: THUMB_SIZE, borderRadius: RADIUS.print, backgroundColor: color.rule },
   /** One style object: expo-router's `Link asChild` rejects style arrays. */
   placeRow: {
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderColor: COLOR.rule,
-    paddingVertical: 14,
+    borderTopWidth: 1,
+    borderColor: color.rule,
+    paddingVertical: SPACE.rhythm,
+    minHeight: SPACE.touch,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'baseline',
   },
-  count: { fontSize: 14, color: COLOR.ink3 },
-  error: { fontFamily: FONT.serif, fontSize: 14, color: COLOR.accent, marginTop: 4 },
-  input: { fontFamily: FONT.serif, fontSize: 18, color: COLOR.ink, padding: 0 },
-  link: { fontSize: 15, fontWeight: '600', color: COLOR.accent },
-});
+  input: { ...textStyle('action'), color: color.ink, padding: 0 },
+}));

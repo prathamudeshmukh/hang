@@ -99,6 +99,12 @@ npm run typecheck
 npm run db:generate    # after changing src/db/schema.ts: new SQLite migration in src/db/migrations
 ```
 
+Design foundations (`src/theme/`, #28): tokens for light and dark (`tokens.ts`), the type scale (`typeScale.ts`), `useTheme()` and
+`makeStyles()` (`theme.ts`), the three voices (`NameText`, `NoteText`, `ActionText`) and `Pill`. Nothing outside `src/theme`
+hard-codes a color, font or size. Fonts are static cuts of Google's OFL variable fonts (Android can't set font axes):
+`scripts/build-fonts.py` rebuilds `assets/fonts/` with fonttools 4.55. `android/` is generated: after changing `app.json`
+plugins (fonts, `expo-navigation-bar`), run `npx expo prebuild --platform android --no-install` before a native build.
+
 Auth (`src/auth/`): `authSession.ts` is plain TS with injected ports (Google, Supabase auth, local account,
 sync); `appSession.ts` wires the real ones and is the only file that imports native modules.
 

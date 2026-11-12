@@ -29,7 +29,26 @@
       "expo-router",
       "./plugins/withShareActivity.js",
       "expo-sqlite",
-      "expo-secure-store"
+      "expo-secure-store",
+      [
+        "expo-font",
+        {
+          "fonts": [
+            "./assets/fonts/Newsreader-Text-Regular.ttf",
+            "./assets/fonts/Newsreader-Text-Italic.ttf",
+            "./assets/fonts/Newsreader-Display-Book.ttf",
+            "./assets/fonts/Newsreader-Display-Regular.ttf",
+            "./assets/fonts/HankenGrotesk-Medium.ttf",
+            "./assets/fonts/HankenGrotesk-SemiBold.ttf"
+          ]
+        }
+      ],
+      [
+        "expo-navigation-bar",
+        {
+          "enforceContrast": false
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,
