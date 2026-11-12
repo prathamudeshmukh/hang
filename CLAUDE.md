@@ -129,6 +129,7 @@ Migrations are forward-only: fix a bad one with a new migration.
 - Credentials live in the GitHub Environment `production` (deploys from `main` only, no approval):
   `SUPABASE_ACCESS_TOKEN`, `SUPABASE_DB_PASSWORD`. Runtime secrets (`EXTRACT_SECRET`, Vault) stay manual.
 - Versions are pinned in the workflow's `env`: Node 22, Deno 2.9.6, Supabase CLI 3.1.0.
+- A change to `ci.yml` itself re-runs both deploys.
 - Not in CI: E2E (#24), Android build (#25), `spikes/`.
 
 ## Architecture notes

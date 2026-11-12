@@ -23,8 +23,9 @@ jobs:
   changes:
     runs-on: ubuntu-latest
     outputs:
-      migrations: ${{ steps.filter.outputs.migrations }}
-      functions: ${{ steps.filter.outputs.functions }}
+      # A change to this file re-runs both deploys: db push is a no-op without new migrations.
+      migrations: ${{ steps.filter.outputs.migrations == 'true' || steps.filter.outputs.workflow == 'true' }}
+      functions: ${{ steps.filter.outputs.functions == 'true' || steps.filter.outputs.workflow == 'true' }}
     steps:
       - uses: actions/checkout@v4
       - uses: dorny/paths-filter@v3
@@ -38,6 +39,8 @@ jobs:
               - '!supabase/functions/**/*.test.ts'
               - '!supabase/functions/**/*.integration.ts'
               - '!supabase/functions/scripts/**'
+            workflow:
+              - '.github/workflows/ci.yml'
           predicate-quantifier: every
 
   test:
@@ -109,11 +112,11 @@ jobs:
       - uses: supabase/setup-cli@v1
         with:
           version: ${{ env.SUPABASE_CLI_VERSION }}
-      - run: supabase link --project-ref "$SUPABASE_PROJECT_REF"
+      # CLI 3.x: db push is local unless --remote; hosted changes need --yes in a non-interactive run.
       - name: Plan
-        run: supabase db push --dry-run
+        run: supabase db push --remote="$SUPABASE_PROJECT_REF" --password="$SUPABASE_DB_PASSWORD" --dry-run
       - name: Push
-        run: supabase db push
+        run: supabase db push --remote="$SUPABASE_PROJECT_REF" --password="$SUPABASE_DB_PASSWORD" --yes
 
   deploy-functions:
     needs: [changes, test, migrate]
@@ -134,4 +137,4 @@ jobs:
       - uses: supabase/setup-cli@v1
         with:
           version: ${{ env.SUPABASE_CLI_VERSION }}
-      - run: supabase functions deploy --project-ref "$SUPABASE_PROJECT_REF"
+      - run: supabase functions deploy --remote="$SUPABASE_PROJECT_REF" --yes
