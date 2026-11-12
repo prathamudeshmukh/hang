@@ -353,7 +353,7 @@ notifications, widgets, import from other apps (Pocket/Raindrop export), web app
 | **0a · Extraction spike** ✅ | Prove extraction quality | 30 real links (the HN front page, 2026-11-08) → ≥ 85% render as the correct card kind with a usable title and image; failures fall back to `link`. **Passed: 87%** (see `spikes/extraction/RESULTS.md`) |
 | **0b · Motion spike** ✅ | Prove shared-element transitions on Android | Emulator, 2026-11-09: **native Reanimated SET ruled out** (no element flight, even with `SharedTransitionBoundary`); **hand-built hero works** (all 4 transitions, no flash, 90th percentile 19ms on a debug emulator). **Owner marked it passed, 2026-11-09.** Gesture-driven predictive back and curve tuning move to Phase 2. See `spikes/motion/SPIKE.md` |
 | **0c · Share sheet spike** ✅ | Prove the translucent sheet over the source app | Emulator, 2026-11-09: **works with no third-party library**: `ShareActivity` via config plugin, intent as initial props. Over Chrome via Chrome's real share sheet; opens in ~0.3s cold / ~55ms warm; all 4 exits return to Chrome; not in recents. **Owner confirmed it works on their phone** (Galaxy S23 Ultra, Android 17). See `spikes/share/SPIKE.md` |
-| 1 · Skeleton ◐ | Auth, schema, RLS, sync, plain list UI | Share → item appears → syncs → survives reinstall |
+| **1 · Skeleton** ✅ | Auth, schema, RLS, sync, plain list UI | Share → item appears → syncs → survives reinstall |
 | 2 · Gallery | Home, grid, feed, design tokens | Matches the approved design sheet |
 | 3 · Reader & video | Reader, inline players, cards that open other apps | All five card kinds complete |
 | 4 · Search & polish | FTS, housekeeping, motion rewards, empty states | v1 scope complete |

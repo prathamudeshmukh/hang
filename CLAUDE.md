@@ -49,7 +49,7 @@ Read SPEC.md before changing behaviour and DESIGN.md before changing anything vi
 
 ## Status
 
-**Phase 1 (Skeleton) in progress** — see `PHASE1.md`. All three spikes passed: **0a (extraction)** 87% on 30 HN links
+**Phase 1 (Skeleton) done 2026-11-12** — see `PHASE1.md`. **Phase 2 (Gallery, #10) next.** All three spikes passed: **0a (extraction)** 87% on 30 HN links
 (`spikes/extraction/RESULTS.md`); **0b (motion)** native Reanimated shared transitions ruled out, hand-built hero is the v1
 approach, owner marked it passed 2026-11-09; gesture-driven predictive back moves to Phase 2 (`spikes/motion/SPIKE.md`);
 **0c (share sheet)** passed on emulator and the owner's phone (`spikes/share/SPIKE.md`).
