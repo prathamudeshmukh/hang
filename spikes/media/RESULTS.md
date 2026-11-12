@@ -31,3 +31,17 @@ Lossy is 3–5× faster than the hosted numbers' lossless encode.
   Conservative given the lossy numbers; revisit with real logs (`media.unusable` reason `too_many_pixels`).
 
 `probe.ts` is the local timing script (`deno run --no-prompt probe.ts`; needs no permissions).
+
+## First hosted run (2026-11-12): alpha was the cost
+
+Backfill: 3 of 4 images stored; one died with `546 WORKER_RESOURCE_LIMIT`. It was a 1536×1024 (1.5 MP) PNG with
+transparency on 68% of its pixels. Locally, decode 40 ms and resize 24 ms, but the WebP encode took 680–880 ms:
+imagescript encodes the alpha plane losslessly by default (`alphaQuality: 100`).
+
+| Encode of the 1080×720 thumbnail | Time | Size |
+|---|---|---|
+| q80, lossless alpha | 680–880 ms | 175 KB |
+| q80, `alphaQuality: 50` (chosen) | 90–130 ms | 90 KB |
+| q80, flattened onto the wall | 56–66 ms | 80 KB |
+
+Chosen: lossy alpha, which keeps transparency so logos read on both light and dark walls.

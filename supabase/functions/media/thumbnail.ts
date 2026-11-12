@@ -3,7 +3,9 @@ import { decode, Image } from 'imagescript';
 export const THUMB_WIDTH = 1080;
 /** Matches the header check in the handler; the decoder enforces it again in case a header lies. */
 export const MAX_PIXELS = 6_000_000;
-const WEBP = { quality: 80 } as const;
+// Lossy alpha: a lossless alpha plane made a transparent 1.5 MP PNG take 7–13× longer to encode and blow the
+// hosted CPU limit (spikes/media/RESULTS.md). Transparency is kept so logos sit right on both walls.
+const WEBP = { quality: 80, alphaQuality: 50 } as const;
 
 export interface Thumbnail {
   readonly webp: Uint8Array;

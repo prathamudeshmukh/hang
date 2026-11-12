@@ -25,6 +25,13 @@ describe('makeThumbnail', () => {
     expect([thumb.width, thumb.height, thumb.rgba[0], thumb.rgba[1]]).toEqual([60, 40, 255, 0]);
   });
 
+  it('keeps transparency', async () => {
+    const halfClear = new Image(40, 20).fill(0x336699ff);
+    halfClear.drawBox(0, 0, 20, 20, 0x00000000);
+    const thumb = await makeThumbnail(await halfClear.encode());
+    expect([thumb.rgba[3], thumb.rgba[thumb.rgba.length - 1]]).toEqual([0, 255]);
+  });
+
   it('refuses to decode more pixels than the cap, even when nothing checked the header first', async () => {
     const tooBig = await new Image(3000, Math.floor(MAX_PIXELS / 3000) + 1).encode();
     await expect(makeThumbnail(tooBig)).rejects.toThrow();
