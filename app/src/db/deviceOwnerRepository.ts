@@ -1,4 +1,4 @@
-import { collections, deviceOwner, itemContent, items, outbox, syncState } from './schema.ts';
+import { collections, deviceOwner, itemContent, items, outbox, syncState, thumbFiles } from './schema.ts';
 import type { HangDb, RepositoryDeps } from './types.ts';
 
 /**
@@ -8,7 +8,7 @@ import type { HangDb, RepositoryDeps } from './types.ts';
  */
 export type BindOutcome = 'claimed' | 'resumed' | 'reset';
 
-const LOCAL_TABLES = [itemContent, items, collections, outbox, syncState, deviceOwner] as const;
+const LOCAL_TABLES = [itemContent, items, collections, outbox, syncState, thumbFiles, deviceOwner] as const;
 
 function wipeAll(tx: HangDb): void {
   LOCAL_TABLES.forEach((table) => tx.delete(table).run());

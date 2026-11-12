@@ -102,6 +102,10 @@ npm run db:generate    # after changing src/db/schema.ts: new SQLite migration i
 Auth (`src/auth/`): `authSession.ts` is plain TS with injected ports (Google, Supabase auth, local account,
 sync); `appSession.ts` wires the real ones and is the only file that imports native modules.
 
+Thumbnails (`src/thumbs/`, #27): after every sync, `thumbSync` drops files whose item is gone and downloads missing
+ones (signed links, 3 at a time, newest first) into `documentDirectory/thumbs/`; the local-only `thumb_files` table
+records them and is wiped with the account. Each thumbnail is fetched once and never re-checked (see #37).
+
 Local store tests use better-sqlite3 with the real migrations (`src/db/testing/testDb.ts`); the device
 uses expo-sqlite. Both are synchronous Drizzle drivers, typed as `HangDb`.
 

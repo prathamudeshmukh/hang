@@ -5,6 +5,7 @@ import { createCollectionsRepository } from '../db/collectionsRepository.ts';
 import { createItemsRepository } from '../db/itemsRepository.ts';
 import { createOutboxRepository } from '../db/outboxRepository.ts';
 import { createTestDeps } from '../db/testing/testDb.ts';
+import { createThumbStore } from '../thumbs/thumbStore.ts';
 import { readHome, readPlace, RECENT_LIMIT } from './homeLists.ts';
 
 const URL = 'https://www.aeon.co/essays/on-boredom';
@@ -15,6 +16,7 @@ function setup() {
     items: createItemsRepository(deps),
     collections: createCollectionsRepository(deps),
     outbox: createOutboxRepository(deps),
+    thumbs: createThumbStore(deps.db),
   };
   const save = (id: string, collectionId: string | null = null) => {
     sources.items.save({ id, sourceUrl: URL, collectionId });
@@ -73,8 +75,16 @@ describe('readPlace', () => {
     s.items.save({ id: 'i1', sourceUrl: URL, sharedTitle: 'On boredom' });
     assert.deepEqual(readPlace(s.sources, { kind: 'inbox' }), {
       title: 'Inbox',
-      rows: [{ id: 'i1', title: 'On boredom', host: 'aeon.co', url: URL, note: 'pending · waiting to sync', inInbox: true }],
+      rows: [{ id: 'i1', title: 'On boredom', host: 'aeon.co', url: URL, note: 'pending · waiting to sync', inInbox: true, thumbUri: null }],
     });
+  });
+
+  it('gives each row its downloaded thumbnail, if any', () => {
+    s.save('with');
+    s.save('without');
+    s.thumbs.record('with', 'file:///thumbs/with.webp');
+    const rows = readPlace(s.sources, { kind: 'inbox' })?.rows ?? [];
+    assert.deepEqual(rows.map(({ id, thumbUri }) => [id, thumbUri]), [['without', null], ['with', 'file:///thumbs/with.webp']]);
   });
 
   it('lists one collection, falling back to the URL for a title', () => {

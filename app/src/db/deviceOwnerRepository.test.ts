@@ -5,7 +5,7 @@ import { createCollectionsRepository } from './collectionsRepository.ts';
 import { createDeviceOwnerRepository } from './deviceOwnerRepository.ts';
 import { createItemsRepository } from './itemsRepository.ts';
 import { createOutboxRepository } from './outboxRepository.ts';
-import { collections, items, syncState } from './schema.ts';
+import { collections, items, syncState, thumbFiles } from './schema.ts';
 import { createTestDeps } from './testing/testDb.ts';
 
 const ALICE = '11111111-1111-4111-8111-111111111111';
@@ -27,7 +27,11 @@ function seedLocalData(t: ReturnType<typeof setup>): void {
   t.collections.create({ id: 'c1', name: 'Reading' });
   t.items.save({ id: 'i1', sourceUrl: URL, collectionId: 'c1' });
   t.db.insert(syncState).values({ tableName: 'items', cursorUpdatedAt: '2026-11-09T10:00:00+00:00', cursorId: 'i1' }).run();
+  t.db.insert(thumbFiles).values({ itemId: 'i1', fileUri: 'file:///thumbs/i1.webp' }).run();
 }
+
+const localRowCount = (t: ReturnType<typeof setup>) =>
+  [items, syncState, thumbFiles].reduce((sum, table) => sum + t.db.select().from(table).all().length, t.outbox.list().length);
 
 describe('device owner: binding a signed-in user', () => {
   let t: ReturnType<typeof setup>;
@@ -57,7 +61,7 @@ describe('device owner: binding a signed-in user', () => {
     const outcome = t.owner.bindTo(BOB);
     assert.equal(outcome, 'reset');
     assert.equal(t.owner.current(), BOB);
-    assert.equal(t.db.select().from(items).all().length + t.outbox.list().length, 0);
+    assert.equal(localRowCount(t), 0);
   });
 });
 
@@ -69,7 +73,7 @@ describe('device owner: wipe', () => {
     t.owner.wipe();
     assert.equal(t.owner.current(), null);
     assert.equal(t.db.select().from(collections).all().length + t.db.select().from(items).all().length, 0);
-    assert.equal(t.db.select().from(syncState).all().length + t.outbox.list().length, 0);
+    assert.equal(localRowCount(t), 0);
   });
 
   it('has no owner on a fresh install', () => {

@@ -1,4 +1,5 @@
-import { Pressable, Text } from 'react-native';
+import { Image } from 'expo-image';
+import { Pressable, Text, View } from 'react-native';
 import type { ItemRow } from './itemRow';
 import { listStyles, RIPPLE } from './listStyles';
 import { openLink } from './openLink';
@@ -10,8 +11,11 @@ export function ItemRowView({ row, markInbox = false }: { readonly row: ItemRow;
   const meta = [row.host, markInbox && row.inInbox ? INBOX_MARK : null, row.note].filter(Boolean).join(' · ');
   return (
     <Pressable testID={`item:${row.url}`} accessibilityRole="link" android_ripple={RIPPLE} onPress={() => void openLink(row.url)} style={listStyles.row}>
-      <Text style={listStyles.rowTitle} numberOfLines={2}>{row.title}</Text>
-      <Text style={listStyles.note} numberOfLines={1}>{meta}</Text>
+      {row.thumbUri ? <Image source={{ uri: row.thumbUri }} style={listStyles.thumb} contentFit="cover" accessible={false} /> : null}
+      <View style={listStyles.rowText}>
+        <Text style={listStyles.rowTitle} numberOfLines={2}>{row.title}</Text>
+        <Text style={listStyles.note} numberOfLines={1}>{meta}</Text>
+      </View>
     </Pressable>
   );
 }

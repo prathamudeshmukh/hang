@@ -9,6 +9,14 @@ export interface ItemRow {
   /** Status worth knowing about (pending, failed, waiting to sync), or null when there is nothing to say. */
   readonly note: string | null;
   readonly inInbox: boolean;
+  /** The downloaded thumbnail (file URI), or null until it's on the device. */
+  readonly thumbUri: string | null;
+}
+
+export interface RowContext {
+  /** The item still has outbox entries, so the server may not have its latest state. */
+  readonly queued: boolean;
+  readonly thumbUri: string | null;
 }
 
 const STATUS_NOTE: Readonly<Record<ItemStatus, string | null>> = {
@@ -33,8 +41,7 @@ export function rowNote({ status, queued }: { readonly status: ItemStatus; reado
   return parts.length > 0 ? parts.join(' · ') : null;
 }
 
-/** `queued`: the item still has outbox entries, so the server may not have its latest state. */
-export function toItemRow(item: Item, queued: boolean): ItemRow {
+export function toItemRow(item: Item, { queued, thumbUri }: RowContext): ItemRow {
   return {
     id: item.id,
     title: item.title ?? item.sharedTitle ?? item.sourceUrl,
@@ -42,5 +49,6 @@ export function toItemRow(item: Item, queued: boolean): ItemRow {
     url: item.sourceUrl,
     note: rowNote({ status: item.status, queued }),
     inInbox: item.collectionId === null,
+    thumbUri,
   };
 }
