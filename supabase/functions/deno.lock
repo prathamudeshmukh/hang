@@ -9,6 +9,7 @@
     "jsr:@std/testing@1.0.21": "1.0.21",
     "npm:@mozilla/readability@0.6.0": "0.6.0",
     "npm:@supabase/supabase-js@2.119.0": "2.119.0",
+    "npm:imagescript@3.20.2": "3.20.2",
     "npm:linkedom@0.18.15": "0.18.15",
     "npm:zod@4.6.7": "4.6.7"
   },
@@ -186,6 +187,9 @@
     "iceberg-js@0.8.1": {
       "integrity": "sha512-1dhVQZXhcHje7798IVM+xoo/1ZdVfzOMIc8/rgVSijRK38EDqOJoGula9N/8ZI5RD8QTxNQtK/Gozpr+qUqRRA=="
     },
+    "imagescript@3.20.2": {
+      "integrity": "sha512-BO5D8bDe9eHMGyIDCrhOIYWganRstRZ60r3aokqgU2Zco3V3gIvYFKMp8jU+RfhkqVMuojVT3Z9ifo4OZGNMeQ=="
+    },
     "linkedom@0.18.15": {
       "integrity": "sha512-o0w7eD/SvoCao+pUi6dzocCLuMR11g4Tv/et0W2OUzwWmUcewntSzyl+Ua/K+0yKym0Y/Mav3nFAaI5Av5jvZg==",
       "dependencies": [
@@ -218,6 +222,7 @@
       "jsr:@std/testing@1.0.21",
       "npm:@mozilla/readability@0.6.0",
       "npm:@supabase/supabase-js@2.119.0",
+      "npm:imagescript@3.20.2",
       "npm:linkedom@0.18.15",
       "npm:zod@4.6.7"
     ]

@@ -1,4 +1,4 @@
-import type { LogFields, Logger } from './types.ts';
+import type { LogFields, Logger } from './logger.ts';
 
 /** Edge Function logs are whatever reaches the console; one JSON line per event keeps them queryable. */
 export const consoleLogger: Logger = {

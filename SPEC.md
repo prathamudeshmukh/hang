@@ -151,8 +151,13 @@ back to a generic link card (Open Graph image, title, site), never to a broken s
    request (Spike 0a: Ars Technica 405, Science 403), `generic` uses it instead of the hostname, and
    the AI step can still classify from the title alone.
 2. **Extract**: the adapter returns a normalised `Extracted` record (see §5).
-3. **Media**: the server downloads the lead image, stores a 1080px-wide WebP thumbnail in Storage,
-   and computes the **palette** (dominant and muted colors).
+3. **Media** (separate `media` function, own CPU budget; decided 2026-11-12, #26): `extract` writes the lead
+   image's address to `image_url` (the adapter's image, else a post's first media). An `AFTER UPDATE OF
+   image_url` trigger posts the item id to `media`, which fetches it through the SSRF guard (5 MB, 10 s),
+   checks the type and size from the file header (JPEG, PNG, WebP, first GIF frame; no SVG; ≤ 6 MP), stores a
+   1080px-wide lossy WebP (never enlarged) at `media/{user_id}/thumbs/{item_id}.webp`, and writes `thumb_*`
+   and the **palette** (dominant and muted colors). It runs after `status = ready`, so cards appear first;
+   an unusable image just leaves a text card. Client writes to `image_url` never trigger a fetch.
 4. **Enrich**: one Haiku 5.5 call (see §6).
 5. **Write**: updates `items` and `item_content`, sets `status = ready` (or `failed` with
    `extract_error`, after which the generic adapter is retried as a fallback).

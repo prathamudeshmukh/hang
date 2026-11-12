@@ -58,4 +58,19 @@ describe('toItemPatch', () => {
     const patch = toItemPatch(item, { ...link, title: 'x'.repeat(5000) });
     expect(patch.title?.length).toBeLessThanOrEqual(500);
   });
+
+  it('keeps the lead image as an absolute http(s) image_url, else a post\'s first media', () => {
+    const post: Extracted = { ...link, kind: 'post', post: { authorName: 'A', handle: 'a', text: '', mediaUrls: ['https://p.test/1.jpg'] } };
+    const images = [
+      toItemPatch(item, { ...link, imageUrl: '/img/lead.png' }).image_url,
+      toItemPatch(item, post).image_url,
+      toItemPatch(item, link).image_url,
+    ];
+    expect(images).toEqual(['https://www.mag.test/img/lead.png', 'https://p.test/1.jpg', null]);
+  });
+
+  it('drops an image address that is not http(s) or is too long', () => {
+    const bad = ['data:image/png;base64,AAAA', 'javascript:alert(1)', `https://cdn.test/${'x'.repeat(5000)}`];
+    expect(bad.map((imageUrl) => toItemPatch(item, { ...link, imageUrl }).image_url)).toEqual([null, null, null]);
+  });
 });

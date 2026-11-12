@@ -37,6 +37,8 @@ export interface ItemPatch {
   readonly author: string | null;
   readonly duration_s: number | null;
   readonly reading_min: number | null;
+  /** Lead image to thumbnail; setting it triggers the `media` function. */
+  readonly image_url: string | null;
   readonly embed: EmbedJson | null;
   readonly post: PostJson | null;
 }
@@ -53,11 +55,4 @@ export interface ItemStore {
 
 export type ExtractItem = (item: ClaimedItem) => Promise<ExtractionResult>;
 
-export type LogFields = Readonly<Record<string, string | number | boolean | undefined>>;
-
-/** Structured log port. Fields carry item ids, never URLs (SPEC §7). */
-export interface Logger {
-  readonly info: (event: string, fields: LogFields) => void;
-  readonly warn: (event: string, fields: LogFields) => void;
-  readonly error: (event: string, fields: LogFields) => void;
-}
+export type { LogFields, Logger } from '../_shared/edge/logger.ts';

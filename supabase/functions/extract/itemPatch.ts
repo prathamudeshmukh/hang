@@ -4,6 +4,8 @@ import type { ClaimedItem, EmbedJson, ItemPatch, PostJson } from './types.ts';
 
 const MAX_TITLE_LENGTH = 500;
 const MAX_TEXT_LENGTH = 1000;
+const MAX_URL_LENGTH = 4096;
+const WEB_PROTOCOLS = new Set(['http:', 'https:']);
 
 function clean(value: string | undefined | null, maxLength = MAX_TEXT_LENGTH): string | null {
   const trimmed = value?.trim();
@@ -36,6 +38,22 @@ function toPostJson(post: PostSnapshot | undefined): PostJson | null {
   };
 }
 
+/** An absolute http(s) address the DB check accepts, or null. Relative ones resolve against the page. */
+function webUrl(value: string | undefined, base: string): string | null {
+  if (!value) return null;
+  try {
+    const url = new URL(value, base);
+    const href = url.toString();
+    return WEB_PROTOCOLS.has(url.protocol) && href.length <= MAX_URL_LENGTH ? href : null;
+  } catch {
+    return null;
+  }
+}
+
+function leadImage(extracted: Extracted): string | null {
+  return webUrl(extracted.imageUrl, extracted.url) ?? webUrl(extracted.post?.mediaUrls[0], extracted.url);
+}
+
 /** Maps a registry result onto the item's derived columns (SPEC §5). */
 export function toItemPatch(item: ClaimedItem, extracted: Extracted): ItemPatch {
   const canonical = stripTracking(new URL(extracted.url));
@@ -52,6 +70,7 @@ export function toItemPatch(item: ClaimedItem, extracted: Extracted): ItemPatch 
     author: clean(extracted.author),
     duration_s: wholeNumber(extracted.durationSeconds),
     reading_min: wholeNumber(extracted.readingMinutes),
+    image_url: leadImage(extracted),
     embed: toEmbedJson(extracted.embed),
     post: toPostJson(extracted.post),
   };

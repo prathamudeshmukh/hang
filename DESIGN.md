@@ -195,7 +195,7 @@ image is drawn, so there's never a flash.
 | Moment | Motion | Frequency |
 |---|---|---|
 | **Rediscover develops** | Blur 8→0, saturation 0→1, brightness 1.3→1 over 1600ms | First view per day |
-| **Fetching fills in** | The dashed placeholder cross-fades to the image (700ms), and the title ink darkens | Once, when extraction completes |
+| **Fetching fills in** | The dashed placeholder cross-fades to the image (700ms), and the title ink darkens | Once, when the thumbnail arrives (it follows the text, SPEC §4) |
 | **Entering a room** | The tint underline draws left to right under the collection title (600ms) | Each entry |
 | **Finishing a read** | One vermilion stroke strikes through "unread", then *read · 8 Nov* fades in | Once, on reaching ~95% |
 

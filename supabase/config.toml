@@ -426,3 +426,7 @@ enabled = true
 [functions.extract]
 verify_jwt = false
 import_map = "./functions/deno.json"
+
+[functions.media]
+verify_jwt = false
+import_map = "./functions/deno.json"
