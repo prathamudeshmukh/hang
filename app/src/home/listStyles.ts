@@ -10,7 +10,10 @@ export const listStyles = StyleSheet.create({
   title: { fontFamily: FONT.serif, fontSize: 40, color: COLOR.ink, letterSpacing: -1 },
   section: { fontFamily: FONT.serif, fontSize: 22, color: COLOR.ink, marginTop: 32, marginBottom: 4 },
   note: { fontFamily: FONT.serif, fontStyle: 'italic', fontSize: 13, color: COLOR.ink3, marginTop: 4 },
-  row: { borderTopWidth: StyleSheet.hairlineWidth, borderColor: COLOR.rule, paddingVertical: 14 },
+  row: { borderTopWidth: StyleSheet.hairlineWidth, borderColor: COLOR.rule, paddingVertical: 14, flexDirection: 'row', gap: 12 },
+  rowText: { flex: 1 },
+  /** DESIGN.md §5: content has square corners (2px `print`). */
+  thumb: { width: 56, height: 56, borderRadius: 2, backgroundColor: COLOR.rule },
   rowTitle: { fontFamily: FONT.serif, fontSize: 18, color: COLOR.ink },
   /** One style object: expo-router's `Link asChild` rejects style arrays. */
   placeRow: {

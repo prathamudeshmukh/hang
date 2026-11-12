@@ -10,6 +10,11 @@ import { systemClock } from '@/db/types';
 import { createSyncEngine } from '@/sync/engine';
 import { fetchWithTimeout, REQUEST_TIMEOUT_MS } from '@/sync/fetchWithTimeout';
 import { createSupabaseRemote } from '@/sync/supabaseRemote';
+import type { SyncReport } from '@/sync/types';
+import { createExpoThumbFiles } from '@/thumbs/expoThumbFiles';
+import { createSupabaseThumbSigner } from '@/thumbs/supabaseThumbSigner';
+import { createThumbStore } from '@/thumbs/thumbStore';
+import { createThumbSync } from '@/thumbs/thumbSync';
 import { createAuthSession } from './authSession';
 import { createGoogleIdTokenProvider } from './googleIdToken';
 import { createSecureSessionStorage } from './secureSessionStorage';
@@ -54,6 +59,32 @@ const syncEngine = createSyncEngine({
   clock: systemClock,
 });
 
+const thumbs = createThumbSync({
+  store: createThumbStore(db),
+  files: createExpoThumbFiles(),
+  signer: createSupabaseThumbSigner(supabase),
+  log: (message) => console.warn(`[thumbs] ${message}`),
+});
+const settleThumbs = (work: Promise<unknown>) => void work.catch((error: unknown) => console.warn(`[thumbs] ${String(error)}`));
+
+/** Thumbnails follow every sync (SPEC §4); sync only runs while signed in, which signing needs. */
+const syncer = {
+  async sync(): Promise<SyncReport> {
+    const report = await syncEngine.sync();
+    settleThumbs(thumbs.run());
+    return report;
+  },
+};
+
+/** A wipe (sign-out, or another account) takes this account's thumbnails with it. */
+function wipeAccount(): void {
+  deviceOwner.wipe();
+  settleThumbs(thumbs.reconcile());
+}
+
+// At launch, finish any cleanup a killed app left behind.
+settleThumbs(thumbs.reconcile());
+
 /** One per process, shared by the main app and the share sheet (same JS runtime). */
 export const authSession = createAuthSession({
   backend: createSupabaseAuthBackend({ client: supabase, storage: sessionStorage, storageKey: SESSION_STORAGE_KEY }),
@@ -64,9 +95,9 @@ export const authSession = createAuthSession({
   }),
   account: {
     bindTo: deviceOwner.bindTo,
-    wipe: deviceOwner.wipe,
+    wipe: wipeAccount,
     unsyncedCount: () => outbox.list().length,
   },
-  syncer: syncEngine,
+  syncer,
   wait: (ms) => new Promise((resolve) => setTimeout(resolve, ms)),
 });

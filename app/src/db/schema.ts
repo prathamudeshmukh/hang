@@ -125,6 +125,15 @@ export const deviceOwner = sqliteTable('device_owner', {
   userId: text('user_id').primaryKey(),
 });
 
+/**
+ * Local only, never synced: the thumbnail files this device has downloaded (SPEC §4, #27). A row means the file
+ * at `file_uri` holds that item's thumbnail; it's written once and never re-checked.
+ */
+export const thumbFiles = sqliteTable('thumb_files', {
+  itemId: text('item_id').primaryKey(),
+  fileUri: text('file_uri').notNull(),
+});
+
 export const SYNC_TABLES = { collections, items, item_content: itemContent } as const;
 export type SyncTableName = keyof typeof SYNC_TABLES;
 
@@ -135,3 +144,4 @@ export type Collection = typeof collections.$inferSelect;
 export type Item = typeof items.$inferSelect;
 export type ItemContent = typeof itemContent.$inferSelect;
 export type OutboxEntry = typeof outbox.$inferSelect;
+export type ThumbFile = typeof thumbFiles.$inferSelect;

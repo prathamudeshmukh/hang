@@ -2,6 +2,7 @@ import type { CollectionsRepository } from '../db/collectionsRepository.ts';
 import type { ItemsRepository } from '../db/itemsRepository.ts';
 import type { OutboxRepository } from '../db/outboxRepository.ts';
 import type { Item } from '../db/schema.ts';
+import type { ThumbStore } from '../thumbs/thumbStore.ts';
 import { toItemRow, type ItemRow } from './itemRow.ts';
 
 /** SPEC §5 "Recently saved": the latest 12 items by created_at. */
@@ -32,12 +33,14 @@ export interface ListSources {
   readonly items: Pick<ItemsRepository, 'listRecent' | 'listInbox' | 'listInCollection' | 'countByCollection'>;
   readonly collections: Pick<CollectionsRepository, 'list'>;
   readonly outbox: Pick<OutboxRepository, 'list'>;
+  readonly thumbs: Pick<ThumbStore, 'fileUris'>;
 }
 
 /** A failed entry will never sync (#14 gives those a UI), so only pending ones count as waiting. */
 function toRows(sources: ListSources, items: readonly Item[]): readonly ItemRow[] {
   const queued = new Set(sources.outbox.list().filter((entry) => entry.tableName === 'items' && entry.status === 'pending').map((entry) => entry.rowId));
-  return items.map((item) => toItemRow(item, queued.has(item.id)));
+  const thumbs = sources.thumbs.fileUris();
+  return items.map((item) => toItemRow(item, { queued: queued.has(item.id), thumbUri: thumbs.get(item.id) ?? null }));
 }
 
 export function readHome(sources: ListSources): HomeLists {
