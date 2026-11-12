@@ -81,8 +81,10 @@ deno task check             # typecheck the entry point
 deno lint
 ```
 
-`_shared/extraction/` is the spike 0a registry, moved here (the spike folder stays frozen). `extract/handler.ts`
-is plain TS with injected ports; `extract/index.ts` is the only file that reads env or Deno globals.
+`_shared/extraction/` is the spike 0a registry, moved here (the spike folder stays frozen); `_shared/edge/` holds what
+both functions share (trigger request check, secret, logger). Each function's `handler.ts` is plain TS with injected
+ports; its `index.ts` is the only file that reads env or Deno globals. `extract` → `image_url` → trigger → `media`
+(thumbnail via `imagescript`, palette). Both triggers read Vault (`extract_url`, `media_url`, shared `extract_secret`).
 Deno is installed with `npm i -g deno` (Homebrew builds it from source). Don't run `deno fmt`: its style
 differs from the repo's.
 

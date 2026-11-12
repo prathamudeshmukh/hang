@@ -2,7 +2,7 @@ import { createClient } from '@supabase/supabase-js';
 import { makeDnsLookup } from '../_shared/extraction/net/dnsLookup.ts';
 import { makeFetchContext } from '../_shared/extraction/net/fetcher.ts';
 import { extract } from '../_shared/extraction/registry.ts';
-import { consoleLogger } from './consoleLogger.ts';
+import { consoleLogger } from '../_shared/edge/consoleLogger.ts';
 import { makeExtractHandler } from './handler.ts';
 import { makeSupabaseItemStore } from './supabaseItemStore.ts';
 import type { ExtractItem } from './types.ts';
