@@ -42,6 +42,8 @@ export const useFeedStyles = makeStyles(({ color }) => ({
     gap: SPACE.caption,
   },
   faded: { opacity: FADED },
+  /** The flyer stands in for it on the way back (#33). */
+  hidden: { opacity: 0 },
   text: { flex: 1, justifyContent: 'space-between', paddingHorizontal: SPACE.margin, paddingTop: SPACE.rhythm },
   words: { gap: SPACE.caption },
   pills: { flexDirection: 'row', gap: SPACE.chip },

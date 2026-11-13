@@ -112,15 +112,41 @@ describe('hero: back to the wall', () => {
     return harness;
   }
 
-  it('flies the page on screen back to its print, popping the feed under cover first', async () => {
-    const harness = await openedHarness();
+  async function flyBackToB(harness: Awaited<ReturnType<typeof openedHarness>>) {
     harness.hero.back({ card: aCard({ id: 'b' }), feed: FEED, pop: () => harness.calls.push('pop') });
     await flush();
     harness.hero.flyerDrawn();
     harness.origins.markDrawn({ scope: SCOPE, id: 'b' });
     await flush();
-    assert.deepEqual(harness.calls, ['board:back', 'feed:0:0', 'pop', 'fly:picture', 'leave:back']);
+  }
+
+  it('flies the page on screen back to its print while the feed fades away, then pops it', async () => {
+    const harness = await openedHarness();
+    await flyBackToB(harness);
+    assert.deepEqual(harness.calls, ['board:back', 'feed:away', 'fly:picture', 'pop', 'leave:back']);
     assert.deepEqual(harness.flights[0].to, { ...CARD_RECT, y: 400 });
+  });
+
+  it('keeps the feed text on screen until the flyer is drawn, so leaving never starts on a blank frame', async () => {
+    const harness = await openedHarness();
+    harness.hero.back({ card: aCard({ id: 'b' }), feed: FEED, pop: () => harness.calls.push('pop') });
+    await flush();
+    assert.deepEqual(harness.calls, ['board:back']);
+  });
+
+  it('only pops once the feed has faded away, so its removal is never seen', async () => {
+    const harness = await openedHarness({ holdFeedFade: true });
+    await flyBackToB(harness);
+    const beforeFade = [...harness.calls];
+    harness.finishFeedFade();
+    await flush();
+    assert.deepEqual([beforeFade.includes('pop'), harness.calls.includes('pop')], [false, true]);
+  });
+
+  it('shows the feed again and keeps it when the flight back fails', async () => {
+    const harness = await openedHarness({ failFlight: true });
+    await flyBackToB(harness);
+    assert.deepEqual([harness.calls.includes('pop'), harness.calls.at(-1), harness.hero.trip().phase], [false, 'feed:1:0', 'idle']);
   });
 
   it('cross-fades back over 340ms when there is nothing to land on (moved away)', async () => {

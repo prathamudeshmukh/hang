@@ -2,7 +2,7 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 import { FRAME, type Look } from './look.ts';
-import { hidesFace, IDLE, inAir, nextTrip, type Flight, type Trip, type TripEvent } from './trip.ts';
+import { hidesFace, hidesFeedMedia, IDLE, inAir, nextTrip, type Flight, type Trip, type TripEvent } from './trip.ts';
 
 const PICTURE: Look = { kind: 'picture', uri: 'file:///t.jpg', landing: { fit: 'cover' } };
 const FLIGHT: Flight = {
@@ -96,5 +96,25 @@ describe('hidesFace', () => {
 
   it('leaves the same item on another wall alone', () => {
     assert.equal(hidesFace(boarded(), { scope: 'home:strip', id: 'a' }), false);
+  });
+});
+
+describe('hidesFeedMedia', () => {
+  const back = (): Trip => run([{ type: 'board', flight: { ...FLIGHT, direction: 'back' } }]);
+
+  it('keeps the feed media drawn until the flyer covering it is drawn, so nothing flashes', () => {
+    assert.equal(hidesFeedMedia(back(), 'a'), false);
+  });
+
+  it('hides it from take-off until the trip ends, so the flyer leaves no copy behind', () => {
+    const flying = run([{ type: 'flyerDrawn' }], back());
+    const leaving = run([{ type: 'landed' }, { type: 'destinationDrawn' }], flying);
+    assert.deepEqual([hidesFeedMedia(flying, 'a'), hidesFeedMedia(leaving, 'a')], [true, true]);
+  });
+
+  it('leaves other pages, and flights out to the feed, alone', () => {
+    const outFlying = run([{ type: 'flyerDrawn' }], boarded());
+    const backFlying = run([{ type: 'flyerDrawn' }], back());
+    assert.deepEqual([hidesFeedMedia(outFlying, 'a'), hidesFeedMedia(backFlying, 'b')], [false, false]);
   });
 });

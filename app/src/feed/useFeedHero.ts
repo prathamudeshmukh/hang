@@ -1,11 +1,12 @@
 import { usePreventRemove } from 'expo-router';
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useRef, useState, useSyncExternalStore } from 'react';
 import { Dimensions } from 'react-native';
 import { useAnimatedStyle } from 'react-native-reanimated';
 import type { CardModel } from '@/grid/cardModel';
 import { hero, rememberFeedSize } from '@/hero/appHero';
 import type { Size } from '@/hero/geometry';
-import { feedOpacity } from '@/hero/heroValues';
+import { feedOpacity, feedTextOpacity } from '@/hero/heroValues';
+import { hidesFeedMedia } from '@/hero/trip';
 
 export const reportMediaDrawn = (id: string) => hero.feedDrawn(id);
 
@@ -35,4 +36,14 @@ export function useFeedHero() {
   }, []);
   const opacity = useAnimatedStyle(() => ({ opacity: feedOpacity.value }));
   return { onShown, onSize, opacity };
+}
+
+/** The feed's words leave sooner than the feed on the way back (#33). */
+export function useFeedTextFade() {
+  return useAnimatedStyle(() => ({ opacity: feedTextOpacity.value }));
+}
+
+/** True while the flyer stands in for this page's media on the way back, so it isn't left behind. */
+export function useHiddenUnderFlyer(id: string): boolean {
+  return useSyncExternalStore(hero.subscribe, () => hidesFeedMedia(hero.trip(), id));
 }

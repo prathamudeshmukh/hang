@@ -23,14 +23,18 @@ interface HarnessOptions {
   readonly timeoutsFire?: boolean;
   readonly withStage?: boolean;
   readonly failFlight?: boolean;
+  /** The feed's fade on the way back never finishes, until `finishFeedFade` is called. */
+  readonly holdFeedFade?: boolean;
 }
 
 /** A hero with a recording stage and fake navigation, origins and clock. */
-export function heroHarness({ reduceMotion = false, timeoutsFire = false, withStage = true, failFlight = false }: HarnessOptions = {}) {
+export function heroHarness({ reduceMotion = false, timeoutsFire = false, withStage = true, failFlight = false, holdFeedFade = false }: HarnessOptions = {}) {
   const calls: string[] = [];
   const flights: Flight[] = [];
   const pushes: { readonly ids: readonly string[]; readonly start: string }[] = [];
   const origins = createOrigins();
+  let finishFeedFade = () => undefined as void;
+  const feedFade = holdFeedFade ? new Promise<void>((resolve) => { finishFeedFade = resolve; }) : Promise.resolve();
   const stage: Stage = {
     board: (flight) => {
       calls.push(`board:${flight.direction}`);
@@ -44,6 +48,10 @@ export function heroHarness({ reduceMotion = false, timeoutsFire = false, withSt
     leave: (direction) => {
       calls.push(`leave:${direction}`);
       return Promise.resolve();
+    },
+    fadeFeedAway: () => {
+      calls.push('feed:away');
+      return feedFade;
     },
     setFeedOpacity: (opacity, durationMs) => {
       calls.push(`feed:${opacity}:${durationMs}`);
@@ -65,5 +73,5 @@ export function heroHarness({ reduceMotion = false, timeoutsFire = false, withSt
   };
   const hero = createHero(ports);
   if (withStage) hero.attachStage(stage);
-  return { hero, origins, calls, flights, pushes, warnings };
+  return { hero, origins, calls, flights, pushes, warnings, finishFeedFade: () => finishFeedFade() };
 }

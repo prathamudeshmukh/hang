@@ -5,6 +5,7 @@ import Animated, { interpolateColor, useAnimatedStyle } from 'react-native-reani
 import { useTheme } from '@/theme/theme';
 import { RADIUS, SCREENING_ROOM } from '@/theme/tokens';
 import { hero } from './appHero';
+import { DEFAULT_TUNING } from './flightPlan';
 import type { Look } from './look';
 import { inAir, type Flight } from './trip';
 import { useStage, type StageValues } from './useStage';
@@ -57,7 +58,7 @@ export function HeroLayer() {
   useEffect(() => {
     wallRaised.current = color.raised;
   }, [color.raised]);
-  const { values, stage } = useStage(() => wallRaised.current);
+  const { values, stage } = useStage({ wallRaised: () => wallRaised.current, tuning: () => DEFAULT_TUNING });
   const styles = useFlyerStyles(values);
   useEffect(() => hero.attachStage(stage), [stage]);
   useBlockBack(inAir(trip));

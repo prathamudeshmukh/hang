@@ -21,6 +21,8 @@ export interface Stage {
   fly(flight: Flight): Promise<void>;
   /** Fades the flyer (and, going out, the backdrop) off the destination. */
   leave(direction: Direction): Promise<void>;
+  /** Going back: the feed fades off the wall over the flight, its text sooner (#33). */
+  fadeFeedAway(): Promise<void>;
   setFeedOpacity(opacity: 0 | 1, durationMs: number): Promise<void>;
 }
 
@@ -139,11 +141,12 @@ export function createHero(ports: HeroPorts) {
   async function flyBack(on: Stage, { card, feed, pop }: BackRequest & { readonly card: CardModel }, at: FaceKey, to: Rect) {
     const look = lookOf(card);
     await board(on, { id: card.id, scope: at.scope, direction: 'back', look, from: landingRect(feed, landingOf(look)), to });
-    // The native removal lags the pop by a frame or two; hidden, the feed can't show through the fading backdrop.
-    await on.setFeedOpacity(0, INSTANT);
     await waitForFlyer();
-    pop();
+    const fadedAway = on.fadeFeedAway();
     await flyAndLand(on);
+    // The native removal lags the pop by a frame or two: only once the feed is invisible can it go unseen.
+    await fadedAway;
+    pop();
     await settle(on, 'back', ports.origins.whenDrawn(at));
   }
 

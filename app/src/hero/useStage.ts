@@ -2,17 +2,18 @@ import { useMemo } from 'react';
 import { Easing, useSharedValue, withDelay, withTiming, type SharedValue } from 'react-native-reanimated';
 import { scheduleOnRN } from 'react-native-worklets';
 import { MOTION, SCREENING_ROOM } from '@/theme/tokens';
+import { flightPlan, type FlightTuning, type Timing } from './flightPlan';
 import type { Rect } from './geometry';
 import type { Stage } from './hero';
-import { feedOpacity } from './heroValues';
+import { feedOpacity, feedTextOpacity } from './heroValues';
 import type { Direction, Flight } from './trip';
 
 const ZERO_RECT: Rect = { x: 0, y: 0, width: 0, height: 0 };
 /** DESIGN.md §7: the text (here, the feed showing through) comes in 60ms behind the image. */
 const TEXT_DELAY_MS = 60;
-const [x1, y1, x2, y2] = MOTION.easing;
-const BASE = { duration: MOTION.baseMs, easing: Easing.bezier(x1, y1, x2, y2) };
-const QUICK = { duration: MOTION.quickMs, easing: Easing.bezier(x1, y1, x2, y2) };
+const timingOf = ({ durationMs, curve: [x1, y1, x2, y2] }: Timing) => ({ duration: durationMs, easing: Easing.bezier(x1, y1, x2, y2) });
+const BASE = timingOf({ durationMs: MOTION.baseMs, curve: MOTION.easing });
+const QUICK = timingOf({ durationMs: MOTION.quickMs, curve: MOTION.easing });
 
 export interface StageValues {
   readonly from: SharedValue<Rect>;
@@ -35,7 +36,13 @@ function animated(start: (resolve: Resolve) => void): Promise<void> {
   return new Promise((resolve) => start(resolve));
 }
 
-function createStage(values: StageValues, wallRaised: () => string): Stage {
+interface StageInputs {
+  readonly wallRaised: () => string;
+  /** Read at each flight, so a change applies to the next one. */
+  readonly tuning: () => FlightTuning;
+}
+
+function createStage(values: StageValues, { wallRaised, tuning }: StageInputs): Stage {
   const { from, to, progress, backdrop, flyerOpacity, colors } = values;
   const roomRaised = SCREENING_ROOM.raised;
   return {
@@ -44,18 +51,27 @@ function createStage(values: StageValues, wallRaised: () => string): Stage {
       to.set(flight.to);
       progress.set(0);
       flyerOpacity.set(1);
-      backdrop.set(flight.direction === 'out' ? 0 : 1);
+      // Going back, the feed itself is the ground: it fades off the wall under the flyer (fadeFeedAway).
+      backdrop.set(0);
       colors.set(flight.direction === 'out' ? [wallRaised(), roomRaised] : [roomRaised, wallRaised()]);
     },
     fly(flight: Flight) {
-      backdrop.set(withTiming(flight.direction === 'out' ? 1 : 0, BASE));
-      return animated((resolve) => progress.set(withTiming(1, BASE, () => scheduleOnRN(resolve))));
+      const plan = flightPlan(tuning(), flight.direction);
+      if (flight.direction === 'out') backdrop.set(withTiming(1, timingOf(plan.ground)));
+      return animated((resolve) => progress.set(withTiming(1, timingOf(plan.flyer), () => scheduleOnRN(resolve))));
+    },
+    fadeFeedAway() {
+      const plan = flightPlan(tuning(), 'back');
+      const text = animated((resolve) => feedTextOpacity.set(withTiming(0, timingOf(plan.text), () => scheduleOnRN(resolve))));
+      const feed = animated((resolve) => feedOpacity.set(withTiming(0, timingOf(plan.ground), () => scheduleOnRN(resolve))));
+      return Promise.all([text, feed]).then(() => undefined);
     },
     leave(direction: Direction) {
       if (direction === 'out') backdrop.set(withDelay(TEXT_DELAY_MS, withTiming(0, QUICK)));
       return animated((resolve) => flyerOpacity.set(withDelay(TEXT_DELAY_MS, withTiming(0, QUICK, () => scheduleOnRN(resolve)))));
     },
     setFeedOpacity(opacity: 0 | 1, durationMs: number) {
+      if (opacity === 1) feedTextOpacity.set(1);
       if (durationMs <= 0) {
         feedOpacity.set(opacity);
         return Promise.resolve();
@@ -66,7 +82,7 @@ function createStage(values: StageValues, wallRaised: () => string): Stage {
 }
 
 /** The shared values the layer draws from, and the Stage the hero drives them through. */
-export function useStage(wallRaised: () => string) {
+export function useStage(inputs: StageInputs) {
   const values: StageValues = {
     from: useSharedValue(ZERO_RECT),
     to: useSharedValue(ZERO_RECT),
@@ -77,6 +93,6 @@ export function useStage(wallRaised: () => string) {
   };
   // Shared values keep their identity across renders, so the stage is built once.
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const stage = useMemo(() => createStage(values, wallRaised), []);
+  const stage = useMemo(() => createStage(values, inputs), []);
   return { values, stage };
 }
