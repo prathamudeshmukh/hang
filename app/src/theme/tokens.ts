@@ -78,4 +78,15 @@ export const MOTION = {
   slowMs: 600,
   /** Calm ease-out; no bounce or overshoot anywhere. */
   easing: [0.2, 0.7, 0.1, 1] as const,
+  /**
+   * The hero flyer only (#33): the calm ease-out front-loads a long trip, so the print seemed to jump and then
+   * drift. Each direction has its own curve; the ground under it keeps `easing` over the same duration.
+   */
+  flight: {
+    out: [0.3, 0, 0.1, 1] as const,
+    back: [0.3, 0, 0.1, 1] as const,
+    durationMs: 340,
+    /** The feed's text leaving alongside the flight back. */
+    textFadeMs: 180,
+  },
 } as const;

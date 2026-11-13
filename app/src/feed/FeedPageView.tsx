@@ -1,11 +1,13 @@
 import { memo } from 'react';
 import { View, type AccessibilityActionEvent } from 'react-native';
+import Animated from 'react-native-reanimated';
 import { Pill } from '@/theme/Pill';
 import { NameText, NoteText } from '@/theme/Text';
 import { samePage, type FeedPage } from './feedPage';
 import { FeedMediaView } from './FeedMediaView';
 import { mediaHeight } from './feedLayout';
 import { useFeedStyles } from './feedStyles';
+import { useFeedTextFade } from './useFeedHero';
 
 const LINES = { title: 3, summary: 2 } as const;
 const PAGE_ACTIONS = [
@@ -35,6 +37,7 @@ function stepOf(event: AccessibilityActionEvent): PageStep | null {
 /** One screen of the feed: media, then note, title, summary and the Read/Watch/Open and Move pills (DESIGN.md §8). */
 export const FeedPageView = memo(function FeedPageView({ page, height, bottomInset, onOpen, onMove, onStep, onMediaDrawn }: FeedPageViewProps) {
   const styles = useFeedStyles();
+  const textFade = useFeedTextFade();
   return (
     <View style={[styles.page, { height }]}>
       <View
@@ -48,7 +51,7 @@ export const FeedPageView = memo(function FeedPageView({ page, height, bottomIns
       >
         <FeedMediaView page={page} height={mediaHeight(height)} onDrawn={onMediaDrawn} />
       </View>
-      <View style={[styles.text, { paddingBottom: bottomInset }]}>
+      <Animated.View style={[styles.text, { paddingBottom: bottomInset }, textFade]}>
         <View style={styles.words}>
           <NoteText testID="feed-note" numberOfLines={1}>{page.note}</NoteText>
           {page.showTitle && page.card.title ? <NameText token="titleL" numberOfLines={LINES.title}>{page.card.title}</NameText> : null}
@@ -58,7 +61,7 @@ export const FeedPageView = memo(function FeedPageView({ page, height, bottomIns
           <Pill kind="filled" label={page.action} testID="feed-open" onPress={() => onOpen(page)} />
           <Pill label="Move" testID="feed-move" onPress={() => onMove(page)} />
         </View>
-      </View>
+      </Animated.View>
     </View>
   );
 }, (previous, next) => {

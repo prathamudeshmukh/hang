@@ -5,6 +5,7 @@ import { Icon } from '@/theme/icons/Icon';
 import { NameText, NoteText } from '@/theme/Text';
 import type { FeedPage } from './feedPage';
 import { useFeedStyles } from './feedStyles';
+import { useHiddenUnderFlyer } from './useFeedHero';
 
 const LINES = { title: 6, post: 10, rawUrl: 3 } as const;
 
@@ -71,8 +72,9 @@ export function FeedMediaView({ page, height, onDrawn }: FeedMediaViewProps) {
   const { media, card } = page;
   const drawn = () => onDrawn(card.id);
   const hasImage = media.kind === 'picture' && media.media.uri !== null;
+  const hidden = useHiddenUnderFlyer(card.id);
   return (
-    <View style={[styles.media, { height }]} onLayout={hasImage ? undefined : drawn}>
+    <View style={[styles.media, { height }, hidden && styles.hidden]} onLayout={hasImage ? undefined : drawn}>
       {media.kind === 'picture' ? <Picture id={card.id} media={media.media} fit={media.fit} playable={media.playable} onDrawn={drawn} /> : null}
       {media.kind === 'title' ? (
         <View style={[styles.picture, styles.titleMedia]}>

@@ -20,7 +20,7 @@ import { useFeedStyles } from './feedStyles';
 import { MoveSheet } from './MoveSheet';
 import { TopShade } from './TopShade';
 import type { CardModel } from '@/grid/cardModel';
-import { reportMediaDrawn, useFeedHero } from './useFeedHero';
+import { reportMediaDrawn, useFeedHero, useFeedTextFade } from './useFeedHero';
 
 const NOTHING_LEFT = 'Nothing here any more.';
 const VISIBLE_TO_COUNT = { itemVisiblePercentThreshold: 60 } as const;
@@ -61,11 +61,12 @@ function useStep(list: RefObject<FlatList<FeedPage> | null>, index: number, tota
 function Counter({ text }: { readonly text: string | null }) {
   const styles = useFeedStyles();
   const insets = useSafeAreaInsets();
+  const textFade = useFeedTextFade();
   if (text === null) return null;
   return (
-    <View style={[styles.counter, { top: insets.top + SPACE.tight }]} pointerEvents="none">
+    <Animated.View style={[styles.counter, { top: insets.top + SPACE.tight }, textFade]} pointerEvents="none">
       <NoteText testID="feed-counter" color="ink">{text}</NoteText>
-    </View>
+    </Animated.View>
   );
 }
 

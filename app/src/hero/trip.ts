@@ -92,3 +92,8 @@ const IN_THE_AIR: ReadonlySet<Trip['phase']> = new Set(['boarding', 'flying']);
 export function hidesFace(trip: Trip, { scope, id }: FaceKey): boolean {
   return 'flight' in trip && IN_THE_AIR.has(trip.phase) && trip.flight.id === id && trip.flight.scope === scope;
 }
+
+/** Going back, the feed's media under the flyer is hidden once the flyer stands in for it, until the trip ends. */
+export function hidesFeedMedia(trip: Trip, id: string): boolean {
+  return 'flight' in trip && trip.phase !== 'boarding' && trip.flight.direction === 'back' && trip.flight.id === id;
+}
