@@ -4,7 +4,8 @@ import { Pill } from '@/theme/Pill';
 import { NameText, NoteText } from '@/theme/Text';
 import { samePage, type FeedPage } from './feedPage';
 import { FeedMediaView } from './FeedMediaView';
-import { MEDIA_SHARE, useFeedStyles } from './feedStyles';
+import { mediaHeight } from './feedLayout';
+import { useFeedStyles } from './feedStyles';
 
 const LINES = { title: 3, summary: 2 } as const;
 const PAGE_ACTIONS = [
@@ -23,6 +24,7 @@ export interface FeedPageViewProps {
   readonly onMove: (page: FeedPage) => void;
   /** TalkBack's way to swipe (#31). */
   readonly onStep: (step: PageStep) => void;
+  readonly onMediaDrawn: (id: string) => void;
 }
 
 function stepOf(event: AccessibilityActionEvent): PageStep | null {
@@ -31,7 +33,7 @@ function stepOf(event: AccessibilityActionEvent): PageStep | null {
 }
 
 /** One screen of the feed: media, then note, title, summary and the Read/Watch/Open and Move pills (DESIGN.md §8). */
-export const FeedPageView = memo(function FeedPageView({ page, height, bottomInset, onOpen, onMove, onStep }: FeedPageViewProps) {
+export const FeedPageView = memo(function FeedPageView({ page, height, bottomInset, onOpen, onMove, onStep, onMediaDrawn }: FeedPageViewProps) {
   const styles = useFeedStyles();
   return (
     <View style={[styles.page, { height }]}>
@@ -44,7 +46,7 @@ export const FeedPageView = memo(function FeedPageView({ page, height, bottomIns
           if (step) onStep(step);
         }}
       >
-        <FeedMediaView page={page} height={Math.round(height * MEDIA_SHARE)} />
+        <FeedMediaView page={page} height={mediaHeight(height)} onDrawn={onMediaDrawn} />
       </View>
       <View style={[styles.text, { paddingBottom: bottomInset }]}>
         <View style={styles.words}>

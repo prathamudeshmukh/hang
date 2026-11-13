@@ -1,5 +1,8 @@
 import { Link } from 'expo-router';
 import { useFeedOpener } from '@/feed/useFeedOpener';
+import { HeroScope } from '@/hero/HeroFace';
+import { HOME_SCOPE } from '@/hero/origins';
+import { useScroller, useScrollersOrigin } from '@/hero/useOrigins';
 import { Pressable, ScrollView, View } from 'react-native';
 import { NameText, NoteText } from '@/theme/Text';
 import { useTheme } from '@/theme/theme';
@@ -8,6 +11,7 @@ import type { RecentPrint } from './homeLists';
 import { useHomeStyles } from './homeStyles';
 import { StripPrint } from './StripPrint';
 
+const SCROLL_THROTTLE_MS = 32;
 const EMPTY_HOME = 'Share anything from another app to hang it here.';
 
 function Label() {
@@ -34,7 +38,10 @@ function InboxLabel({ inboxCount }: { readonly inboxCount: number }) {
 
 export function RecentStrip({ recent, inboxCount }: { readonly recent: readonly RecentPrint[]; readonly inboxCount: number }) {
   const styles = useHomeStyles();
-  const openFeed = useFeedOpener(recent.map(({ card }) => card.id));
+  const ids = recent.map(({ card }) => card.id);
+  const openFeed = useFeedOpener(ids, HOME_SCOPE.strip);
+  const { attach: attachStrip, onScroll: onStripScroll, step: stripStep } = useScroller('x');
+  useScrollersOrigin(HOME_SCOPE.strip, ids, stripStep);
   if (recent.length === 0) {
     return (
       <View style={styles.sectionLabel}>
@@ -51,9 +58,11 @@ export function RecentStrip({ recent, inboxCount }: { readonly recent: readonly 
           <Label />
         </View>
       )}
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.strip} contentContainerStyle={styles.stripContent}>
-        {recent.map((print) => <StripPrint key={print.card.id} print={print} onOpen={openFeed} />)}
-      </ScrollView>
+      <HeroScope scope={HOME_SCOPE.strip}>
+        <ScrollView ref={attachStrip} onScroll={onStripScroll} scrollEventThrottle={SCROLL_THROTTLE_MS} horizontal showsHorizontalScrollIndicator={false} style={styles.strip} contentContainerStyle={styles.stripContent}>
+          {recent.map((print) => <StripPrint key={print.card.id} print={print} onOpen={openFeed} />)}
+        </ScrollView>
+      </HeroScope>
     </>
   );
 }

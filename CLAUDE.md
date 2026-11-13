@@ -124,6 +124,13 @@ keeps that order and re-reads contents live; `originsOf` lets a moved item say *
 (`src/theme/ScreeningRoom.tsx`) draws with the always-dark `SCREENING_ROOM` palette. `CollectionChips`
 (`src/collections/`) is shared by the share sheet and Move. E2E waits on `testID="feed"`, `feed-counter`, `feed-move`.
 
+Hero (`src/hero/`, #32): every way into the feed goes through `hero.open({ ids, card, scope })` (`appHero.ts`), and the
+feed's `usePreventRemove` sends every way out through `hero.back`. `hero.ts` runs the trip (`trip.ts` reducer:
+boarding → flying → settling → leaving, or a plain fading cross-fade) with injected ports; `HeroLayer` (above `<Stack>`)
+is the only Reanimated part. Prints register as `HeroFace`s under a `HeroScope` (a place key, `home:strip`,
+`home:rediscover`), and each wall registers an origin that reveals a print under the opaque feed (`useOrigins.ts`).
+The feed route is `transparentModal` with no native animation, so the wall stays drawn under it.
+
 Local store tests use better-sqlite3 with the real migrations (`src/db/testing/testDb.ts`); the device
 uses expo-sqlite. Both are synchronous Drizzle drivers, typed as `HangDb`.
 

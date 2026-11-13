@@ -1,4 +1,5 @@
-import { FlashList } from '@shopify/flash-list';
+import { FlashList, type FlashListRef } from '@shopify/flash-list';
+import { useRef, type ReactElement } from 'react';
 import { RefreshControl, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Card } from '@/grid/Card';
@@ -8,6 +9,8 @@ import { useGridStyles } from '@/grid/gridStyles';
 import { PlaceControls } from '@/grid/PlaceControls';
 import { usePlaceView, type PlaceViewControls } from '@/grid/usePlaceView';
 import { useFeedOpener } from '@/feed/useFeedOpener';
+import { HeroScope } from '@/hero/HeroFace';
+import { useListOrigin } from '@/hero/useOrigins';
 import { NameText, NoteText } from '@/theme/Text';
 import { useTheme } from '@/theme/theme';
 import { SPACE } from '@/theme/tokens';
@@ -35,31 +38,53 @@ function PlaceHeader({ list, controls }: { readonly list: PlaceList | null; read
   );
 }
 
-/** The Inbox or one collection as a masonry wall, newest first unless filtered or shuffled (DESIGN.md §8, #42). */
-export function PlaceScreen({ place }: { readonly place: Place }) {
+interface WallProps {
+  readonly scope: string;
+  readonly cards: readonly CardModel[];
+  readonly header: ReactElement;
+}
+
+/** The masonry itself, registered as the place a flight back to one of its cards lands (#32). */
+function Wall({ scope, cards, header }: WallProps) {
   const insets = useSafeAreaInsets();
   const styles = useGridStyles();
   const { color } = useTheme();
   const { fontScale } = useWindowDimensions();
-  const list = useLiveQuery(() => readPlace(appListSources, place), placeKey(place));
   const { refreshing, onRefresh } = useRefresh();
   const columns = columnsFor(fontScale);
-  const controls = usePlaceView(list?.cards ?? NO_CARDS);
   // The feed swipes through the wall as shown: same filter, same Shuffle order (#31).
-  const openFeed = useFeedOpener(controls.view.cards.map(({ id }) => id));
+  const shownIds = cards.map(({ id }) => id);
+  const openFeed = useFeedOpener(shownIds, scope);
+  const wall = useRef<FlashListRef<CardModel>>(null);
+  const frame = useListOrigin(scope, wall, shownIds);
 
   return (
-    <FlashList
-      key={columns}
-      masonry
-      numColumns={columns}
-      style={styles.wall}
-      contentContainerStyle={{ ...styles.content, paddingTop: insets.top + SPACE.screenTop, paddingBottom: insets.bottom + SPACE.screenBottom }}
-      data={controls.view.cards}
-      keyExtractor={(card) => card.id}
-      renderItem={({ item }) => <Card card={item} onOpen={openFeed} />}
-      ListHeaderComponent={<PlaceHeader list={list} controls={controls} />}
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[color.ink]} progressBackgroundColor={color.raised} />}
-    />
+    <View ref={frame} collapsable={false} style={styles.wall}>
+      <FlashList
+        ref={wall}
+        key={columns}
+        masonry
+        numColumns={columns}
+        style={styles.wall}
+        contentContainerStyle={{ ...styles.content, paddingTop: insets.top + SPACE.screenTop, paddingBottom: insets.bottom + SPACE.screenBottom }}
+        data={cards}
+        keyExtractor={(card) => card.id}
+        renderItem={({ item }) => <Card card={item} onOpen={openFeed} />}
+        ListHeaderComponent={header}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[color.ink]} progressBackgroundColor={color.raised} />}
+      />
+    </View>
+  );
+}
+
+/** The Inbox or one collection as a masonry wall, newest first unless filtered or shuffled (DESIGN.md §8, #42). */
+export function PlaceScreen({ place }: { readonly place: Place }) {
+  const list = useLiveQuery(() => readPlace(appListSources, place), placeKey(place));
+  const controls = usePlaceView(list?.cards ?? NO_CARDS);
+  const scope = placeKey(place);
+  return (
+    <HeroScope scope={scope}>
+      <Wall scope={scope} cards={controls.view.cards} header={<PlaceHeader list={list} controls={controls} />} />
+    </HeroScope>
   );
 }

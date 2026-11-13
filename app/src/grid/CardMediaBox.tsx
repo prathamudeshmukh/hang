@@ -2,6 +2,7 @@ import { Image } from 'expo-image';
 import { useState } from 'react';
 import { View } from 'react-native';
 import { useReducedMotion } from 'react-native-reanimated';
+import { useFaceDrawn } from '@/hero/HeroFace';
 import { Icon } from '@/theme/icons/Icon';
 import { MOTION } from '@/theme/tokens';
 import { thumbJustArrived, type ShownThumb } from './arrival';
@@ -36,6 +37,7 @@ interface CardMediaBoxProps {
 export function CardMediaBox({ id, media, playable = false }: CardMediaBoxProps) {
   const styles = useGridStyles();
   const transition = useArrivalFade({ id, uri: media.uri });
+  const onDisplay = useFaceDrawn();
   return (
     <View style={[styles.media, { aspectRatio: 1 / media.ratio }]}>
       {media.uri ? (
@@ -46,6 +48,7 @@ export function CardMediaBox({ id, media, playable = false }: CardMediaBoxProps)
           contentFit="cover"
           contentPosition={TOP_ANCHORED}
           transition={transition}
+          onDisplay={onDisplay}
           accessible={false}
         />
       ) : null}

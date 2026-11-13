@@ -3,7 +3,10 @@ import { Pressable, View } from 'react-native';
 import { CardMediaBox } from '@/grid/CardMediaBox';
 import { NameText, NoteText } from '@/theme/Text';
 import { useTheme } from '@/theme/theme';
-import { openFeed } from '@/feed/appFeed';
+import { hero } from '@/hero/appHero';
+import { HeroFace, HeroScope } from '@/hero/HeroFace';
+import { HOME_SCOPE } from '@/hero/origins';
+import { useScrollersOrigin } from '@/hero/useOrigins';
 import { stampRediscovered } from './appItemActions';
 import type { RediscoverPick } from './homeLists';
 import { useHomeStyles } from './homeStyles';
@@ -25,8 +28,9 @@ export function RediscoverSection({ pick, day }: { readonly pick: RediscoverPick
   const { color } = useTheme();
   const { card } = pick;
   useStampOnFirstShow(pick, day);
+  useScrollersOrigin(HOME_SCOPE.rediscover, [card.id], null);
   return (
-    <>
+    <HeroScope scope={HOME_SCOPE.rediscover}>
       <View style={styles.sectionLabel}>
         <NameText token="titleS">Rediscover</NameText>
         {pick.savedNote ? <NoteText>{pick.savedNote}</NoteText> : null}
@@ -37,17 +41,17 @@ export function RediscoverSection({ pick, day }: { readonly pick: RediscoverPick
         accessibilityLabel={`Rediscover: ${card.accessibilityLabel}`}
         android_ripple={{ color: color.ripple }}
         // One thing a day: the feed holds only this pick (#31).
-        onPress={() => openFeed([card.id], card.id)}
+        onPress={() => hero.open({ ids: [card.id], card, scope: HOME_SCOPE.rediscover })}
         style={styles.rediscover}
       >
-        <View style={styles.rediscoverFrame}>
+        <HeroFace id={card.id} drawnOnLayout={!card.media?.uri} style={styles.rediscoverFrame}>
           {card.media ? <CardMediaBox id={card.id} media={{ ...card.media, ratio: SQUARE }} /> : null}
-        </View>
+        </HeroFace>
         <View style={styles.rowText}>
           <NameText token="titleS" numberOfLines={TITLE_LINES}>{card.title ?? card.site}</NameText>
           <NoteText numberOfLines={1}>{card.note}</NoteText>
         </View>
       </Pressable>
-    </>
+    </HeroScope>
   );
 }

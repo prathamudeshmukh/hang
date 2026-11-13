@@ -1,8 +1,6 @@
 import { makeStyles } from '@/theme/theme';
 import { RADIUS, SPACE } from '@/theme/tokens';
 
-/** DESIGN.md §8: media fills the top ~56% of the page. */
-export const MEDIA_SHARE = 0.56;
 const PLAY_DISC = SPACE.touch * 1.5;
 const FADED = 0.5;
 const COUNTER_PADDING_X = 10;

@@ -2,6 +2,7 @@ import { NavigationBar } from 'expo-navigation-bar';
 import { StatusBar } from 'expo-status-bar';
 import { useCallback, useEffect, useRef, useState, type RefObject } from 'react';
 import { FlatList, View, type LayoutChangeEvent, type ListViewToken } from 'react-native';
+import Animated from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { openItem } from '@/home/appItemActions';
 import { useLiveQuery } from '@/home/useLiveQuery';
@@ -18,6 +19,8 @@ import type { FeedSession } from './feedSession';
 import { useFeedStyles } from './feedStyles';
 import { MoveSheet } from './MoveSheet';
 import { TopShade } from './TopShade';
+import type { CardModel } from '@/grid/cardModel';
+import { reportMediaDrawn, useFeedHero } from './useFeedHero';
 
 const NOTHING_LEFT = 'Nothing here any more.';
 const VISIBLE_TO_COUNT = { itemVisiblePercentThreshold: 60 } as const;
@@ -70,24 +73,28 @@ interface PagerProps {
   readonly session: FeedSession;
   readonly pages: readonly FeedPage[];
   readonly height: number;
+  /** The card on screen, for the flight back (#32). */
+  readonly onShown: (card: CardModel | null) => void;
 }
 
 const openPage = (page: FeedPage) => void openItem(page.card);
 /** Items deleted above the page on screen must not scroll a different item into view. */
 const KEEP_VISIBLE_PAGE = { minIndexForVisible: 0 } as const;
 
-function Pager({ session, pages, height }: PagerProps) {
+function Pager({ session, pages, height, onShown }: PagerProps) {
   const insets = useSafeAreaInsets();
   const list = useRef<FlatList<FeedPage>>(null);
   const { index, onViewableItemsChanged } = useCurrentPage(session, pages);
   const step = useStep(list, index, pages.length);
+  const shownCard = pages[index]?.card ?? null;
+  useEffect(() => onShown(shownCard), [onShown, shownCard]);
   // Only the id: the sheet reads the page live, so a re-file by sync shows the right place.
   const [movingId, setMovingId] = useState<string | null>(null);
   const [initialIndex] = useState(() => Math.max(0, pages.findIndex(({ card }) => card.id === session.start)));
   const bottomInset = insets.bottom + SPACE.rhythm;
   const startMove = useCallback((page: FeedPage) => setMovingId(page.card.id), []);
   const renderItem = useCallback(
-    ({ item }: { readonly item: FeedPage }) => <FeedPageView page={item} height={height} bottomInset={bottomInset} onOpen={openPage} onMove={startMove} onStep={step} />,
+    ({ item }: { readonly item: FeedPage }) => <FeedPageView page={item} height={height} bottomInset={bottomInset} onOpen={openPage} onMove={startMove} onStep={step} onMediaDrawn={reportMediaDrawn} />,
     [height, bottomInset, startMove, step],
   );
 
@@ -133,20 +140,28 @@ export function FeedScreen({ session, sessionKey }: { readonly session: FeedSess
   const styles = useFeedStyles();
   const pages = useFeedPages(session, sessionKey);
   const [height, setHeight] = useState(0);
-  const onLayout = (event: LayoutChangeEvent) => setHeight(event.nativeEvent.layout.height);
+  const { onShown, onSize, opacity } = useFeedHero();
+  const onLayout = (event: LayoutChangeEvent) => {
+    const { width, height: laidOut } = event.nativeEvent.layout;
+    setHeight(laidOut);
+    onSize({ width, height: laidOut });
+  };
+  useEffect(() => {
+    if (pages.length === 0) onShown(null);
+  }, [pages.length, onShown]);
 
   return (
     <ScreeningRoom>
       <StatusBar style="light" />
       <NavigationBar style="light" />
-      <View testID="feed" style={styles.screen} onLayout={onLayout}>
+      <Animated.View testID="feed" style={[styles.screen, opacity]} onLayout={onLayout}>
         {pages.length === 0 ? (
           <View style={styles.empty}>
             <NoteText token="prompt">{NOTHING_LEFT}</NoteText>
           </View>
         ) : null}
-        {pages.length > 0 && height > 0 ? <Pager session={session} pages={pages} height={height} /> : null}
-      </View>
+        {pages.length > 0 && height > 0 ? <Pager session={session} pages={pages} height={height} onShown={onShown} /> : null}
+      </Animated.View>
     </ScreeningRoom>
   );
 }

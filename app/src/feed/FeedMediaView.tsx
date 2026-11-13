@@ -8,11 +8,22 @@ import { useFeedStyles } from './feedStyles';
 
 const LINES = { title: 6, post: 10, rawUrl: 3 } as const;
 
-function Picture({ id, media, fit, playable }: { readonly id: string; readonly media: CardMedia; readonly fit: 'contain' | 'cover'; readonly playable: boolean }) {
+/** Cropped pictures keep their top, as on the grid, so a flight lands without the crop jumping (#32). */
+const TOP_ANCHORED = 'top';
+
+interface PictureProps {
+  readonly id: string;
+  readonly media: CardMedia;
+  readonly fit: 'contain' | 'cover';
+  readonly playable: boolean;
+  readonly onDrawn: () => void;
+}
+
+function Picture({ id, media, fit, playable, onDrawn }: PictureProps) {
   const styles = useFeedStyles();
   return (
     <View style={[styles.picture, fit === 'contain' && styles.letterbox]}>
-      {media.uri ? <Image source={{ uri: media.uri }} recyclingKey={id} style={styles.picture} contentFit={fit} accessible={false} /> : null}
+      {media.uri ? <Image source={{ uri: media.uri }} recyclingKey={id} style={styles.picture} contentFit={fit} contentPosition={TOP_ANCHORED} onDisplay={onDrawn} accessible={false} /> : null}
       {playable ? (
         <View style={styles.playDisc}>
           <Icon name="play" />
@@ -47,13 +58,22 @@ function Pending({ page }: { readonly page: FeedPage }) {
   );
 }
 
+interface FeedMediaViewProps {
+  readonly page: FeedPage;
+  readonly height: number;
+  /** The media is on screen: its image displayed, or laid out when there's none (#32 settling). */
+  readonly onDrawn: (id: string) => void;
+}
+
 /** The top ~56% of a feed page, by kind (#31). */
-export function FeedMediaView({ page, height }: { readonly page: FeedPage; readonly height: number }) {
+export function FeedMediaView({ page, height, onDrawn }: FeedMediaViewProps) {
   const styles = useFeedStyles();
   const { media, card } = page;
+  const drawn = () => onDrawn(card.id);
+  const hasImage = media.kind === 'picture' && media.media.uri !== null;
   return (
-    <View style={[styles.media, { height }]}>
-      {media.kind === 'picture' ? <Picture id={card.id} media={media.media} fit={media.fit} playable={media.playable} /> : null}
+    <View style={[styles.media, { height }]} onLayout={hasImage ? undefined : drawn}>
+      {media.kind === 'picture' ? <Picture id={card.id} media={media.media} fit={media.fit} playable={media.playable} onDrawn={drawn} /> : null}
       {media.kind === 'title' ? (
         <View style={[styles.picture, styles.titleMedia]}>
           <NameText token="display" numberOfLines={LINES.title}>{card.title ?? card.site}</NameText>
