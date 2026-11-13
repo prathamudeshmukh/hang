@@ -7,7 +7,7 @@ name: Sign out of the test account
 - back
 - extendedWaitUntil:
     visible:
-      id: inbox
+      id: home-greeting
     timeout: 10000
 - scrollUntilVisible:
     element:

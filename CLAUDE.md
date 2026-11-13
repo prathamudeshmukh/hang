@@ -112,6 +112,12 @@ Thumbnails (`src/thumbs/`, #27): after every sync, `thumbSync` drops files whose
 ones (signed links, 3 at a time, newest first) into `documentDirectory/thumbs/`; the local-only `thumb_files` table
 records them and is wiped with the account. Each thumbnail is fetched once and never re-checked (see #37).
 
+Home (`src/home/`, #30): `readHome(sources, now)` builds the strip prints, the Inbox count, today's Rediscover
+pick (`rediscover.ts`, pure) and the collection rows with their covers; `homeCopy.ts` holds the greeting, date and
+count words. Every item tap goes through `openItem` (`appItemActions.ts`), which records `last_opened_at` and then
+opens the link; #31 swaps the Custom Tab for the feed there. E2E waits on `testID="home-greeting"` (not `home`: Maestro also matches `android:id/home`); `inbox`
+is the "Recently saved" label, present only while something is unsorted.
+
 Local store tests use better-sqlite3 with the real migrations (`src/db/testing/testDb.ts`); the device
 uses expo-sqlite. Both are synchronous Drizzle drivers, typed as `HangDb`.
 

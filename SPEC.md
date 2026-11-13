@@ -213,7 +213,7 @@ collections (
   name          text not null,
   position      int  not null,       -- order on Home
   tint          text,                -- hex, derived from recent items' palettes (server)
-  cover_item_id uuid,                -- most recent image-bearing item (server)
+  cover_item_id uuid,                -- unused: Home derives covers on the device (#30)
   created_at, updated_at, deleted_at
 )
 
@@ -274,10 +274,15 @@ Storage bucket `media` (private): `{user_id}/thumbs/{item_id}.webp` and
 ### Derived behaviour
 
 - **Inbox** = `collection_id is null and deleted_at is null`.
-- **Recently saved** = the latest 12 items by `created_at`; Inbox items are badged.
+- **Recently saved** = the latest 12 items by `created_at`; Inbox items are badged. Its label row
+  opens the Inbox and is only there while something is unsorted.
 - **Rediscover** (one per day, deterministic for that date): `created_at < now() − 30d`, not
   opened in 30 days, `rediscovered_on` empty or more than 60 days ago; prefers unread items. If no
-  item qualifies, the section is hidden.
+  item qualifies, the section is hidden. The pick is stamped (`rediscovered_on` = today, local date)
+  the first time Home shows it, and an item stamped today stays the pick until tomorrow, even once
+  opened. Opening an item from anywhere sets `last_opened_at`.
+- **Collection cover** (Home) = the newest live item in the collection with a downloaded thumbnail,
+  derived on the device.
 - **Collection tint** = the most common muted palette color across the collection's last 10 items,
   adjusted to ≥ 3:1 contrast against the wall in both themes. Recomputed on item change.
 - **Shuffle** = a seeded random order, stable while you're looking at it (a fresh seed each time it's turned on; #42).

@@ -149,4 +149,37 @@ describe('items repository', () => {
     repo.items.save({ id: '01a1-b', sourceUrl: URL });
     assert.deepEqual(repo.items.listRecent(5).map((i) => i.id), ['01a1-b', '01a1-a']);
   });
+
+  it('records when an item was opened and queues only that field', () => {
+    repo.items.save({ id: 'i1', sourceUrl: URL });
+    repo.clock.advance(60_000);
+    repo.items.markOpened('i1');
+    assert.deepEqual(repo.outbox.list().at(-1)?.payload, { last_opened_at: '2026-11-09T10:01:00.000Z' });
+  });
+
+  it('stamps the day an item was rediscovered', () => {
+    repo.items.save({ id: 'i1', sourceUrl: URL });
+    repo.items.markRediscovered('i1', '2026-11-12');
+    assert.equal(repo.items.getById('i1')?.rediscoveredOn, '2026-11-12');
+    assert.deepEqual(repo.outbox.list().at(-1)?.payload, { rediscovered_on: '2026-11-12' });
+  });
+
+  it('refuses a malformed rediscovered day without writing anything', () => {
+    repo.items.save({ id: 'i1', sourceUrl: URL });
+    assert.throws(() => repo.items.markRediscovered('i1', '12/11/2026'), /not a day/);
+    assert.equal(repo.outbox.list().length, 1);
+  });
+
+  it('lists only live items that could be today\'s Rediscover', () => {
+    const window = { savedBefore: '2026-11-09T10:00:30.000Z', openedBefore: '2026-11-09T10:00:00.000Z', rediscoveredBefore: '2026-09-01', today: '2026-11-12' };
+    ['candidate', 'gone', 'opened', 'recentlyRediscovered', 'stampedToday'].forEach((id) => repo.items.save({ id, sourceUrl: URL }));
+    repo.items.remove('gone');
+    repo.clock.advance(60_000);
+    repo.items.markOpened('opened');
+    repo.items.markRediscovered('recentlyRediscovered', '2026-10-01');
+    repo.items.markRediscovered('stampedToday', '2026-11-12');
+    repo.items.save({ id: 'new', sourceUrl: URL });
+    assert.deepEqual(repo.items.listRediscoverCandidates(window).map((i) => i.id).sort(), ['candidate', 'stampedToday']);
+  });
+
 });

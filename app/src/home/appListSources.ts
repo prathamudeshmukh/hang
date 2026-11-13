@@ -1,7 +1,6 @@
 import { db } from '@/db/client';
 import { createCollectionsRepository } from '@/db/collectionsRepository';
 import { createItemsRepository } from '@/db/itemsRepository';
-import { createOutboxRepository } from '@/db/outboxRepository';
 import { systemClock } from '@/db/types';
 import { createThumbStore } from '@/thumbs/thumbStore';
 import type { ListSources } from './homeLists';
@@ -14,6 +13,5 @@ export const appCollections = createCollectionsRepository(repositoryDeps);
 export const appListSources: ListSources = {
   items: createItemsRepository(repositoryDeps),
   collections: appCollections,
-  outbox: createOutboxRepository(repositoryDeps),
   thumbs: createThumbStore(db),
 };

@@ -1,5 +1,5 @@
 import type { Item, ItemKind } from '../db/schema.ts';
-import { hostOf } from '../home/itemRow.ts';
+import { hostOf } from './host.ts';
 import { durationNote, joinNote, minutesNote } from './catalogueNote.ts';
 
 /** Height over width. Taller is cropped from the top, wider from both sides (#29). */

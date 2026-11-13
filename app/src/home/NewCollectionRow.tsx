@@ -6,7 +6,7 @@ import { syncTriggers } from '@/sync/syncWiring';
 import { appCollections } from './appListSources';
 import { ActionText, NoteText } from '@/theme/Text';
 import { useTheme } from '@/theme/theme';
-import { useListStyles } from './listStyles';
+import { useHomeStyles } from './homeStyles';
 
 type Draft = { readonly kind: 'idle' } | { readonly kind: 'editing'; readonly error: string | null };
 
@@ -15,7 +15,7 @@ const IDLE: Draft = { kind: 'idle' };
 /** "New collection" turns into a field in place: Enter creates, an empty name or tapping away cancels. */
 export function NewCollectionRow() {
   const [draft, setDraft] = useState<Draft>(IDLE);
-  const listStyles = useListStyles();
+  const styles = useHomeStyles();
   const { color } = useTheme();
 
   function create(name: string) {
@@ -31,15 +31,17 @@ export function NewCollectionRow() {
 
   if (draft.kind === 'idle') {
     return (
-      <Pressable testID="new-collection" accessibilityRole="button" android_ripple={{ color: color.ripple }} onPress={() => setDraft({ kind: 'editing', error: null })} style={listStyles.row}>
-        <ActionText token="action">New collection</ActionText>
+      <Pressable testID="new-collection" accessibilityRole="button" android_ripple={{ color: color.ripple }} onPress={() => setDraft({ kind: 'editing', error: null })} style={styles.collectionRow}>
+        <View style={styles.coverPlaceholder} />
+        <ActionText token="action" color="ink3">New collection</ActionText>
       </Pressable>
     );
   }
 
   return (
-    <View style={listStyles.row}>
-      <View style={listStyles.rowText}>
+    <View style={styles.collectionRow}>
+      <View style={styles.coverPlaceholder} />
+      <View style={styles.rowText}>
         <TextInput
           testID="new-collection-name"
           autoFocus
@@ -50,7 +52,7 @@ export function NewCollectionRow() {
           submitBehavior="submit"
           onSubmitEditing={(event) => create(event.nativeEvent.text)}
           onBlur={() => setDraft(IDLE)}
-          style={listStyles.input}
+          style={styles.input}
         />
         {draft.error && <NoteText color="ink2">{draft.error}</NoteText>}
       </View>

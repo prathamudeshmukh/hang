@@ -1,17 +1,9 @@
 import { useState } from 'react';
 import { Alert, Pressable, View } from 'react-native';
+import { useHomeStyles } from '@/home/homeStyles';
 import { ActionText, NoteText } from '@/theme/Text';
-import { makeStyles } from '@/theme/theme';
-import { SPACE } from '@/theme/tokens';
 import { authSession } from './appSession';
-import { lastSyncLabel } from './lastSyncLabel';
 import { useAuth } from './useAuth';
-
-const useStyles = makeStyles(() => ({
-  panel: { marginTop: 8, gap: 4 },
-  actions: { flexDirection: 'row', gap: 20, marginTop: 8 },
-  action: { minHeight: SPACE.touch, justifyContent: 'center' },
-}));
 
 function confirmDiscard(unsynced: number): Promise<boolean> {
   return new Promise((resolve) => {
@@ -27,10 +19,10 @@ function confirmDiscard(unsynced: number): Promise<boolean> {
   });
 }
 
-/** Phase 1 stand-in: who is signed in, how the last sync went, and sign-out. Pull down on a list to sync. */
-export function AccountPanel() {
-  const { status, lastSync } = useAuth();
-  const styles = useStyles();
+/** The foot of Home, below the collections: who is signed in, and sign-out. A settings screen can take it later. */
+export function AccountLine() {
+  const { status } = useAuth();
+  const styles = useHomeStyles();
   const [busy, setBusy] = useState(false);
   const user = status.kind === 'signedIn' || status.kind === 'signingOut' ? status.user : null;
 
@@ -47,14 +39,11 @@ export function AccountPanel() {
   }
 
   return (
-    <View style={styles.panel}>
-      <NoteText testID="account-email">Signed in as {user?.email ?? 'unknown'}</NoteText>
-      <NoteText testID="last-sync">{lastSyncLabel(lastSync)}</NoteText>
-      <View style={styles.actions}>
-        <Pressable accessibilityRole="button" testID="sign-out" onPress={signOut} disabled={busy} style={styles.action}>
-          <ActionText token="action">{busy ? 'Signing out…' : 'Sign out'}</ActionText>
-        </Pressable>
-      </View>
+    <View style={styles.footer}>
+      <NoteText testID="account-email">{`signed in as ${user?.email ?? 'unknown'}  ·  `}</NoteText>
+      <Pressable accessibilityRole="button" testID="sign-out" onPress={signOut} disabled={busy} style={styles.footerAction}>
+        <ActionText token="actionS" color="ink2">{busy ? 'signing out…' : 'sign out'}</ActionText>
+      </Pressable>
     </View>
   );
 }

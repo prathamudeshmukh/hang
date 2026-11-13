@@ -23,3 +23,11 @@ export function validSharedTitle(title: string | undefined): string | null {
   const trimmed = title?.trim();
   return trimmed ? trimmed.slice(0, SHARED_TITLE_MAX) : null;
 }
+
+const DAY = /^\d{4}-\d{2}-\d{2}$/;
+
+/** A Postgres `date`, as `YYYY-MM-DD`. */
+export function validDay(day: string): string {
+  if (!DAY.test(day)) throw new Error(`${day} is not a day (YYYY-MM-DD)`);
+  return day;
+}

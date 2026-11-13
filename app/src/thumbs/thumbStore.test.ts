@@ -12,10 +12,11 @@ interface Seed {
   readonly status?: ItemStatus;
   readonly thumbPath?: string | null;
   readonly deletedAt?: string | null;
+  readonly collectionId?: string | null;
 }
 
-function seed(db: HangDb, { id, createdAt, status = 'ready', thumbPath = `u/thumbs/${id}.webp`, deletedAt = null }: Seed): void {
-  db.insert(items).values({ id, sourceUrl: `https://a.test/${id}`, status, thumbPath, createdAt, deletedAt }).run();
+function seed(db: HangDb, { id, createdAt, status = 'ready', thumbPath = `u/thumbs/${id}.webp`, deletedAt = null, collectionId = null }: Seed): void {
+  db.insert(items).values({ id, sourceUrl: `https://a.test/${id}`, status, thumbPath, createdAt, deletedAt, collectionId }).run();
 }
 
 describe('thumb store', () => {
@@ -43,6 +44,21 @@ describe('thumb store', () => {
     seed(db, { id: 'a', createdAt: '2026-11-01T00:00:00Z' });
     store.record('a', 'file:///thumbs/a.webp');
     assert.deepEqual([...store.fileUris()], [['a', 'file:///thumbs/a.webp']]);
+  });
+
+  it('covers each collection with its newest live item that has a file', () => {
+    seed(db, { id: 'older', createdAt: '2026-11-01T00:00:00Z', collectionId: 'c1' });
+    seed(db, { id: 'newer', createdAt: '2026-11-05T00:00:00Z', collectionId: 'c1' });
+    seed(db, { id: 'newestNoFile', createdAt: '2026-11-09T00:00:00Z', collectionId: 'c1' });
+    seed(db, { id: 'gone', createdAt: '2026-11-10T00:00:00Z', collectionId: 'c1', deletedAt: '2026-11-11T00:00:00Z' });
+    ['older', 'newer', 'gone'].forEach((id) => store.record(id, `file:///thumbs/${id}.webp`));
+    assert.deepEqual([...store.coversByCollection()], [['c1', 'file:///thumbs/newer.webp']]);
+  });
+
+  it('gives Inbox items no cover', () => {
+    seed(db, { id: 'a', createdAt: '2026-11-01T00:00:00Z' });
+    store.record('a', 'file:///thumbs/a.webp');
+    assert.equal(store.coversByCollection().size, 0);
   });
 
   it('finds files whose item was deleted or purged, and forgets them', () => {
