@@ -1,4 +1,4 @@
-import { and, desc, eq, inArray, isNotNull, isNull, or } from 'drizzle-orm';
+import { and, asc, desc, eq, inArray, isNotNull, isNull, or } from 'drizzle-orm';
 import { items, thumbFiles, type ThumbFile } from '../db/schema.ts';
 import type { HangDb } from '../db/types.ts';
 
@@ -18,6 +18,8 @@ export interface ThumbStore {
   all(): readonly ThumbFile[];
   /** Live items' files, for the lists. */
   fileUris(): ReadonlyMap<string, string>;
+  /** Each collection's newest live item that has a file: its cover on Home (derived here, not `cover_item_id`; #30). */
+  coversByCollection(): ReadonlyMap<string, string>;
 }
 
 export function createThumbStore(db: HangDb): ThumbStore {
@@ -51,6 +53,17 @@ export function createThumbStore(db: HangDb): ThumbStore {
           .where(isNull(items.deletedAt))
           .all()
           .map(({ itemId, fileUri }) => [itemId, fileUri] as const),
+      ),
+    // Oldest first: a Map keeps the last value per key, so each collection ends on its newest file.
+    coversByCollection: () =>
+      new Map(
+        db.select({ collectionId: items.collectionId, fileUri: thumbFiles.fileUri })
+          .from(thumbFiles)
+          .innerJoin(items, eq(items.id, thumbFiles.itemId))
+          .where(and(isNull(items.deletedAt), isNotNull(items.collectionId)))
+          .orderBy(asc(items.createdAt), asc(items.id))
+          .all()
+          .flatMap(({ collectionId, fileUri }) => (collectionId ? [[collectionId, fileUri] as const] : [])),
       ),
   };
 }

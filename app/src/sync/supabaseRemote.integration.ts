@@ -70,6 +70,17 @@ describe('supabase remote against the local stack', () => {
     assert.ok(phone.items.getById(id)?.readAt);
   });
 
+  it('pushes Home\'s bookkeeping: when an item was opened and rediscovered (#30)', async () => {
+    const phone = device(await signedInClient());
+    const id = randomUUID();
+    phone.items.save({ id, sourceUrl: 'https://example.com/rediscover-me' });
+    phone.items.markOpened(id);
+    phone.items.markRediscovered(id, '2026-11-12');
+    const report = await phone.engine.sync();
+    assert.deepEqual([report.pushed, report.failed], [3, 0]);
+    assert.equal(phone.items.getById(id)?.rediscoveredOn, '2026-11-12');
+  });
+
   it('rejects, as permanent, a patch that matches no row (PostgREST answers it with success)', async () => {
     const remote = createSupabaseRemote(await signedInClient());
     const push = remote.push({ tableName: 'items', rowId: randomUUID(), op: 'patch', payload: { read_at: null } });

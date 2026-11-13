@@ -1,9 +1,10 @@
-import { and, count, desc, eq, isNull, type SQL } from 'drizzle-orm';
+import { and, count, desc, eq, isNull, lt, or, type SQL } from 'drizzle-orm';
+import type { RediscoverFields, RediscoverWindow } from '../home/rediscover.ts';
 import { enqueue } from './outboxRepository.ts';
 import { toServerShape } from './rowShape.ts';
 import { collections, items, type Item } from './schema.ts';
 import type { HangDb, RepositoryDeps } from './types.ts';
-import { validSharedTitle, validSourceUrl } from './validation.ts';
+import { validDay, validSharedTitle, validSourceUrl } from './validation.ts';
 
 export interface NewItem {
   readonly id: string;
@@ -12,8 +13,8 @@ export interface NewItem {
   readonly collectionId?: string | null;
 }
 
-/** The fields a user can change on an item; everything else is the server's enrichment. */
-type ItemUserFields = Partial<Pick<Item, 'collectionId' | 'readAt' | 'progress' | 'deletedAt'>>;
+/** The fields a user (or Home, on their behalf) can change on an item; everything else is the server's enrichment. */
+type ItemUserFields = Partial<Pick<Item, 'collectionId' | 'readAt' | 'progress' | 'lastOpenedAt' | 'rediscoveredOn' | 'deletedAt'>>;
 
 const live = isNull(items.deletedAt);
 
@@ -72,6 +73,16 @@ export function createItemsRepository({ db, clock }: RepositoryDeps) {
       patch(id, { readAt: nowIso() });
     },
 
+    /** Feeds Rediscover's "not opened in 30 days" (SPEC §5). */
+    markOpened(id: string): void {
+      patch(id, { lastOpenedAt: nowIso() });
+    },
+
+    /** `day` is the local calendar date, `YYYY-MM-DD`. */
+    markRediscovered(id: string, day: string): void {
+      patch(id, { rediscoveredOn: validDay(day) });
+    },
+
     remove(id: string): void {
       patch(id, { deletedAt: nowIso() });
     },
@@ -92,6 +103,25 @@ export function createItemsRepository({ db, clock }: RepositoryDeps) {
     countByCollection(): ReadonlyMap<string | null, number> {
       const rows = db.select({ collectionId: items.collectionId, total: count() }).from(items).where(live).groupBy(items.collectionId).all();
       return new Map(rows.map(({ collectionId, total }) => [collectionId, total]));
+    },
+
+    /**
+     * Rediscover's candidates (SPEC §5), narrowed in SQL and light: only the columns the pick reads.
+     * `pickRediscover` applies the exact rules; this keeps a large old library from loading on every change.
+     */
+    listRediscoverCandidates(window: RediscoverWindow): readonly RediscoverFields[] {
+      return db
+        .select({ id: items.id, createdAt: items.createdAt, lastOpenedAt: items.lastOpenedAt, rediscoveredOn: items.rediscoveredOn, readAt: items.readAt })
+        .from(items)
+        .where(and(
+          live,
+          lt(items.createdAt, window.savedBefore),
+          or(eq(items.rediscoveredOn, window.today), and(
+            or(isNull(items.lastOpenedAt), lt(items.lastOpenedAt, window.openedBefore)),
+            or(isNull(items.rediscoveredOn), lt(items.rediscoveredOn, window.rediscoveredBefore)),
+          )),
+        ))
+        .all();
     },
 
     listRecent(limit: number): readonly Item[] {

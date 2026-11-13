@@ -1,12 +1,12 @@
 import { memo } from 'react';
 import { Pressable, View } from 'react-native';
-import { openLink } from '@/home/openLink';
+import { openItem } from '@/home/appItemActions';
 import { useTheme } from '@/theme/theme';
 import { CARD_BODIES } from './cardBodies';
 import { sameCard, type CardModel } from './cardModel';
 import { useGridStyles } from './gridStyles';
 
-/** Opens the link until the swipe feed (#31) takes over the tap. */
+/** Taps go through the shared `openItem`, which the swipe feed (#31) takes over. */
 export const Card = memo(function Card({ card }: { readonly card: CardModel }) {
   const styles = useGridStyles();
   const { color } = useTheme();
@@ -18,7 +18,7 @@ export const Card = memo(function Card({ card }: { readonly card: CardModel }) {
         accessibilityRole="link"
         accessibilityLabel={card.accessibilityLabel}
         android_ripple={{ color: color.ripple, foreground: true }}
-        onPress={() => void openLink(card.url)}
+        onPress={() => void openItem(card)}
         style={styles.pressable}
       >
         <Body card={card} />

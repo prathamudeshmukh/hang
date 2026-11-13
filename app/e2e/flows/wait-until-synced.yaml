@@ -3,10 +3,11 @@
 # An article read of the page would add its minutes, hence the optional `N min · `.
 appId: com.prathamesh.hang
 ---
-# Home lists Recently saved above the Inbox row, so with enough test rows it's below the fold.
-- scrollUntilVisible:
-    element:
+# Home's "Recently saved" label opens the Inbox; it's there once the share has left an item unsorted.
+- extendedWaitUntil:
+    visible:
       id: inbox
+    timeout: 10000
 - tapOn:
     id: inbox
 - repeat:
