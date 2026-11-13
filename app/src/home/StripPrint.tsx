@@ -1,6 +1,7 @@
 import { memo } from 'react';
 import { Pressable, View } from 'react-native';
 import { CardMediaBox } from '@/grid/CardMediaBox';
+import { HeroFace } from '@/hero/HeroFace';
 import { sameCard, type CardModel } from '@/grid/cardModel';
 import { ActionText, NameText, NoteText } from '@/theme/Text';
 import { useTheme } from '@/theme/theme';
@@ -58,7 +59,7 @@ function Caption({ card }: { readonly card: CardModel }) {
 interface StripPrintProps {
   readonly print: RecentPrint;
   /** Opens the feed through the strip; must keep its identity, since redraws only follow the print. */
-  readonly onOpen: (id: string) => void;
+  readonly onOpen: (card: CardModel) => void;
 }
 
 export const StripPrint = memo(function StripPrint({ print, onOpen }: StripPrintProps) {
@@ -71,10 +72,12 @@ export const StripPrint = memo(function StripPrint({ print, onOpen }: StripPrint
       accessibilityRole="link"
       accessibilityLabel={inInbox ? `${card.accessibilityLabel}, ${IN_INBOX}` : card.accessibilityLabel}
       android_ripple={{ color: color.ripple, foreground: true }}
-      onPress={() => onOpen(card.id)}
+      onPress={() => onOpen(card)}
       style={styles.stripPrint}
     >
-      <Face card={card} />
+      <HeroFace id={card.id} drawnOnLayout={card.variant === 'pending' || !card.media?.uri}>
+        <Face card={card} />
+      </HeroFace>
       {inInbox ? <View style={[styles.inboxDot, styles.printDot]} /> : null}
       <Caption card={card} />
     </Pressable>

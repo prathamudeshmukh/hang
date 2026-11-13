@@ -1,0 +1,43 @@
+# #32: back from the feed lands on the item it ended on, so the wall jumps to follow it.
+# From the Inbox with the run's item at the top (newest first). Env (from run.sh): URL_PATTERN.
+# With 11+ items, the last page's card is at the bottom of the wall, below the fold or behind the nav bar,
+# so coming back from it has to scroll the wall past its title.
+appId: com.prathamesh.hang
+---
+- tapOn:
+    id: ${URL_PATTERN}
+- extendedWaitUntil:
+    visible:
+      id: feed
+    timeout: 5000
+- runFlow:
+    when:
+      visible:
+        id: feed-counter
+        text: 1 of (1[1-9]|[2-9]\d|\d{3,})
+    commands:
+      - repeat:
+          while:
+            notVisible: (\d+) of \1
+          times: 60
+          commands:
+            - swipe:
+                direction: UP
+      - back
+      - assertNotVisible:
+          id: feed
+      - assertNotVisible: Inbox
+      - scrollUntilVisible:
+          element:
+            id: ${URL_PATTERN}
+          direction: UP
+- runFlow:
+    when:
+      visible:
+        id: feed
+    commands:
+      - back
+- extendedWaitUntil:
+    visible:
+      id: ${URL_PATTERN}
+    timeout: 5000

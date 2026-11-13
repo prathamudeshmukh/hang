@@ -8,7 +8,7 @@ import { useGridStyles } from './gridStyles';
 interface CardProps {
   readonly card: CardModel;
   /** Opens the feed at this card; must keep its identity, since redraws only follow the card. */
-  readonly onOpen: (id: string) => void;
+  readonly onOpen: (card: CardModel) => void;
 }
 
 export const Card = memo(function Card({ card, onOpen }: CardProps) {
@@ -22,7 +22,7 @@ export const Card = memo(function Card({ card, onOpen }: CardProps) {
         accessibilityRole="link"
         accessibilityLabel={card.accessibilityLabel}
         android_ripple={{ color: color.ripple, foreground: true }}
-        onPress={() => onOpen(card.id)}
+        onPress={() => onOpen(card)}
         style={styles.pressable}
       >
         <Body card={card} />

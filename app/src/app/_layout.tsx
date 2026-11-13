@@ -9,11 +9,14 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { authSession } from '@/auth/appSession';
 import { useAuth } from '@/auth/useAuth';
 import { useDatabaseReady } from '@/db/useDatabaseReady';
+import { HeroLayer } from '@/hero/HeroLayer';
 import { syncTriggers } from '@/sync/syncWiring';
 import { NoteText } from '@/theme/Text';
 import { makeStyles, useTheme } from '@/theme/theme';
 
 void SplashScreen.preventAutoHideAsync();
+
+const FEED_OPTIONS = { animation: 'none', presentation: 'transparentModal', contentStyle: { backgroundColor: 'transparent' } } as const;
 
 const useStyles = makeStyles(({ color }) => ({
   root: { flex: 1, backgroundColor: color.wall },
@@ -71,14 +74,15 @@ export default function RootLayout() {
             <Stack.Screen name="index" />
             <Stack.Screen name="inbox" />
             <Stack.Screen name="collection/[id]" />
-            {/* A plain cross-fade into the always-dark room until the hero flight (#32). */}
-            <Stack.Screen name="feed" options={{ animation: 'fade', contentStyle: { backgroundColor: theme.color.screen } }} />
+            {/* The hero layer animates the way in and out (#32): no native animation, and the wall stays drawn underneath. */}
+            <Stack.Screen name="feed" options={FEED_OPTIONS} />
           </Stack.Protected>
           <Stack.Protected guard={!signedIn}>
             <Stack.Screen name="sign-in" />
           </Stack.Protected>
         </Stack>
       )}
+      <HeroLayer />
     </GestureHandlerRootView>
   );
 }

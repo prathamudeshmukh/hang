@@ -113,7 +113,7 @@ describe('readPlace', () => {
     s.markReady('with', { thumbW: 100, thumbH: 100 });
     s.thumbs.record('with', 'file:///thumbs/with.webp');
     const cards = readPlace(s.sources, { kind: 'inbox' })?.cards ?? [];
-    assert.deepEqual(cards[0].media, { ratio: 1, uri: 'file:///thumbs/with.webp' });
+    assert.deepEqual(cards[0].media, { ratio: 1, naturalRatio: 1, uri: 'file:///thumbs/with.webp' });
   });
 
   it('lists one collection, newest first', () => {

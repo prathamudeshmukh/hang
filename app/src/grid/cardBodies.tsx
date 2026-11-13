@@ -1,4 +1,5 @@
 import { View } from 'react-native';
+import { HeroFace } from '@/hero/HeroFace';
 import { Icon } from '@/theme/icons/Icon';
 import { ActionText, NameText, NoteText } from '@/theme/Text';
 import type { CardModel, CardVariant } from './cardModel';
@@ -24,10 +25,10 @@ function TitleCard({ card }: { readonly card: CardModel }) {
   const styles = useGridStyles();
   return (
     <>
-      <View style={styles.textCard}>
+      <HeroFace id={card.id} drawnOnLayout style={styles.textCard}>
         <NameText token="titleS" numberOfLines={LINES.textCardTitle}>{card.title ?? card.site}</NameText>
         {card.variant === 'video' ? <Icon name="play" /> : null}
-      </View>
+      </HeroFace>
       <Caption card={card} withTitle={false} />
     </>
   );
@@ -38,9 +39,9 @@ function SiteCard({ card }: { readonly card: CardModel }) {
   const styles = useGridStyles();
   return (
     <>
-      <View style={styles.textCard}>
+      <HeroFace id={card.id} drawnOnLayout style={styles.textCard}>
         <NameText token="title" numberOfLines={LINES.site}>{card.site}</NameText>
-      </View>
+      </HeroFace>
       <Caption card={card} />
     </>
   );
@@ -51,7 +52,9 @@ function withMedia(Fallback: Body, options: { readonly playable?: boolean } = {}
     if (!card.media) return <Fallback card={card} />;
     return (
       <>
-        <CardMediaBox id={card.id} media={card.media} playable={options.playable} />
+        <HeroFace id={card.id} drawnOnLayout={card.media.uri === null}>
+          <CardMediaBox id={card.id} media={card.media} playable={options.playable} />
+        </HeroFace>
         <Caption card={card} />
       </>
     );
@@ -62,10 +65,12 @@ function PostCard({ card }: { readonly card: CardModel }) {
   const styles = useGridStyles();
   return (
     <>
-      <View style={styles.post}>
-        <NameText token="post" numberOfLines={LINES.post}>{card.postText ?? card.title ?? card.site}</NameText>
-      </View>
-      {card.media ? <View style={styles.postMedia}><CardMediaBox id={card.id} media={card.media} /></View> : null}
+      <HeroFace id={card.id} drawnOnLayout>
+        <View style={styles.post}>
+          <NameText token="post" numberOfLines={LINES.post}>{card.postText ?? card.title ?? card.site}</NameText>
+        </View>
+        {card.media ? <View style={styles.postMedia}><CardMediaBox id={card.id} media={card.media} /></View> : null}
+      </HeroFace>
       <Caption card={card} withTitle={false} />
     </>
   );
@@ -75,9 +80,9 @@ function PendingCard({ card }: { readonly card: CardModel }) {
   const styles = useGridStyles();
   return (
     <>
-      <View style={styles.pending}>
+      <HeroFace id={card.id} drawnOnLayout style={styles.pending}>
         <NoteText>{card.note}</NoteText>
-      </View>
+      </HeroFace>
       <View style={[styles.caption, styles.faded]}>
         <NoteText numberOfLines={LINES.rawUrl}>{card.url}</NoteText>
       </View>

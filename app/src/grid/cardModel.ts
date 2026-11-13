@@ -13,7 +13,10 @@ const FALLBACK_KIND: ItemKind = 'link';
 export type CardVariant = ItemKind | 'pending' | 'failed';
 
 export interface CardMedia {
+  /** Height over width of the box, clamped to MIN_RATIO..MAX_RATIO. */
   readonly ratio: number;
+  /** The thumbnail's own height over width, for drawing it whole (the feed's image fit, #32). */
+  readonly naturalRatio: number;
   /** The downloaded thumbnail; null while the box waits for it. */
   readonly uri: string | null;
 }
@@ -70,7 +73,8 @@ function noteFor(item: Item, variant: CardVariant, site: string): string {
 
 function mediaOf(item: Item, thumbUri: string | null): CardMedia | null {
   const ratio = clampRatio({ width: item.thumbW, height: item.thumbH });
-  return ratio === null ? null : { ratio, uri: thumbUri };
+  if (ratio === null || !item.thumbW || !item.thumbH) return null;
+  return { ratio, naturalRatio: item.thumbH / item.thumbW, uri: thumbUri };
 }
 
 /** Kind, title, note (DESIGN.md §10), skipping what isn't known yet or is already said. */
@@ -91,6 +95,7 @@ export function sameCard(a: CardModel, b: CardModel): boolean {
     a.note === b.note &&
     a.postText === b.postText &&
     a.media?.ratio === b.media?.ratio &&
+    a.media?.naturalRatio === b.media?.naturalRatio &&
     a.media?.uri === b.media?.uri &&
     a.accessibilityLabel === b.accessibilityLabel
   );

@@ -42,12 +42,17 @@ describe('toCardModel: status', () => {
 describe('toCardModel: media', () => {
   it('holds the box at the clamped ratio before the file is on the device', () => {
     const card = toCardModel(ready({ kind: 'article', thumbW: 1000, thumbH: 500 }), null);
-    assert.deepEqual(card.media, { ratio: 0.5, uri: null });
+    assert.deepEqual(card.media, { ratio: 0.5, naturalRatio: 0.5, uri: null });
   });
 
   it('carries the downloaded file', () => {
     const card = toCardModel(ready({ kind: 'image', thumbW: 800, thumbH: 1000 }), THUMB);
-    assert.deepEqual(card.media, { ratio: 1.25, uri: THUMB });
+    assert.deepEqual(card.media, { ratio: 1.25, naturalRatio: 1.25, uri: THUMB });
+  });
+
+  it('keeps the unclamped ratio, so a whole image can be fitted in the feed (#32)', () => {
+    const card = toCardModel(ready({ kind: 'image', thumbW: 400, thumbH: 1200 }), THUMB);
+    assert.deepEqual(card.media, { ratio: 1.6, naturalRatio: 3, uri: THUMB });
   });
 
   it('has no media without a thumbnail size, so it becomes a text card', () => {

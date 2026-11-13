@@ -36,7 +36,7 @@ export interface FeedPageExtras {
   readonly placeId: string | null;
 }
 
-function mediaOf(card: CardModel): FeedMedia {
+export function feedMediaOf(card: CardModel): FeedMedia {
   if (card.variant === 'pending') return { kind: 'pending' };
   if (card.variant === 'post') return { kind: 'post' };
   if (!card.media) return { kind: 'title' };
@@ -48,7 +48,7 @@ function titleShownBelow(media: FeedMedia, card: CardModel): boolean {
 }
 
 export function toFeedPage(card: CardModel, { summary, movedTo, placeId }: FeedPageExtras): FeedPage {
-  const media = mediaOf(card);
+  const media = feedMediaOf(card);
   return {
     card,
     media,

@@ -18,8 +18,8 @@ const items = createItemsRepository({ db, clock: systemClock });
 
 export const feedSources: FeedSources = { items, collections: appCollections, thumbs: createThumbStore(db) };
 
-/** Every way into the feed (grid, Home strip, Rediscover): the list as the opener shows it, starting at `start`. */
-export function openFeed(ids: readonly string[], start: string): void {
+/** Pushes the feed route on the list as the opener shows it, starting at `start`. Openers go through the hero (#32). */
+export function pushFeedRoute(ids: readonly string[], start: string): void {
   const session = feedSessions.begin({ ids, start });
   router.push({ pathname: '/feed', params: { session, start } });
 }

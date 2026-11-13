@@ -1,6 +1,7 @@
 import { RefreshControl, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AccountLine } from '@/auth/AccountLine';
+import { PageScroller, useScroller } from '@/hero/useOrigins';
 import { appListSources } from '@/home/appListSources';
 import { CollectionList } from '@/home/CollectionList';
 import { dayKey, dayLine, greetingFor } from '@/home/homeCopy';
@@ -16,6 +17,9 @@ import { NameText, NoteText } from '@/theme/Text';
 import { useTheme } from '@/theme/theme';
 import { SPACE } from '@/theme/tokens';
 
+/** Offsets only matter when a flight comes back, so a few reports a frame is plenty. */
+const SCROLL_THROTTLE_MS = 32;
+
 /** Home (SPEC #16, DESIGN.md sheet): greeting → Recently saved (holds the Inbox) → Rediscover → collections. */
 export default function Home() {
   const insets = useSafeAreaInsets();
@@ -25,9 +29,14 @@ export default function Home() {
   const day = dayKey(today);
   const home = useLiveQuery(() => readHome(appListSources, today), `home:${day}`);
   const { refreshing, onRefresh } = useRefresh();
+  const { attach: attachPage, onScroll: onPageScroll, step: pageStep } = useScroller('y');
 
   return (
+    <PageScroller.Provider value={pageStep}>
     <ScrollView
+      ref={attachPage}
+      onScroll={onPageScroll}
+      scrollEventThrottle={SCROLL_THROTTLE_MS}
       style={styles.wall}
       contentContainerStyle={[styles.content, { paddingTop: insets.top + SPACE.screenTop, paddingBottom: insets.bottom + SPACE.screenBottom }]}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[color.ink]} progressBackgroundColor={color.raised} />}
@@ -42,5 +51,6 @@ export default function Home() {
       <CollectionList collections={home.collections} />
       <AccountLine />
     </ScrollView>
+    </PageScroller.Provider>
   );
 }

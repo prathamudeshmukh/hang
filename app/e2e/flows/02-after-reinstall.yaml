@@ -7,3 +7,4 @@ name: Still there after reinstall
 - runFlow: sign-in.google.yaml
 - runFlow: wait-until-synced.yaml
 - runFlow: open-feed.yaml
+- runFlow: back-to-shown.yaml
