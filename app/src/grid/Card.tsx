@@ -1,13 +1,17 @@
 import { memo } from 'react';
 import { Pressable, View } from 'react-native';
-import { openItem } from '@/home/appItemActions';
 import { useTheme } from '@/theme/theme';
 import { CARD_BODIES } from './cardBodies';
 import { sameCard, type CardModel } from './cardModel';
 import { useGridStyles } from './gridStyles';
 
-/** Taps go through the shared `openItem`, which the swipe feed (#31) takes over. */
-export const Card = memo(function Card({ card }: { readonly card: CardModel }) {
+interface CardProps {
+  readonly card: CardModel;
+  /** Opens the feed at this card; must keep its identity, since redraws only follow the card. */
+  readonly onOpen: (id: string) => void;
+}
+
+export const Card = memo(function Card({ card, onOpen }: CardProps) {
   const styles = useGridStyles();
   const { color } = useTheme();
   const Body = CARD_BODIES[card.variant];
@@ -18,7 +22,7 @@ export const Card = memo(function Card({ card }: { readonly card: CardModel }) {
         accessibilityRole="link"
         accessibilityLabel={card.accessibilityLabel}
         android_ripple={{ color: color.ripple, foreground: true }}
-        onPress={() => void openItem(card)}
+        onPress={() => onOpen(card.id)}
         style={styles.pressable}
       >
         <Body card={card} />

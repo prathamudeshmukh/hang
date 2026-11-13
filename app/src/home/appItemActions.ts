@@ -7,7 +7,7 @@ import { openLink } from './openLink';
 const items = createItemsRepository({ db, clock: systemClock });
 const warn = (message: string) => console.warn(message);
 
-/** The one tap handler for an item: grid cards, the Home strip and Rediscover (#30). */
+/** The feed's Read/Watch/Open (#31); grid, strip and Rediscover taps open the feed instead. */
 export const openItem = createOpenItem({ markOpened: items.markOpened, openUrl: openLink, warn });
 
 /** Today's Rediscover pick, stamped on first show so it holds for the day (SPEC §5). */

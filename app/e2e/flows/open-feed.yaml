@@ -1,0 +1,42 @@
+# From the Inbox (after wait-until-synced): the card opens the swipe feed at that item (#31).
+# Env (from run.sh): URL_PATTERN.
+appId: com.prathamesh.hang
+---
+- tapOn:
+    id: ${URL_PATTERN}
+- extendedWaitUntil:
+    visible:
+      id: feed
+    timeout: 5000
+- assertVisible:
+    id: feed-note
+    text: (\d+ min · )?example\.com
+# The test account's Inbox holds every past run's item, so there is usually a next one; one item hides the counter.
+- runFlow:
+    when:
+      visible:
+        id: feed-counter
+    commands:
+      - assertVisible: 1 of \d+
+      - swipe:
+          direction: UP
+      - assertVisible: 2 of \d+
+      - swipe:
+          direction: DOWN
+      - assertVisible: 1 of \d+
+- tapOn:
+    id: feed-move
+- assertVisible: Where does it hang\?
+# The Inbox is where it already hangs, so this closes the sheet without moving it.
+- tapOn:
+    id: chip:Inbox
+- assertNotVisible:
+    id: move-sheet
+- assertVisible:
+    id: feed-note
+    text: (\d+ min · )?example\.com
+- back
+- extendedWaitUntil:
+    visible:
+      id: ${URL_PATTERN}
+    timeout: 5000

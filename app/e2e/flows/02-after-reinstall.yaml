@@ -6,3 +6,4 @@ name: Still there after reinstall
 - launchApp
 - runFlow: sign-in.google.yaml
 - runFlow: wait-until-synced.yaml
+- runFlow: open-feed.yaml

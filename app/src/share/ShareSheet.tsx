@@ -8,9 +8,10 @@ import { parseShare, type ShareIntentProps } from './parseShare';
 import type { CollectionChoice, ShareOpening } from './shareCapture';
 import { createAppShareCapture } from './shareSession';
 import { sheetHint, sheetNote } from './sheetNote';
+import { CollectionChips } from '@/collections/CollectionChips';
 import { Pill } from '@/theme/Pill';
-import { ActionText, NameText, NoteText } from '@/theme/Text';
-import { makeStyles, useTheme } from '@/theme/theme';
+import { NameText, NoteText } from '@/theme/Text';
+import { makeStyles } from '@/theme/theme';
 import { RADIUS, SPACE } from '@/theme/tokens';
 import { SHEET } from './tokens';
 import { useSheetMotion } from './useSheetMotion';
@@ -26,36 +27,6 @@ function hostOf(url: string | undefined): string {
   } catch {
     return 'link';
   }
-}
-
-interface ChipsProps {
-  readonly choices: readonly CollectionChoice[];
-  readonly selected: string | null;
-  readonly onSelect: (collectionId: string) => void;
-}
-
-function CollectionChips({ choices, selected, onSelect }: ChipsProps) {
-  const styles = useStyles();
-  const { color } = useTheme();
-  return (
-    <>
-      <NoteText token="prompt" color="ink" style={styles.prompt}>Where does it hang?</NoteText>
-      <View style={styles.chips}>
-        {choices.map(({ id, name }) => (
-          <Pressable
-            key={id}
-            accessibilityRole="button"
-            accessibilityState={{ selected: id === selected }}
-            android_ripple={{ color: color.ripple }}
-            onPress={() => onSelect(id)}
-            style={[styles.chip, id === selected && styles.chipOn]}
-          >
-            <ActionText token="actionS" style={id === selected ? { color: color.wall } : null}>{name}</ActionText>
-          </Pressable>
-        ))}
-      </View>
-    </>
-  );
 }
 
 function choicesOf(opening: ShareOpening | null): readonly CollectionChoice[] {
@@ -107,7 +78,7 @@ function Sheet({ openedAt, ...intent }: ShareSheetProps) {
               <NoteText>{sheetNote(opening, host)}</NoteText>
             </View>
           </View>
-          {choices.length > 0 && <CollectionChips choices={choices} selected={selected} onSelect={setSelected} />}
+          {choices.length > 0 && <CollectionChips choices={choices} selected={selected ?? undefined} onSelect={setSelected} />}
           <View style={styles.footer}>
             <NoteText style={styles.hint}>{sheetHint(opening)}</NoteText>
             {choices.length > 0 && <Pill kind="accent" label="Save" disabled={selected === null} onPress={save} />}
@@ -131,7 +102,6 @@ export function ShareSheetRoot(props: ShareSheetProps) {
 
 const ROOT = { flex: 1, backgroundColor: 'transparent' } as const;
 const HANDLE = { width: 32, height: 4 } as const;
-const CHIP_PADDING_X = 14;
 
 const useStyles = makeStyles(({ color }) => ({
   scrim: { backgroundColor: color.scrim },
@@ -141,10 +111,6 @@ const useStyles = makeStyles(({ color }) => ({
   print: { width: SHEET.printSize, height: SHEET.printSize, borderRadius: RADIUS.print },
   printEmpty: { borderWidth: 1, borderStyle: 'dashed', borderColor: color.ink3 },
   previewText: { flex: 1, gap: 2 },
-  prompt: { marginTop: 18 },
-  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 10 },
-  chip: { minHeight: SPACE.touch, justifyContent: 'center', borderRadius: RADIUS.pill, borderWidth: 1, borderColor: color.rule, backgroundColor: color.raised, paddingHorizontal: CHIP_PADDING_X, overflow: 'hidden' },
-  chipOn: { backgroundColor: color.ink, borderColor: color.ink },
   footer: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 20, gap: 12 },
   hint: { flex: 1 },
 }));

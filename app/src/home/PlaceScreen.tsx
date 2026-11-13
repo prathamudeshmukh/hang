@@ -7,6 +7,7 @@ import { columnsFor } from '@/grid/columns';
 import { useGridStyles } from '@/grid/gridStyles';
 import { PlaceControls } from '@/grid/PlaceControls';
 import { usePlaceView, type PlaceViewControls } from '@/grid/usePlaceView';
+import { useFeedOpener } from '@/feed/useFeedOpener';
 import { NameText, NoteText } from '@/theme/Text';
 import { useTheme } from '@/theme/theme';
 import { SPACE } from '@/theme/tokens';
@@ -44,6 +45,8 @@ export function PlaceScreen({ place }: { readonly place: Place }) {
   const { refreshing, onRefresh } = useRefresh();
   const columns = columnsFor(fontScale);
   const controls = usePlaceView(list?.cards ?? NO_CARDS);
+  // The feed swipes through the wall as shown: same filter, same Shuffle order (#31).
+  const openFeed = useFeedOpener(controls.view.cards.map(({ id }) => id));
 
   return (
     <FlashList
@@ -54,7 +57,7 @@ export function PlaceScreen({ place }: { readonly place: Place }) {
       contentContainerStyle={{ ...styles.content, paddingTop: insets.top + SPACE.screenTop, paddingBottom: insets.bottom + SPACE.screenBottom }}
       data={controls.view.cards}
       keyExtractor={(card) => card.id}
-      renderItem={({ item }) => <Card card={item} />}
+      renderItem={({ item }) => <Card card={item} onOpen={openFeed} />}
       ListHeaderComponent={<PlaceHeader list={list} controls={controls} />}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[color.ink]} progressBackgroundColor={color.raised} />}
     />

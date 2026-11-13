@@ -71,6 +71,8 @@ export default function RootLayout() {
             <Stack.Screen name="index" />
             <Stack.Screen name="inbox" />
             <Stack.Screen name="collection/[id]" />
+            {/* A plain cross-fade into the always-dark room until the hero flight (#32). */}
+            <Stack.Screen name="feed" options={{ animation: 'fade', contentStyle: { backgroundColor: theme.color.screen } }} />
           </Stack.Protected>
           <Stack.Protected guard={!signedIn}>
             <Stack.Screen name="sign-in" />

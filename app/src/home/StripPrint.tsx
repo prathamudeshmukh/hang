@@ -4,7 +4,6 @@ import { CardMediaBox } from '@/grid/CardMediaBox';
 import { sameCard, type CardModel } from '@/grid/cardModel';
 import { ActionText, NameText, NoteText } from '@/theme/Text';
 import { useTheme } from '@/theme/theme';
-import { openItem } from './appItemActions';
 import type { RecentPrint } from './homeLists';
 import { HOME_SIZE, useHomeStyles } from './homeStyles';
 
@@ -56,7 +55,13 @@ function Caption({ card }: { readonly card: CardModel }) {
   return <ActionText token="card" numberOfLines={LINES.caption} style={styles.stripCaption}>{card.title ?? card.site}</ActionText>;
 }
 
-export const StripPrint = memo(function StripPrint({ print }: { readonly print: RecentPrint }) {
+interface StripPrintProps {
+  readonly print: RecentPrint;
+  /** Opens the feed through the strip; must keep its identity, since redraws only follow the print. */
+  readonly onOpen: (id: string) => void;
+}
+
+export const StripPrint = memo(function StripPrint({ print, onOpen }: StripPrintProps) {
   const styles = useHomeStyles();
   const { color } = useTheme();
   const { card, inInbox } = print;
@@ -66,7 +71,7 @@ export const StripPrint = memo(function StripPrint({ print }: { readonly print: 
       accessibilityRole="link"
       accessibilityLabel={inInbox ? `${card.accessibilityLabel}, ${IN_INBOX}` : card.accessibilityLabel}
       android_ripple={{ color: color.ripple, foreground: true }}
-      onPress={() => void openItem(card)}
+      onPress={() => onOpen(card.id)}
       style={styles.stripPrint}
     >
       <Face card={card} />

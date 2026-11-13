@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Slice 9 E2E: share from Chrome → synced → uninstall → reinstall → sign in → still there.
+# Slice 9 E2E: share from Chrome → synced → uninstall → reinstall → sign in → still there → opens in the feed.
 #
 #   e2e/run.sh emulator [--skip-build]
 #   e2e/run.sh phone --i-know [--skip-build]

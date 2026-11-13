@@ -49,6 +49,9 @@ export const PALETTES: Readonly<Record<Scheme, Palette>> = {
   },
 };
 
+/** The feed and its sheets (DESIGN.md §3 "always dark"): the dark theme on the screen colors. */
+export const SCREENING_ROOM: Palette = { ...PALETTES.dark, wall: SCREEN.screen, ink: SCREEN.screenInk };
+
 export const RADIUS = { print: 2, sheet: 24, pill: 999 } as const;
 
 /** Grid and screen rhythm (DESIGN.md §8). */

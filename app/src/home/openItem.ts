@@ -12,8 +12,9 @@ export interface OpenableItem {
 export const errorMessage = (error: unknown) => (error instanceof Error ? error.message : String(error));
 
 /**
- * The one tap handler for an item, wherever it hangs (grid, Home strip, Rediscover). Opens the link
- * until the swipe feed (#31) takes over. Recording the open is bookkeeping: it never stops the read.
+ * Read/Watch/Open in the feed (#31): records the open, then opens the link until Phase 3 brings the
+ * reader and players. Swiping past an item never counts as opening it. Recording is bookkeeping: it
+ * never stops the read.
  */
 export function createOpenItem({ markOpened, openUrl, warn }: OpenItemPorts) {
   return async function openItem({ id, url }: OpenableItem): Promise<void> {

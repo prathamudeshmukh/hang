@@ -133,6 +133,18 @@ describe('items repository', () => {
     assert.deepEqual(repo.items.listRecent(1).map((i) => i.id), ['i2']);
   });
 
+  it('reads many live items by id in one go, skipping deleted and unknown ones', () => {
+    ['i1', 'i2', 'i3'].forEach((id) => repo.items.save({ id, sourceUrl: URL }));
+    repo.items.remove('i2');
+    assert.deepEqual(repo.items.listByIds(['i3', 'i2', 'nope', 'i1']).map((i) => i.id).sort(), ['i1', 'i3']);
+  });
+
+  it('reads more ids than SQLite takes in one statement', () => {
+    const ids = Array.from({ length: 1200 }, (_, n) => `i${n}`);
+    ids.forEach((id) => repo.items.save({ id, sourceUrl: URL }));
+    assert.equal(repo.items.listByIds(ids).length, 1200);
+  });
+
   it('counts live items per collection, with the Inbox under null', () => {
     repo.collections.create({ id: 'c1', name: 'Reading' });
     ['i1', 'i2', 'i3', 'i4'].forEach((id, n) => repo.items.save({ id, sourceUrl: URL, collectionId: n < 2 ? 'c1' : null }));
