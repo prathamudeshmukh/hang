@@ -186,6 +186,12 @@ The same print travels with you:
 | Back | Exact reverse, back to the item's *current* grid position |
 | Home strip / Rediscover → feed | Same rule as grid cards |
 
+The flyer moves on its own curve, `cubic-bezier(.3,0,.1,1)` over 340ms in both directions (`MOTION.flight`): the
+calm ease-out made a long trip jump and then drift, so the print now lifts off before it travels. The ground under
+it keeps the calm curve over the same 340ms: the wall cross-fading to `screen` going out, and the feed fading off
+the wall coming back. Coming back, the feed's text leaves with the print (180ms) instead of blinking out. Chosen on
+the owner's phone, 2026-11-13 (#33).
+
 Implementation: a **hand-built hero** (Spike 0b ruled out Reanimated's native shared transitions on
 Android). The flyer only launches once its image is drawn, and is only removed once the destination
 image is drawn, so there's never a flash.

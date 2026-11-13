@@ -9,7 +9,6 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { authSession } from '@/auth/appSession';
 import { useAuth } from '@/auth/useAuth';
 import { useDatabaseReady } from '@/db/useDatabaseReady';
-import { FlightTuner } from '@/hero/dev/FlightTuner';
 import { HeroLayer } from '@/hero/HeroLayer';
 import { syncTriggers } from '@/sync/syncWiring';
 import { NoteText } from '@/theme/Text';
@@ -83,7 +82,6 @@ export default function RootLayout() {
           </Stack.Protected>
         </Stack>
       )}
-      {__DEV__ ? <FlightTuner /> : null}
       <HeroLayer />
     </GestureHandlerRootView>
   );
