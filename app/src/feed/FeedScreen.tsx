@@ -17,6 +17,7 @@ import { FeedPageView, type PageStep } from './FeedPageView';
 import type { FeedSession } from './feedSession';
 import { useFeedStyles } from './feedStyles';
 import { MoveSheet } from './MoveSheet';
+import { TopShade } from './TopShade';
 
 const NOTHING_LEFT = 'Nothing here any more.';
 const VISIBLE_TO_COUNT = { itemVisiblePercentThreshold: 60 } as const;
@@ -107,6 +108,7 @@ function Pager({ session, pages, height }: PagerProps) {
         onViewableItemsChanged={onViewableItemsChanged}
         viewabilityConfig={VISIBLE_TO_COUNT}
       />
+      <TopShade />
       <Counter text={counterText(index, pages.length)} />
       <MoveSheetHost page={pages.find(({ card }) => card.id === movingId) ?? null} onClose={() => setMovingId(null)} />
     </>
