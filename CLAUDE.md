@@ -114,9 +114,15 @@ records them and is wiped with the account. Each thumbnail is fetched once and n
 
 Home (`src/home/`, #30): `readHome(sources, now)` builds the strip prints, the Inbox count, today's Rediscover
 pick (`rediscover.ts`, pure) and the collection rows with their covers; `homeCopy.ts` holds the greeting, date and
-count words. Every item tap goes through `openItem` (`appItemActions.ts`), which records `last_opened_at` and then
-opens the link; #31 swaps the Custom Tab for the feed there. E2E waits on `testID="home-greeting"` (not `home`: Maestro also matches `android:id/home`); `inbox`
+count words. Item taps open the swipe feed (below). E2E waits on `testID="home-greeting"` (not `home`: Maestro also matches `android:id/home`); `inbox`
 is the "Recently saved" label, present only while something is unsorted.
+
+Feed (`src/feed/`, #31): grid cards, strip prints and Rediscover call `openFeed(ids, start)` (`appFeed.ts`); the ids go
+through an in-memory `feedSession` (latest only; a restored route falls back to its start item), not the URL. `readFeed`
+keeps that order and re-reads contents live; `originsOf` lets a moved item say *moved to X*. Read/Watch/Open goes through
+`openItem` (records `last_opened_at`, opens the Custom Tab) until Phase 3. Everything inside `ScreeningRoom`
+(`src/theme/ScreeningRoom.tsx`) draws with the always-dark `SCREENING_ROOM` palette. `CollectionChips`
+(`src/collections/`) is shared by the share sheet and Move. E2E waits on `testID="feed"`, `feed-counter`, `feed-move`.
 
 Local store tests use better-sqlite3 with the real migrations (`src/db/testing/testDb.ts`); the device
 uses expo-sqlite. Both are synchronous Drizzle drivers, typed as `HangDb`.

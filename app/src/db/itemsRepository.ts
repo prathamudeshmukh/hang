@@ -1,4 +1,4 @@
-import { and, count, desc, eq, isNull, lt, or, type SQL } from 'drizzle-orm';
+import { and, count, desc, eq, inArray, isNull, lt, or, type SQL } from 'drizzle-orm';
 import type { RediscoverFields, RediscoverWindow } from '../home/rediscover.ts';
 import { enqueue } from './outboxRepository.ts';
 import { toServerShape } from './rowShape.ts';
@@ -17,6 +17,12 @@ export interface NewItem {
 type ItemUserFields = Partial<Pick<Item, 'collectionId' | 'readAt' | 'progress' | 'lastOpenedAt' | 'rediscoveredOn' | 'deletedAt'>>;
 
 const live = isNull(items.deletedAt);
+/** Under SQLite's oldest bound-parameter limit (999), so any build takes it. */
+const IDS_PER_QUERY = 500;
+
+function chunksOf(ids: readonly string[]): readonly (readonly string[])[] {
+  return Array.from({ length: Math.ceil(ids.length / IDS_PER_QUERY) }, (_, n) => ids.slice(n * IDS_PER_QUERY, (n + 1) * IDS_PER_QUERY));
+}
 
 function assertCollectionExists(tx: HangDb, collectionId: string): void {
   const found = tx.select({ id: collections.id }).from(collections)
@@ -89,6 +95,11 @@ export function createItemsRepository({ db, clock }: RepositoryDeps) {
 
     getById(id: string): Item | undefined {
       return db.select().from(items).where(and(eq(items.id, id), live)).get();
+    },
+
+    /** Live items among `ids`, in no particular order; unknown and deleted ids are skipped. */
+    listByIds(ids: readonly string[]): readonly Item[] {
+      return chunksOf(ids).flatMap((chunk) => db.select().from(items).where(and(inArray(items.id, [...chunk]), live)).all());
     },
 
     listInbox(): readonly Item[] {

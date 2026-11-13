@@ -2,7 +2,7 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 import { contrastRatio } from './contrast.ts';
-import { PALETTES, type Scheme } from './tokens.ts';
+import { PALETTES, SCREENING_ROOM, type Scheme } from './tokens.ts';
 import { textStyle, tokensOf, TYPE_SCALE } from './typeScale.ts';
 
 const SCHEMES: readonly Scheme[] = ['light', 'dark'];
@@ -22,6 +22,17 @@ describe('palette (DESIGN.md §10)', () => {
   it('keeps the accent and screen ink readable', () => {
     const ratios = SCHEMES.flatMap((scheme) => [contrastRatio(PALETTES[scheme].accent, PALETTES[scheme].wall), contrastRatio(PALETTES[scheme].screenInk, PALETTES[scheme].screen)]);
     assert.equal(ratios.every((ratio) => ratio >= AA_LARGE), true);
+  });
+
+  it('keeps every ink at AA body contrast in the screening room, on its wall and raised sheets', () => {
+    const p = SCREENING_ROOM;
+    const failures = (['ink', 'ink2', 'ink3'] as const).flatMap((ink) =>
+      [p.wall, p.raised].filter((ground) => contrastRatio(p[ink], ground) < AA_BODY).map((ground) => `${ink} on ${ground}`));
+    assert.deepEqual(failures, []);
+  });
+
+  it('builds the screening room from the screen colors, so the feed is always dark', () => {
+    assert.deepEqual([SCREENING_ROOM.wall, SCREENING_ROOM.ink], [PALETTES.light.screen, PALETTES.light.screenInk]);
   });
 
   it('never uses pure black for the dark wall', () => {

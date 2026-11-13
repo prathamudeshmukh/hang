@@ -3,7 +3,8 @@ import { Pressable, View } from 'react-native';
 import { CardMediaBox } from '@/grid/CardMediaBox';
 import { NameText, NoteText } from '@/theme/Text';
 import { useTheme } from '@/theme/theme';
-import { openItem, stampRediscovered } from './appItemActions';
+import { openFeed } from '@/feed/appFeed';
+import { stampRediscovered } from './appItemActions';
 import type { RediscoverPick } from './homeLists';
 import { useHomeStyles } from './homeStyles';
 
@@ -35,7 +36,8 @@ export function RediscoverSection({ pick, day }: { readonly pick: RediscoverPick
         accessibilityRole="link"
         accessibilityLabel={`Rediscover: ${card.accessibilityLabel}`}
         android_ripple={{ color: color.ripple }}
-        onPress={() => void openItem(card)}
+        // One thing a day: the feed holds only this pick (#31).
+        onPress={() => openFeed([card.id], card.id)}
         style={styles.rediscover}
       >
         <View style={styles.rediscoverFrame}>

@@ -1,4 +1,5 @@
 import { Link } from 'expo-router';
+import { useFeedOpener } from '@/feed/useFeedOpener';
 import { Pressable, ScrollView, View } from 'react-native';
 import { NameText, NoteText } from '@/theme/Text';
 import { useTheme } from '@/theme/theme';
@@ -33,6 +34,7 @@ function InboxLabel({ inboxCount }: { readonly inboxCount: number }) {
 
 export function RecentStrip({ recent, inboxCount }: { readonly recent: readonly RecentPrint[]; readonly inboxCount: number }) {
   const styles = useHomeStyles();
+  const openFeed = useFeedOpener(recent.map(({ card }) => card.id));
   if (recent.length === 0) {
     return (
       <View style={styles.sectionLabel}>
@@ -50,7 +52,7 @@ export function RecentStrip({ recent, inboxCount }: { readonly recent: readonly 
         </View>
       )}
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.strip} contentContainerStyle={styles.stripContent}>
-        {recent.map((print) => <StripPrint key={print.card.id} print={print} />)}
+        {recent.map((print) => <StripPrint key={print.card.id} print={print} onOpen={openFeed} />)}
       </ScrollView>
     </>
   );
