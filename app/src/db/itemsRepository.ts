@@ -135,6 +135,11 @@ export function createItemsRepository({ db, clock }: RepositoryDeps) {
         .all();
     },
 
+    /** Every live item's addresses, for spotting a link that's already saved (#19). Light: four columns. */
+    listLinks(): readonly Pick<Item, 'id' | 'sourceUrl' | 'canonicalUrl' | 'createdAt'>[] {
+      return db.select({ id: items.id, sourceUrl: items.sourceUrl, canonicalUrl: items.canonicalUrl, createdAt: items.createdAt }).from(items).where(live).all();
+    },
+
     listRecent(limit: number): readonly Item[] {
       return newestFirst(undefined).limit(limit).all();
     },

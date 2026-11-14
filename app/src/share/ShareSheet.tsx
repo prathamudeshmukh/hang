@@ -6,8 +6,9 @@ import Animated from 'react-native-reanimated';
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { parseShare, type ShareIntentProps } from './parseShare';
 import type { CollectionChoice, ShareOpening } from './shareCapture';
+import { ExistingNoteText } from './ExistingNoteText';
 import { createAppShareCapture } from './shareSession';
-import { sheetHint, sheetNote } from './sheetNote';
+import { canSave, sheetHint, sheetNote } from './sheetNote';
 import { CollectionChips } from '@/collections/CollectionChips';
 import { Pill } from '@/theme/Pill';
 import { NameText, NoteText } from '@/theme/Text';
@@ -30,7 +31,13 @@ function hostOf(url: string | undefined): string {
 }
 
 function choicesOf(opening: ShareOpening | null): readonly CollectionChoice[] {
-  return opening?.kind === 'saved' ? opening.collections : [];
+  return opening?.kind === 'saved' || opening?.kind === 'existing' ? opening.collections : [];
+}
+
+/** The item the sheet files: the one it just saved, or the one the link already was (#19). */
+function itemIdOf(opening: ShareOpening | null): string | null {
+  if (opening?.kind === 'saved') return opening.itemId;
+  return opening?.kind === 'existing' ? opening.item.id : null;
 }
 
 function Sheet({ openedAt, ...intent }: ShareSheetProps) {
@@ -42,7 +49,11 @@ function Sheet({ openedAt, ...intent }: ShareSheetProps) {
   const [selected, setSelected] = useState<string | null>(null);
 
   useEffect(() => {
-    void capture.open(share).then(setOpening);
+    void capture.open(share).then((opened) => {
+      setOpening(opened);
+      // A re-shared link starts on the place it already hangs.
+      if (opened.kind === 'existing') setSelected(opened.item.place?.id ?? null);
+    });
   }, [capture, share]);
 
   const leaveInInbox = useCallback(() => void capture.close(), [capture]);
@@ -50,13 +61,19 @@ function Sheet({ openedAt, ...intent }: ShareSheetProps) {
 
   /** Files before the slide-out starts, so the choice is on disk even if the process dies mid-animation. */
   const save = () => {
-    if (opening?.kind !== 'saved' || selected === null || isClosing()) return;
-    capture.file(opening.itemId, selected);
+    const itemId = itemIdOf(opening);
+    if (itemId === null || selected === null || !canSave(opening, selected) || isClosing()) return;
+    capture.file(itemId, selected);
     close(leaveInInbox);
   };
 
   const choices = choicesOf(opening);
   const host = hostOf(share.url);
+  const existing = opening?.kind === 'existing' ? opening : null;
+  const printUri = existing ? existing.item.thumbUri : share.imageUri;
+  const title = existing?.item.title ?? share.sharedTitle ?? (share.kind === 'unsupported' ? 'No link in this share' : host);
+  // A new share shows Save from the start (disabled until a pick); a re-shared one only once the pick would move it.
+  const showsSave = existing ? canSave(opening, selected) : choices.length > 0;
 
   return (
     <View style={StyleSheet.absoluteFill}>
@@ -72,16 +89,16 @@ function Sheet({ openedAt, ...intent }: ShareSheetProps) {
         >
           <View style={styles.handle} />
           <View style={styles.preview}>
-            {share.imageUri ? <Image source={share.imageUri} style={styles.print} contentFit="cover" /> : <View style={[styles.print, styles.printEmpty]} />}
+            {printUri ? <Image source={printUri} style={styles.print} contentFit="cover" /> : <View style={[styles.print, styles.printEmpty]} />}
             <View style={styles.previewText}>
-              <NameText token="titleS" numberOfLines={2}>{share.sharedTitle ?? (share.kind === 'unsupported' ? 'No link in this share' : host)}</NameText>
-              <NoteText>{sheetNote(opening, host)}</NoteText>
+              <NameText token="titleS" numberOfLines={2}>{title}</NameText>
+              {existing ? <ExistingNoteText opening={existing} /> : <NoteText>{sheetNote(opening, host)}</NoteText>}
             </View>
           </View>
           {choices.length > 0 && <CollectionChips choices={choices} selected={selected ?? undefined} onSelect={setSelected} />}
           <View style={styles.footer}>
-            <NoteText style={styles.hint}>{sheetHint(opening)}</NoteText>
-            {choices.length > 0 && <Pill kind="accent" label="Save" disabled={selected === null} onPress={save} />}
+            <NoteText style={styles.hint}>{sheetHint(opening, selected)}</NoteText>
+            {showsSave && <Pill kind="accent" label="Save" disabled={!canSave(opening, selected)} onPress={save} />}
           </View>
         </Animated.View>
       </GestureDetector>

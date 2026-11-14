@@ -129,6 +129,12 @@ back to a generic link card (Open Graph image, title, site), never to a broken s
 ### Save flow
 
 1. A share intent arrives (via our `ShareActivity`, see Spike 0c). The sheet opens immediately.
+   **A link Hang already has** (decided 2026-11-14, #19) makes no new item: the sheet opens on the live item whose
+   `source_url` or `canonical_url` has the same link key (`_shared/links/linkKey.ts`: no scheme, lowercase host
+   without `www.`/`m.`/`mobile.`, tracking parameters stripped, the rest sorted, no fragment or trailing `/`, path
+   case kept; every YouTube form → its video id). The oldest copy wins. Steps 2–3 are skipped; Save moves it. A copy
+   on another device that hasn't synced, or a short link shared before its full form, isn't caught (#52 defers it;
+   `supabase/functions/scripts/dedupe/run.ts` merges such copies by hand).
 2. The client creates the item **locally** with a client-generated UUIDv7, `status = pending`,
    `collection_id = null` (Inbox), and adds it to the outbox. If the intent carries a title
    (`EXTRA_SUBJECT`, or the text before the URL in `EXTRA_TEXT`, which Chrome and most apps send),
