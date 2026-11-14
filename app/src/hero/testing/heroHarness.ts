@@ -1,6 +1,6 @@
 import type { Item } from '../../db/schema.ts';
 import { toCardModel, type CardModel } from '../../grid/cardModel.ts';
-import { anItem } from '../../grid/testing/anItem.ts';
+import { anItem, CARD_NOW } from '../../grid/testing/anItem.ts';
 import type { Rect, Size } from '../geometry.ts';
 import { createHero, type HeroPorts, type Stage } from '../hero.ts';
 import { createOrigins } from '../origins.ts';
@@ -14,7 +14,7 @@ export const SCOPE = 'inbox';
 export const flush = () => new Promise<void>((resolve) => setImmediate(resolve));
 
 export function aCard(overrides: Partial<Item> = {}): CardModel {
-  return toCardModel(anItem({ id: 'a', status: 'ready', kind: 'video', thumbW: 1600, thumbH: 900, ...overrides }), 'file:///a.jpg');
+  return toCardModel(anItem({ id: 'a', status: 'ready', kind: 'video', thumbW: 1600, thumbH: 900, ...overrides }), 'file:///a.jpg', CARD_NOW);
 }
 
 interface HarnessOptions {

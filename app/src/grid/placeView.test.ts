@@ -4,10 +4,10 @@ import { describe, it } from 'node:test';
 import { toCardModel, type CardModel } from './cardModel.ts';
 import { settledChoice, toggledShuffle, viewOf } from './placeView.ts';
 import { shuffleOrder } from './shuffleOrder.ts';
-import { anItem } from './testing/anItem.ts';
+import { anItem, CARD_NOW } from './testing/anItem.ts';
 import type { ItemKind } from '../db/schema.ts';
 
-const ready = (id: string, kind: ItemKind): CardModel => toCardModel(anItem({ id, status: 'ready', kind }), null);
+const ready = (id: string, kind: ItemKind): CardModel => toCardModel(anItem({ id, status: 'ready', kind }), null, CARD_NOW);
 const ids = (cards: readonly CardModel[]) => cards.map(({ id }) => id);
 const wall = [ready('a', 'video'), ready('b', 'article'), ready('c', 'video'), ready('d', 'article'), ready('e', 'video')];
 const UNSHUFFLED = { filter: 'all', seed: null } as const;

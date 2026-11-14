@@ -3,6 +3,7 @@ import { Pressable, View } from 'react-native';
 import { CardMediaBox } from '@/grid/CardMediaBox';
 import { HeroFace } from '@/hero/HeroFace';
 import { sameCard, type CardModel } from '@/grid/cardModel';
+import { TextArrival } from '@/rewards/TextArrival';
 import { ActionText, NameText, NoteText } from '@/theme/Text';
 import { useTheme } from '@/theme/theme';
 import type { RecentPrint } from './homeLists';
@@ -75,11 +76,13 @@ export const StripPrint = memo(function StripPrint({ print, onOpen }: StripPrint
       onPress={() => onOpen(card)}
       style={styles.stripPrint}
     >
-      <HeroFace id={card.id} drawnOnLayout={card.variant === 'pending' || !card.media?.uri}>
-        <Face card={card} />
-      </HeroFace>
-      {inInbox ? <View style={[styles.inboxDot, styles.printDot]} /> : null}
-      <Caption card={card} />
+      <TextArrival card={card}>
+        <HeroFace id={card.id} drawnOnLayout={card.variant === 'pending' || !card.media?.uri}>
+          <Face card={card} />
+        </HeroFace>
+        {inInbox ? <View style={[styles.inboxDot, styles.printDot]} /> : null}
+        <Caption card={card} />
+      </TextArrival>
     </Pressable>
   );
 }, (previous, next) => previous.print.inInbox === next.print.inInbox && sameCard(previous.print.card, next.print.card));

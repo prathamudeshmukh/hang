@@ -9,6 +9,10 @@ export const MAX_RATIO = 1.6;
 const FETCHING = 'fetching…';
 const COULD_NOT_READ = 'couldn’t read this';
 const FALLBACK_KIND: ItemKind = 'link';
+/** The dashed box's shape while the size of the image isn't known (DESIGN.md §8 pending). */
+const WAITING_RATIO = 5 / 4;
+/** After this long without the server finishing the image, it's probably not coming: draw a text card. */
+const IMAGE_WAIT_MS = 2 * 60 * 1000;
 
 export type CardVariant = ItemKind | 'pending' | 'failed';
 
@@ -71,10 +75,15 @@ function noteFor(item: Item, variant: CardVariant, site: string): string {
   return notes[variant]();
 }
 
-function mediaOf(item: Item, thumbUri: string | null): CardMedia | null {
+function awaitsImage(item: Item, now: Date): boolean {
+  if (item.imageUrl === null || item.updatedAt === null) return false;
+  return now.getTime() - Date.parse(item.updatedAt) < IMAGE_WAIT_MS;
+}
+
+function mediaOf(item: Item, thumbUri: string | null, now: Date): CardMedia | null {
   const ratio = clampRatio({ width: item.thumbW, height: item.thumbH });
-  if (ratio === null || !item.thumbW || !item.thumbH) return null;
-  return { ratio, naturalRatio: item.thumbH / item.thumbW, uri: thumbUri };
+  if (ratio !== null && item.thumbW && item.thumbH) return { ratio, naturalRatio: item.thumbH / item.thumbW, uri: thumbUri };
+  return awaitsImage(item, now) ? { ratio: WAITING_RATIO, naturalRatio: WAITING_RATIO, uri: null } : null;
 }
 
 /** Kind, title, note (DESIGN.md §10), skipping what isn't known yet or is already said. */
@@ -101,7 +110,8 @@ export function sameCard(a: CardModel, b: CardModel): boolean {
   );
 }
 
-export function toCardModel(item: Item, thumbUri: string | null): CardModel {
+/** `now` decides whether a card still waits for its image (#34). */
+export function toCardModel(item: Item, thumbUri: string | null, now: Date): CardModel {
   const variant = variantOf(item);
   const site = item.siteName ?? hostOf(item.sourceUrl);
   const title = item.title ?? item.sharedTitle ?? null;
@@ -113,7 +123,7 @@ export function toCardModel(item: Item, thumbUri: string | null): CardModel {
     title,
     site,
     note,
-    media: variant === 'pending' ? null : mediaOf(item, thumbUri),
+    media: variant === 'pending' ? null : mediaOf(item, thumbUri, now),
     postText: textField(item.post, 'text'),
     accessibilityLabel: describe(item, { variant, title, site, note }),
   };

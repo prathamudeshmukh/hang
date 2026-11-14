@@ -85,16 +85,14 @@ Light or dark follows the system setting. Never pure black on the wall.
 
 Nothing else. If something new "needs" an accent, use `ink` instead.
 
-### Tint: borrowed from content
+### Collections stay ink
 
-Each collection has a `tint` computed server-side from its items' palettes (SPEC §5), adjusted
-to ≥ 3:1 against the wall in both themes. It's used **only inside that collection**:
-- Underline on the collection title (draws in on entry)
-- Selected filter chip
-- Reader progress bar for items from that collection
-- Shuffle button outline
-
-Tint never appears on Home, which belongs to vermilion and ink.
+Collections have no colour of their own (decided 2026-11-14, #34). A tint derived from their items was
+dropped: it never showed on Home, where you choose between collections; keeping it ≥ 3:1 on both walls
+flattened every tint into the same dusty mid-tones; and it competed with vermilion. A collection's title,
+cover and prints already make it feel like its own room. Mocked and turned down along with it: a curated
+set, a colour you pick, the cover flying in as a header, a wall label, staggered "lights", a contact sheet,
+room numbers. A colour you choose stays a deferred idea (SPEC §3).
 
 ### Reader themes
 
@@ -200,9 +198,9 @@ image is drawn, so there's never a flash.
 
 | Moment | Motion | Frequency |
 |---|---|---|
-| **Rediscover develops** | Blur 8→0, saturation 0→1, brightness 1.3→1 over 1600ms | First view per day |
-| **Fetching fills in** | The dashed placeholder cross-fades to the image (700ms), and the title ink darkens | Once, when the thumbnail arrives (it follows the text, SPEC §4) |
-| **Entering a room** | The tint underline draws left to right under the collection title (600ms) | Each entry |
+| **Rediscover develops** | Blur 8→0, saturation 0→1, brightness 1.3→1 over 1600ms | First view per day: the sight that stamps the pick |
+| **Fetching fills in** | Two beats. Text lands: the card comes in from the fetching card's 50% ink (340ms); while an image is on its way its box stays dashed. Image lands: it cross-fades over the dashed box (700ms) | Once each, only while the card is on screen (grid and Recently saved) |
+| **Entering a room** | A 2px ink underline draws left to right under the collection title (600ms), once the push has settled. Not in the Inbox | Each entry into a collection |
 | **Finishing a read** | One vermilion stroke strikes through "unread", then *read · 8 Nov* fades in | Once, on reaching ~95% |
 
 ### Reduce motion
@@ -251,7 +249,7 @@ for the next item. The counter appears as a note in the top-right: *4 of 12*.
 ### Reader
 
 Full-bleed hero image · note · headline · byline note · body in `body-read` with a drop cap
-on the first paragraph · a 2px progress bar in the collection tint at the top. Long press
+on the first paragraph · a 2px progress bar in the reader theme's text colour at the top. Long press
 selects text (no highlights in v1). Theme and size controls sit in a bottom sheet opened by
 tapping the page once.
 
@@ -276,7 +274,7 @@ Short, warm and literal. Gallery language used lightly: *hang*, *wall*, *room*, 
 
 ## 10. Accessibility
 
-- Text contrast meets AA (4.5:1 body; 3:1 large and UI tints), verified for every token in both themes
+- Text contrast meets AA (4.5:1 body; 3:1 large text and UI), verified for every token in both themes
 - Touch targets ≥ 48dp, including chips
 - Every card has a content description built as *"{kind}, {title}, {note}"*
 - Supports system font scale up to 200%; the masonry grid drops to one column above 150%

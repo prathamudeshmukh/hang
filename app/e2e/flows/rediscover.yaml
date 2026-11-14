@@ -1,0 +1,13 @@
+# Needs a build with EXPO_PUBLIC_HANG_DEV_TOOLS=1 (run.sh builds one) and a signed-in Home with a ready item.
+# The dev link backdates the newest ready item on this device, so today's Rediscover pick exists (#34). It lasts only
+# until the next sync: stamping the pick pushes a change, and the pull brings back the item's real created_at.
+appId: com.prathamesh.hang
+---
+- openLink: hang://dev/rediscover
+- extendedWaitUntil:
+    visible:
+      id: home-greeting
+    timeout: 10000
+- extendedWaitUntil:
+    visible: Rediscover
+    timeout: 5000

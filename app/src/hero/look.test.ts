@@ -3,12 +3,12 @@ import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 import type { Item } from '../db/schema.ts';
 import { toCardModel } from '../grid/cardModel.ts';
-import { anItem } from '../grid/testing/anItem.ts';
+import { anItem, CARD_NOW } from '../grid/testing/anItem.ts';
 import { FRAME, landingOf, lookOf } from './look.ts';
 
 const THUMB = 'file:///thumb.jpg';
 const TALL = { thumbW: 400, thumbH: 1200 } as const;
-const cardOf = (overrides: Partial<Item>, thumb: string | null = THUMB) => toCardModel(anItem({ status: 'ready', ...overrides }), thumb);
+const cardOf = (overrides: Partial<Item>, thumb: string | null = THUMB) => toCardModel(anItem({ status: 'ready', ...overrides }), thumb, CARD_NOW);
 
 describe('lookOf', () => {
   it('flies an image’s thumbnail and lands it whole, at its own ratio', () => {

@@ -1,3 +1,5 @@
+import type { CardVariant } from './cardModel.ts';
+
 export interface ShownThumb {
   readonly id: string;
   readonly uri: string | null;
@@ -9,4 +11,14 @@ export interface ShownThumb {
  */
 export function thumbJustArrived(previous: ShownThumb | null, next: ShownThumb): boolean {
   return previous !== null && previous.id === next.id && previous.uri === null && next.uri !== null;
+}
+
+export interface ShownText {
+  readonly id: string;
+  readonly variant: CardVariant;
+}
+
+/** The first beat of "fetching fills in" (DESIGN.md §7, #34): the same card, on screen, stops fetching. */
+export function textJustArrived(previous: ShownText | null, next: ShownText): boolean {
+  return previous !== null && previous.id === next.id && previous.variant === 'pending' && next.variant !== 'pending';
 }

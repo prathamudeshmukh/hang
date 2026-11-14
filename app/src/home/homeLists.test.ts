@@ -8,6 +8,7 @@ import { items, type Item } from '../db/schema.ts';
 import { createTestDeps, T0 } from '../db/testing/testDb.ts';
 import { createThumbStore } from '../thumbs/thumbStore.ts';
 import { dayKey } from './homeCopy.ts';
+import { CARD_NOW } from '../grid/testing/anItem.ts';
 import { readHome, readPlace, RECENT_LIMIT } from './homeLists.ts';
 
 const URL = 'https://www.aeon.co/essays/on-boredom';
@@ -101,7 +102,7 @@ describe('readPlace', () => {
 
   it('lists the Inbox as cards ready to draw', () => {
     s.items.save({ id: 'i1', sourceUrl: URL, sharedTitle: 'On boredom' });
-    const place = readPlace(s.sources, { kind: 'inbox' });
+    const place = readPlace(s.sources, { kind: 'inbox' }, CARD_NOW);
     assert.equal(place?.title, 'Inbox');
     assert.deepEqual(place?.cards.map(({ id, variant, title, note }) => ({ id, variant, title, note })), [
       { id: 'i1', variant: 'pending', title: 'On boredom', note: 'fetching…' },
@@ -112,7 +113,7 @@ describe('readPlace', () => {
     s.items.save({ id: 'with', sourceUrl: URL });
     s.markReady('with', { thumbW: 100, thumbH: 100 });
     s.thumbs.record('with', 'file:///thumbs/with.webp');
-    const cards = readPlace(s.sources, { kind: 'inbox' })?.cards ?? [];
+    const cards = readPlace(s.sources, { kind: 'inbox' }, CARD_NOW)?.cards ?? [];
     assert.deepEqual(cards[0].media, { ratio: 1, naturalRatio: 1, uri: 'file:///thumbs/with.webp' });
   });
 
@@ -121,12 +122,12 @@ describe('readPlace', () => {
     s.save('i1', 'c1');
     s.save('i2', 'c1');
     s.save('i3');
-    const place = readPlace(s.sources, { kind: 'collection', id: 'c1' });
+    const place = readPlace(s.sources, { kind: 'collection', id: 'c1' }, CARD_NOW);
     assert.equal(place?.title, 'Reading');
     assert.deepEqual(place?.cards.map(({ id }) => id), ['i2', 'i1']);
   });
 
   it('is null for a collection that is not on the device', () => {
-    assert.equal(readPlace(s.sources, { kind: 'collection', id: 'gone' }), null);
+    assert.equal(readPlace(s.sources, { kind: 'collection', id: 'gone' }, CARD_NOW), null);
   });
 });

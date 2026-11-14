@@ -1,6 +1,9 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Pressable, View } from 'react-native';
+import { useReducedMotion } from 'react-native-reanimated';
 import { CardMediaBox } from '@/grid/CardMediaBox';
+import { Develop } from '@/rewards/Develop';
+import { rediscoverEntry } from '@/rewards/rediscoverEntry';
 import { NameText, NoteText } from '@/theme/Text';
 import { useTheme } from '@/theme/theme';
 import { hero } from '@/hero/appHero';
@@ -23,9 +26,12 @@ function useStampOnFirstShow(pick: RediscoverPick, day: string) {
   }, [id, stampedToday, day]);
 }
 
+/** Key it by the pick and the day: it remembers whether the pick was stamped when this Home first drew it. */
 export function RediscoverSection({ pick, day }: { readonly pick: RediscoverPick; readonly day: string }) {
   const styles = useHomeStyles();
   const { color } = useTheme();
+  const reduceMotion = useReducedMotion();
+  const [stampedWhenFirstShown] = useState(pick.stampedToday);
   const { card } = pick;
   useStampOnFirstShow(pick, day);
   useScrollersOrigin(HOME_SCOPE.rediscover, [card.id], null);
@@ -44,9 +50,11 @@ export function RediscoverSection({ pick, day }: { readonly pick: RediscoverPick
         onPress={() => hero.open({ ids: [card.id], card, scope: HOME_SCOPE.rediscover })}
         style={styles.rediscover}
       >
-        <HeroFace id={card.id} drawnOnLayout={!card.media?.uri} style={styles.rediscoverFrame}>
-          {card.media ? <CardMediaBox id={card.id} media={{ ...card.media, ratio: SQUARE }} /> : null}
-        </HeroFace>
+        <Develop entry={rediscoverEntry({ stampedWhenFirstShown, reduceMotion })}>
+          <HeroFace id={card.id} drawnOnLayout={!card.media?.uri} style={styles.rediscoverFrame}>
+            {card.media ? <CardMediaBox id={card.id} media={{ ...card.media, ratio: SQUARE }} /> : null}
+          </HeroFace>
+        </Develop>
         <View style={styles.rowText}>
           <NameText token="titleS" numberOfLines={TITLE_LINES}>{card.title ?? card.site}</NameText>
           <NoteText numberOfLines={1}>{card.note}</NoteText>

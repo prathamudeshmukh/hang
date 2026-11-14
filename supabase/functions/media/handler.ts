@@ -4,7 +4,7 @@ import { paletteOf } from './palette.ts';
 import { makeThumbnail, MAX_PIXELS, type Thumbnail } from './thumbnail.ts';
 import type { MediaDeps, MediaPatch, MediaSource } from './types.ts';
 
-/** Why an image was set aside. The item stays a good text card either way (SPEC §2). */
+/** Why an image was set aside. The item stays a good text card either way (SPEC §2); its `image_url` is cleared. */
 type Unusable = 'fetch_failed' | 'not_an_image' | 'too_many_pixels' | 'decode_failed';
 
 const thumbPath = (source: MediaSource) => `${source.userId}/thumbs/${source.id}.webp`;
@@ -26,6 +26,17 @@ async function thumbnailFor(source: MediaSource, deps: MediaDeps): Promise<Thumb
   if (!header) return 'not_an_image';
   if (header.width * header.height > MAX_PIXELS) return 'too_many_pixels';
   return (await attempt(() => makeThumbnail(bytes))) ?? 'decode_failed';
+}
+
+async function dropUnusable(source: MediaSource, reason: Unusable, deps: MediaDeps): Promise<Response> {
+  deps.log.warn('media.unusable', { item_id: source.id, reason });
+  try {
+    await deps.store.dropImage(source);
+    return reply(STATUS.ok, reason);
+  } catch (error) {
+    deps.log.error('media.failed', { item_id: source.id, error: errorName(error) });
+    return reply(STATUS.internal, 'failed');
+  }
 }
 
 async function store(source: MediaSource, thumb: Thumbnail, deps: MediaDeps): Promise<Response> {
@@ -59,10 +70,6 @@ export function makeMediaHandler(deps: MediaDeps): (req: Request) => Promise<Res
       return reply(STATUS.ok, 'skipped');
     }
     const thumb = await thumbnailFor(source, deps);
-    if (typeof thumb === 'string') {
-      deps.log.warn('media.unusable', { item_id: source.id, reason: thumb });
-      return reply(STATUS.ok, thumb);
-    }
-    return store(source, thumb, deps);
+    return typeof thumb === 'string' ? dropUnusable(source, thumb, deps) : store(source, thumb, deps);
   };
 }

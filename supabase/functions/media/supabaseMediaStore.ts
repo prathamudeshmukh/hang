@@ -34,6 +34,12 @@ export function makeSupabaseMediaStore(client: SupabaseClient): MediaStore {
     save: async (source: MediaSource, patch: MediaPatch) => {
       throwIfError(await items().update(patch).eq('id', source.id).eq('image_url', source.imageUrl), 'save');
     },
+    // Setting it to null never re-fires the media trigger, which only runs for a new non-null address. An earlier
+    // image's thumbnail goes too, so the card doesn't keep showing a picture that's no longer the item's.
+    dropImage: async (source: MediaSource) => {
+      const noImage = { image_url: null, thumb_path: null, thumb_w: null, thumb_h: null, palette: null };
+      throwIfError(await items().update(noImage).eq('id', source.id).eq('image_url', source.imageUrl), 'drop');
+    },
   };
 }
 

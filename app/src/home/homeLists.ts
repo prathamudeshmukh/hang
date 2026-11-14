@@ -56,7 +56,7 @@ function readRediscover(sources: ListSources, now: Date, thumbs: ReadonlyMap<str
   const item = picked ? sources.items.getById(picked.id) : undefined;
   if (!item) return null;
   return {
-    card: toCardModel(item, thumbs.get(item.id) ?? null),
+    card: toCardModel(item, thumbs.get(item.id) ?? null, now),
     savedNote: savedMonthNote(item.createdAt, now),
     stampedToday: item.rediscoveredOn === dayKey(now),
   };
@@ -70,7 +70,7 @@ function readCollections(sources: ListSources, counts: ReadonlyMap<string | null
 export function readHome(sources: ListSources, now: Date): HomeLists {
   const counts = sources.items.countByCollection();
   const thumbs = sources.thumbs.fileUris();
-  const toPrint = (item: Item): RecentPrint => ({ card: toCardModel(item, thumbs.get(item.id) ?? null), inInbox: item.collectionId === null });
+  const toPrint = (item: Item): RecentPrint => ({ card: toCardModel(item, thumbs.get(item.id) ?? null, now), inInbox: item.collectionId === null });
   return {
     recent: sources.items.listRecent(RECENT_LIMIT).map(toPrint),
     inboxCount: counts.get(null) ?? 0,
@@ -79,15 +79,15 @@ export function readHome(sources: ListSources, now: Date): HomeLists {
   };
 }
 
-function toCards(sources: ListSources, items: readonly Item[]): readonly CardModel[] {
+function toCards(sources: ListSources, items: readonly Item[], now: Date): readonly CardModel[] {
   const thumbs = sources.thumbs.fileUris();
-  return items.map((item) => toCardModel(item, thumbs.get(item.id) ?? null));
+  return items.map((item) => toCardModel(item, thumbs.get(item.id) ?? null, now));
 }
 
 /** Null when the collection isn't on the device (deleted elsewhere, or a stale link). */
-export function readPlace(sources: ListSources, place: Place): PlaceList | null {
-  if (place.kind === 'inbox') return { title: INBOX_TITLE, cards: toCards(sources, sources.items.listInbox()) };
+export function readPlace(sources: ListSources, place: Place, now: Date): PlaceList | null {
+  if (place.kind === 'inbox') return { title: INBOX_TITLE, cards: toCards(sources, sources.items.listInbox(), now) };
   const collection = sources.collections.list().find(({ id }) => id === place.id);
   if (!collection) return null;
-  return { title: collection.name, cards: toCards(sources, sources.items.listInCollection(collection.id)) };
+  return { title: collection.name, cards: toCards(sources, sources.items.listInCollection(collection.id), now) };
 }

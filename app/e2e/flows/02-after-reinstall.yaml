@@ -8,3 +8,4 @@ name: Still there after reinstall
 - runFlow: wait-until-synced.yaml
 - runFlow: open-feed.yaml
 - runFlow: back-to-shown.yaml
+- runFlow: rediscover.yaml

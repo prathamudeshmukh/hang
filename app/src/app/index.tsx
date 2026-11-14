@@ -27,7 +27,8 @@ export default function Home() {
   const { color } = useTheme();
   const today = useToday();
   const day = dayKey(today);
-  const home = useLiveQuery(() => readHome(appListSources, today), `home:${day}`);
+  // A fresh `now` on every read: cards waiting for an image stop after 2 minutes (#34); the day still follows `today`.
+  const home = useLiveQuery(() => readHome(appListSources, new Date()), `home:${day}`);
   const { refreshing, onRefresh } = useRefresh();
   const { attach: attachPage, onScroll: onPageScroll, step: pageStep } = useScroller('y');
 
@@ -47,7 +48,7 @@ export default function Home() {
       </View>
       <SyncProblem />
       <RecentStrip recent={home.recent} inboxCount={home.inboxCount} />
-      {home.rediscover ? <RediscoverSection pick={home.rediscover} day={day} /> : null}
+      {home.rediscover ? <RediscoverSection key={`${home.rediscover.card.id}:${day}`} pick={home.rediscover} day={day} /> : null}
       <CollectionList collections={home.collections} />
       <AccountLine />
     </ScrollView>

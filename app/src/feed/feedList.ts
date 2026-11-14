@@ -15,6 +15,12 @@ export interface FeedSources {
 /** Where each item hung when the feed opened, so a move shows as *moved to X*. */
 export type Origins = ReadonlyMap<string, string | null>;
 
+/** What the feed was opened on: the ids in order, and where each item lived then. */
+export interface FeedSnapshot {
+  readonly ids: readonly string[];
+  readonly origins: Origins;
+}
+
 /** One read for the whole list, put back in the snapshot's order. */
 function liveItems(sources: FeedSources, ids: readonly string[]): readonly Item[] {
   const byId = new Map(sources.items.listByIds(ids).map((item) => [item.id, item]));
@@ -26,12 +32,12 @@ export function originsOf(sources: FeedSources, ids: readonly string[]): Origins
 }
 
 /** The snapshot's order with each item's latest contents; items deleted since are dropped (#31). */
-export function readFeed(sources: FeedSources, ids: readonly string[], origins: Origins): readonly FeedPage[] {
+export function readFeed(sources: FeedSources, { ids, origins }: FeedSnapshot, now: Date): readonly FeedPage[] {
   const thumbs = sources.thumbs.fileUris();
   const collections = sources.collections.list();
   return liveItems(sources, ids).map((item) => {
     const moved = origins.has(item.id) && origins.get(item.id) !== item.collectionId;
-    return toFeedPage(toCardModel(item, thumbs.get(item.id) ?? null), {
+    return toFeedPage(toCardModel(item, thumbs.get(item.id) ?? null, now), {
       summary: item.summary,
       ...(moved ? { movedTo: placeName(collections, item.collectionId) } : {}),
       placeId: item.collectionId,

@@ -3,12 +3,12 @@ import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 import type { Item } from '../db/schema.ts';
 import { toCardModel } from '../grid/cardModel.ts';
-import { anItem } from '../grid/testing/anItem.ts';
+import { anItem, CARD_NOW } from '../grid/testing/anItem.ts';
 import { samePage, toFeedPage, type FeedPageExtras } from './feedPage.ts';
 
 const WITH_THUMB = { thumbW: 800, thumbH: 600 } as const;
 const UNMOVED: FeedPageExtras = { summary: null, placeId: null };
-const pageOf = (overrides: Partial<Item>, extras = UNMOVED) => toFeedPage(toCardModel(anItem(overrides), 'file:///thumb.jpg'), extras);
+const pageOf = (overrides: Partial<Item>, extras = UNMOVED) => toFeedPage(toCardModel(anItem(overrides), 'file:///thumb.jpg', CARD_NOW), extras);
 
 describe('toFeedPage media', () => {
   it('fits an image whole, never cropped', () => {
