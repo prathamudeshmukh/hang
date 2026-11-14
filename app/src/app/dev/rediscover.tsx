@@ -8,7 +8,8 @@ import { backdateForRediscover } from '@/dev/rediscoverBackdate';
 export default function DevRediscover() {
   useEffect(() => {
     if (DEV_TOOLS_ON) backdateForRediscover(db, new Date());
-    router.replace('/');
+    // Back to the Home already in the stack: a second, freshly mounted Home cut italic notes short on the S23.
+    router.dismissTo('/');
   }, []);
   return null;
 }
