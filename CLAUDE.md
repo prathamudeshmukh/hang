@@ -131,6 +131,14 @@ is the only Reanimated part. Prints register as `HeroFace`s under a `HeroScope` 
 `home:rediscover`), and each wall registers an origin that reveals a print under the opaque feed (`useOrigins.ts`).
 The feed route is `transparentModal` with no native animation, so the wall stays drawn under it.
 
+Rewards (`src/rewards/`, #34): each reward's trigger is a pure function (`roomEntry`, `rediscoverEntry`;
+`textJustArrived`/`thumbJustArrived` in `src/grid/arrival.ts`, kept per cell by `useArrival`). `RoomUnderline` draws
+the ink underline once the push settles (`useAfterArrival`), `TextArrival` and `CardMediaBox` play "fetching fills in"
+(the box stays dashed while `image_url` is set and no thumbnail has come, for at most 2 minutes), `Develop` runs
+Rediscover's develop. No collection tint (DESIGN.md §3). Dev tools (`src/dev/`) exist only in builds made with
+`EXPO_PUBLIC_HANG_DEV_TOOLS=1` (`e2e/run.sh` sets it): `hang://dev/rediscover` backdates the newest ready item on the
+device so Rediscover has a pick.
+
 Local store tests use better-sqlite3 with the real migrations (`src/db/testing/testDb.ts`); the device
 uses expo-sqlite. Both are synchronous Drizzle drivers, typed as `HangDb`.
 

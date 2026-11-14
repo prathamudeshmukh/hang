@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Slice 9 E2E: share from Chrome → synced → uninstall → reinstall → sign in → still there → opens in the feed.
+# Slice 9 E2E: share from Chrome → synced → uninstall → reinstall → sign in → still there → opens in the feed
+# → Rediscover has a pick once an item is backdated.
 #
 #   e2e/run.sh emulator [--skip-build]
 #   e2e/run.sh phone --i-know [--skip-build]
@@ -32,8 +33,9 @@ pick_serial() {
   esac
 }
 
+# Dev tools on: the Rediscover flow backdates an item through hang://dev/rediscover (#34).
 build_apk() {
-  (cd "$APP_DIR/android" && ./gradlew assembleRelease -PreactNativeArchitectures=arm64-v8a -q)
+  (cd "$APP_DIR/android" && EXPO_PUBLIC_HANG_DEV_TOOLS=1 ./gradlew assembleRelease -PreactNativeArchitectures=arm64-v8a -q)
 }
 
 # Screen timeouts lock the device mid-flow; keep it awake while plugged in, then put the setting back.

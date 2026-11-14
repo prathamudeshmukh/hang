@@ -29,7 +29,7 @@ const PAGES_KEPT_DRAWN = 3;
 /** The snapshot's ids in order, with contents that follow local writes and sync (#31 decision 6). */
 function useFeedPages(session: FeedSession, key: string): readonly FeedPage[] {
   const [origins] = useState(() => originsOf(feedSources, session.ids));
-  return useLiveQuery(() => readFeed(feedSources, session.ids, origins), key);
+  return useLiveQuery(() => readFeed(feedSources, { ids: session.ids, origins }, new Date()), key);
 }
 
 /** The page on screen by id, so the counter and TalkBack steps follow it when items before it drop out. */

@@ -1,7 +1,7 @@
 /// <reference types="node" />
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
-import { thumbJustArrived } from './arrival.ts';
+import { textJustArrived, thumbJustArrived } from './arrival.ts';
 
 const FILE = 'file:///thumbs/i1.webp';
 
@@ -21,5 +21,20 @@ describe('thumbJustArrived', () => {
 
   it('is false while there is still no file', () => {
     assert.equal(thumbJustArrived({ id: 'i1', uri: null }, { id: 'i1', uri: null }), false);
+  });
+});
+
+describe('textJustArrived', () => {
+  it('is true when the same card stops fetching', () => {
+    assert.equal(textJustArrived({ id: 'i1', variant: 'pending' }, { id: 'i1', variant: 'article' }), true);
+  });
+
+  it('is false for a card drawn ready, or one still fetching', () => {
+    assert.equal(textJustArrived(null, { id: 'i1', variant: 'article' }), false);
+    assert.equal(textJustArrived({ id: 'i1', variant: 'pending' }, { id: 'i1', variant: 'pending' }), false);
+  });
+
+  it('is false when a recycled cell starts showing a different card', () => {
+    assert.equal(textJustArrived({ id: 'i0', variant: 'pending' }, { id: 'i1', variant: 'article' }), false);
   });
 });

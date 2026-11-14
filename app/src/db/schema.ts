@@ -22,8 +22,6 @@ export const collections = sqliteTable('collections', {
   id: text('id').primaryKey(),
   name: text('name').notNull(),
   position: integer('position').notNull().default(0),
-  tint: text('tint'),
-  coverItemId: text('cover_item_id'),
   createdAt: text('created_at').notNull(),
   updatedAt: text('updated_at'),
   deletedAt: text('deleted_at'),
@@ -51,6 +49,8 @@ export const items = sqliteTable(
     publishedAt: text('published_at'),
     durationS: integer('duration_s'),
     readingMin: integer('reading_min'),
+    /** The lead image the server will make a thumbnail from; cleared when it proves unusable (#34). */
+    imageUrl: text('image_url'),
     thumbPath: text('thumb_path'),
     thumbW: integer('thumb_w'),
     thumbH: integer('thumb_h'),

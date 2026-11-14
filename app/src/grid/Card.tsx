@@ -1,5 +1,6 @@
 import { memo } from 'react';
 import { Pressable, View } from 'react-native';
+import { TextArrival } from '@/rewards/TextArrival';
 import { useTheme } from '@/theme/theme';
 import { CARD_BODIES } from './cardBodies';
 import { sameCard, type CardModel } from './cardModel';
@@ -25,7 +26,9 @@ export const Card = memo(function Card({ card, onOpen }: CardProps) {
         onPress={() => onOpen(card)}
         style={styles.pressable}
       >
-        <Body card={card} />
+        <TextArrival card={card}>
+          <Body card={card} />
+        </TextArrival>
       </Pressable>
     </View>
   );

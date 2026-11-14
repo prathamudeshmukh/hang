@@ -7,6 +7,7 @@ import { createItemsRepository } from '../db/itemsRepository.ts';
 import { items, type Item } from '../db/schema.ts';
 import { createTestDeps } from '../db/testing/testDb.ts';
 import { createThumbStore } from '../thumbs/thumbStore.ts';
+import { CARD_NOW } from '../grid/testing/anItem.ts';
 import { originsOf, readFeed } from './feedList.ts';
 
 const URL = 'https://www.aeon.co/essays/on-boredom';
@@ -36,14 +37,14 @@ describe('readFeed', () => {
 
   it('keeps the order it was opened with', () => {
     const ids = ['c', 'a', 'b'];
-    assert.deepEqual(idsOf(readFeed(s.sources, ids, originsOf(s.sources, ids))), ['c', 'a', 'b']);
+    assert.deepEqual(idsOf(readFeed(s.sources, { ids, origins: originsOf(s.sources, ids) }, CARD_NOW)), ['c', 'a', 'b']);
   });
 
   it('reads each item’s latest contents', () => {
     const ids = ['a'];
     const origins = originsOf(s.sources, ids);
     s.update('a', { status: 'ready', kind: 'article', title: 'On boredom', summary: 'Why we drift.' });
-    const [page] = readFeed(s.sources, ids, origins);
+    const [page] = readFeed(s.sources, { ids, origins }, CARD_NOW);
     assert.deepEqual([page.card.title, page.summary], ['On boredom', 'Why we drift.']);
   });
 
@@ -51,7 +52,7 @@ describe('readFeed', () => {
     const ids = ['a', 'b', 'c'];
     const origins = originsOf(s.sources, ids);
     s.items.remove('b');
-    assert.deepEqual(idsOf(readFeed(s.sources, ids, origins)), ['a', 'c']);
+    assert.deepEqual(idsOf(readFeed(s.sources, { ids, origins }, CARD_NOW)), ['a', 'c']);
   });
 });
 
@@ -65,26 +66,26 @@ describe('readFeed moves', () => {
   it('keeps a moved item in place and says where it went', () => {
     const origins = originsOf(s.sources, ['a']);
     s.items.file('a', 'c2');
-    const [page] = readFeed(s.sources, ['a'], origins);
+    const [page] = readFeed(s.sources, { ids: ['a'], origins }, CARD_NOW);
     assert.deepEqual([page.card.id, page.note, page.placeId], ['a', 'moved to Recipes', 'c2']);
   });
 
   it('says so when an item is moved to the Inbox', () => {
     const origins = originsOf(s.sources, ['a']);
     s.items.file('a', null);
-    assert.equal(readFeed(s.sources, ['a'], origins)[0].note, 'moved to Inbox');
+    assert.equal(readFeed(s.sources, { ids: ['a'], origins }, CARD_NOW)[0].note, 'moved to Inbox');
   });
 
   it('says it moved when the new place is not on the device', () => {
     const origins = originsOf(s.sources, ['a']);
     s.update('a', { collectionId: 'c9' });
-    assert.equal(readFeed(s.sources, ['a'], origins)[0].note, 'moved');
+    assert.equal(readFeed(s.sources, { ids: ['a'], origins }, CARD_NOW)[0].note, 'moved');
   });
 
   it('keeps the catalogue note when an item is moved back where it was', () => {
     const origins = originsOf(s.sources, ['a']);
     s.items.file('a', 'c2');
     s.items.file('a', 'c1');
-    assert.equal(readFeed(s.sources, ['a'], origins)[0].note, 'fetching…');
+    assert.equal(readFeed(s.sources, { ids: ['a'], origins }, CARD_NOW)[0].note, 'fetching…');
   });
 });

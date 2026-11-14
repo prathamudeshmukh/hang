@@ -3,12 +3,12 @@ import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 import { toCardModel, type CardModel } from './cardModel.ts';
 import { chipLabel, filterCards, kindCount, kindsIn, selectedOrAll } from './kindFilter.ts';
-import { anItem } from './testing/anItem.ts';
+import { anItem, CARD_NOW } from './testing/anItem.ts';
 import type { ItemKind } from '../db/schema.ts';
 
-const ready = (id: string, kind: ItemKind): CardModel => toCardModel(anItem({ id, status: 'ready', kind }), null);
-const pending = (id: string): CardModel => toCardModel(anItem({ id, status: 'pending' }), null);
-const failed = (id: string): CardModel => toCardModel(anItem({ id, status: 'failed' }), null);
+const ready = (id: string, kind: ItemKind): CardModel => toCardModel(anItem({ id, status: 'ready', kind }), null, CARD_NOW);
+const pending = (id: string): CardModel => toCardModel(anItem({ id, status: 'pending' }), null, CARD_NOW);
+const failed = (id: string): CardModel => toCardModel(anItem({ id, status: 'failed' }), null, CARD_NOW);
 const ids = (cards: readonly CardModel[]) => cards.map(({ id }) => id);
 
 describe('kindsIn', () => {

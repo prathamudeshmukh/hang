@@ -1,6 +1,7 @@
 import { FlashList, type FlashListRef } from '@shopify/flash-list';
 import { useRef, type ReactElement } from 'react';
 import { RefreshControl, useWindowDimensions, View } from 'react-native';
+import { useReducedMotion } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Card } from '@/grid/Card';
 import type { CardModel } from '@/grid/cardModel';
@@ -11,6 +12,8 @@ import { usePlaceView, type PlaceViewControls } from '@/grid/usePlaceView';
 import { useFeedOpener } from '@/feed/useFeedOpener';
 import { HeroScope } from '@/hero/HeroFace';
 import { useListOrigin } from '@/hero/useOrigins';
+import { RoomUnderline } from '@/rewards/RoomUnderline';
+import { roomEntry } from '@/rewards/roomEntry';
 import { NameText, NoteText } from '@/theme/Text';
 import { useTheme } from '@/theme/theme';
 import { SPACE } from '@/theme/tokens';
@@ -25,11 +28,21 @@ const placeKey = (place: Place) => (place.kind === 'inbox' ? 'inbox' : `collecti
 const EMPTY_WALL = 'An empty wall. Share anything from another app to hang it here.';
 const GONE = 'This collection isn’t on this device any more.';
 
-function PlaceHeader({ list, controls }: { readonly list: PlaceList | null; readonly controls: PlaceViewControls }) {
+interface PlaceHeaderProps {
+  readonly place: Place;
+  readonly list: PlaceList | null;
+  readonly controls: PlaceViewControls;
+}
+
+function PlaceHeader({ place, list, controls }: PlaceHeaderProps) {
   const styles = useGridStyles();
+  const reduceMotion = useReducedMotion();
   return (
     <View style={styles.header}>
-      <NameText token="display">{list?.title ?? 'Gone'}</NameText>
+      <View style={styles.title}>
+        <NameText token="display">{list?.title ?? 'Gone'}</NameText>
+        <RoomUnderline entry={roomEntry({ place: place.kind, reduceMotion })} />
+      </View>
       <PlaceControls {...controls} />
       <SyncProblem />
       {list?.cards.length === 0 ? <NoteText>{EMPTY_WALL}</NoteText> : null}
@@ -79,12 +92,12 @@ function Wall({ scope, cards, header }: WallProps) {
 
 /** The Inbox or one collection as a masonry wall, newest first unless filtered or shuffled (DESIGN.md §8, #42). */
 export function PlaceScreen({ place }: { readonly place: Place }) {
-  const list = useLiveQuery(() => readPlace(appListSources, place), placeKey(place));
+  const list = useLiveQuery(() => readPlace(appListSources, place, new Date()), placeKey(place));
   const controls = usePlaceView(list?.cards ?? NO_CARDS);
   const scope = placeKey(place);
   return (
     <HeroScope scope={scope}>
-      <Wall scope={scope} cards={controls.view.cards} header={<PlaceHeader list={list} controls={controls} />} />
+      <Wall scope={scope} cards={controls.view.cards} header={<PlaceHeader place={place} list={list} controls={controls} />} />
     </HeroScope>
   );
 }

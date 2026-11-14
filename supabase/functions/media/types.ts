@@ -21,6 +21,8 @@ export interface MediaStore {
   readonly load: (id: string) => Promise<MediaSource | null>;
   /** Writes the patch only while `image_url` still matches, so a newer image is never overwritten. */
   readonly save: (source: MediaSource, patch: MediaPatch) => Promise<void>;
+  /** Clears an unusable `image_url` and any earlier thumbnail (same guard as save), so the app stops waiting (#34). */
+  readonly dropImage: (source: MediaSource) => Promise<void>;
 }
 
 export interface ThumbStorage {

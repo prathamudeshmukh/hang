@@ -18,7 +18,7 @@ export interface ThumbStore {
   all(): readonly ThumbFile[];
   /** Live items' files, for the lists. */
   fileUris(): ReadonlyMap<string, string>;
-  /** Each collection's newest live item that has a file: its cover on Home (derived here, not `cover_item_id`; #30). */
+  /** Each collection's newest live item that has a file: its cover on Home (derived here; #30). */
   coversByCollection(): ReadonlyMap<string, string>;
 }
 

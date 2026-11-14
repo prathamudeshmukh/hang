@@ -1,3 +1,4 @@
+import { StyleSheet } from 'react-native';
 import { makeStyles } from '@/theme/theme';
 import { RADIUS, SPACE } from '@/theme/tokens';
 
@@ -10,12 +11,17 @@ export const useGridStyles = makeStyles(({ color }) => ({
   wall: { flex: 1, backgroundColor: color.wall },
   content: { paddingHorizontal: SPACE.margin - SPACE.gutter / 2 },
   header: { paddingHorizontal: SPACE.gutter / 2, paddingBottom: SPACE.rhythm * 2, gap: SPACE.tight },
+  /** As wide as the title, so its underline is too. */
+  title: { alignSelf: 'flex-start', gap: SPACE.tight },
   cell: { paddingHorizontal: SPACE.gutter / 2, paddingBottom: SPACE.rhythm },
   /** The ripple stays on the card, not the gutter around it. */
   pressable: { borderRadius: RADIUS.print, overflow: 'hidden' },
   caption: { marginTop: SPACE.caption, gap: SPACE.hair },
   /** Content keeps square-ish `print` corners and waits on `raised` until its image lands. */
   media: { width: '100%', borderRadius: RADIUS.print, overflow: 'hidden', backgroundColor: color.raised },
+  /** Waiting for its thumbnail: no fill, a dashed outline the image cross-fades over. */
+  mediaWaiting: { backgroundColor: 'transparent' },
+  dashed: { ...StyleSheet.absoluteFill, borderRadius: RADIUS.print, borderWidth: 1, borderStyle: 'dashed', borderColor: color.ink3 },
   image: { width: '100%', height: '100%' },
   playDisc: {
     position: 'absolute',

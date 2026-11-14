@@ -17,8 +17,6 @@ const collectionRow = z.object({
   id: z.string().min(1),
   name: z.string(),
   position: z.number().int().optional(),
-  tint: optionalText,
-  cover_item_id: optionalText,
   created_at: timestamp,
   ...syncColumns,
 });
@@ -42,6 +40,7 @@ const itemRow = z.object({
   published_at: optionalText,
   duration_s: optionalInt,
   reading_min: optionalInt,
+  image_url: optionalText,
   thumb_path: optionalText,
   thumb_w: optionalInt,
   thumb_h: optionalInt,

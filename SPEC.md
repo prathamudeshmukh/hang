@@ -101,7 +101,7 @@ back to a generic link card (Open Graph image, title, site), never to a broken s
 2. Highlights and notes in the reader
 3. Smarter Rediscover: items gather "dust"; a "let go" action deletes them guilt-free
 4. TikTok / Instagram / X video embeds; X threads
-5. Custom cover and tint override per collection
+5. Custom cover and a chosen colour per collection
 6. iOS build, sharing a collection, export
 
 ---
@@ -157,7 +157,9 @@ back to a generic link card (Open Graph image, title, site), never to a broken s
    checks the type and size from the file header (JPEG, PNG, WebP, first GIF frame; no SVG; ≤ 6 MP), stores a
    1080px-wide lossy WebP (never enlarged) at `media/{user_id}/thumbs/{item_id}.webp`, and writes `thumb_*`
    and the **palette** (dominant and muted colors). It runs after `status = ready`, so cards appear first;
-   an unusable image just leaves a text card. Client writes to `image_url` never trigger a fetch.
+   an unusable image is dropped (`image_url` cleared) and leaves a text card. Client writes to `image_url` never
+   trigger a fetch. The app mirrors `image_url` to hold a dashed box for the coming image, for at most 2 minutes
+   after the item's last server change (#34).
 4. **Enrich**: one Haiku 5.5 call (see §6).
 5. **Write**: updates `items` and `item_content`, sets `status = ready` (or `failed` with
    `extract_error`, after which the generic adapter is retried as a fallback).
@@ -212,8 +214,6 @@ collections (
   user_id       uuid not null,       -- = auth.uid(), RLS
   name          text not null,
   position      int  not null,       -- order on Home
-  tint          text,                -- hex, derived from recent items' palettes (server)
-  cover_item_id uuid,                -- unused: Home derives covers on the device (#30)
   created_at, updated_at, deleted_at
 )
 
@@ -238,6 +238,7 @@ items (
   published_at    timestamptz,
   duration_s      int,               -- video
   reading_min     int,               -- article
+  image_url       text,              -- lead image for `media`; server-written, cleared when unusable (#34)
   thumb_path      text,              -- Storage
   thumb_w, thumb_h int,              -- masonry aspect ratio
   palette         jsonb,             -- { dominant, muted, onDominant }
@@ -283,8 +284,8 @@ Storage bucket `media` (private): `{user_id}/thumbs/{item_id}.webp` and
   opened. Opening an item from anywhere sets `last_opened_at`.
 - **Collection cover** (Home) = the newest live item in the collection with a downloaded thumbnail,
   derived on the device.
-- **Collection tint** = the most common muted palette color across the collection's last 10 items,
-  adjusted to ≥ 3:1 contrast against the wall in both themes. Recomputed on item change.
+- **No collection tint** (decided 2026-11-14, #34): collections are drawn in ink like the rest of the app; their
+  covers and prints already tell them apart (DESIGN.md §3).
 - **Shuffle** = a seeded random order, stable while you're looking at it (a fresh seed each time it's turned on; #42).
 
 ---
@@ -377,7 +378,7 @@ Coverage target **80%** on all non-UI logic.
 
 | Level | What | Tooling |
 |---|---|---|
-| Unit | Each adapter's `matches` + `extract` against saved HTML/JSON fixtures; URL canonicalisation; palette → tint contrast adjustment; Rediscover selection; sync merge rules; outbox replay; FTS query building | Vitest (Deno test for Edge Functions) |
+| Unit | Each adapter's `matches` + `extract` against saved HTML/JSON fixtures; URL canonicalisation; Rediscover selection; reward triggers; sync merge rules; outbox replay; FTS query building | Vitest (Deno test for Edge Functions) |
 | Integration | `extract` against a local Supabase (`supabase start`) with fixture HTTP server; RLS tests proving user A cannot read/write user B's rows or storage objects; AI call with a recorded response | Deno test + Supabase CLI |
 | E2E | Share from Chrome → sheet → Save → appears in collection; offline share → reconnect → fills in; open article → read → finish note appears | Maestro on an Android emulator and a real device |
 

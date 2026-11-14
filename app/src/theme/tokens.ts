@@ -72,10 +72,20 @@ export const SPACE = {
   screenBottom: 40,
 } as const;
 
+/** Drawn lines that aren't hairlines. */
+export const STROKE = {
+  /** Under a collection's title (DESIGN.md §7 "Entering a room"). */
+  underline: 2,
+} as const;
+
 export const MOTION = {
   quickMs: 180,
   baseMs: 340,
   slowMs: 600,
+  /** A thumbnail cross-fading over its dashed box (DESIGN.md §7 "fetching fills in"). */
+  fillInMs: 700,
+  /** Today's Rediscover print developing (DESIGN.md §7). */
+  develop: { durationMs: 1600, blur: 8, brightness: 1.3 },
   /** Calm ease-out; no bounce or overshoot anywhere. */
   easing: [0.2, 0.7, 0.1, 1] as const,
   /**

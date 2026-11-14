@@ -78,7 +78,7 @@ describe('media against the local stack', () => {
     expect(file.type).toBe('image/webp');
   });
 
-  it('refuses to fetch a private image address and leaves the item as it was', async () => {
+  it('refuses to fetch a private image address and drops it, so the app stops waiting', async () => {
     const id = await readyItem();
     await setImage(id, PRIVATE_IMAGE);
     const res = await fetch(`${API_URL}/functions/v1/media`, {
@@ -87,7 +87,8 @@ describe('media against the local stack', () => {
       body: JSON.stringify({ item_id: id }),
     });
     expect(await res.json()).toEqual({ outcome: 'fetch_failed' });
-    const { data } = await admin.from('items').select('thumb_path').eq('id', id).single<{ thumb_path: string | null }>();
-    expect(data?.thumb_path).toBeNull();
+    const { data } = await admin.from('items').select('thumb_path, image_url').eq('id', id)
+      .single<{ thumb_path: string | null; image_url: string | null }>();
+    expect(data).toEqual({ thumb_path: null, image_url: null });
   });
 });

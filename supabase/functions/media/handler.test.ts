@@ -12,6 +12,7 @@ const SOURCE: MediaSource = { id: ITEM_ID, userId: 'user-1', imageUrl: 'https://
 
 interface Recorder {
   saved: Array<{ source: MediaSource; patch: MediaPatch }>;
+  dropped: MediaSource[];
   uploads: Array<{ path: string; size: number }>;
   logs: Array<{ level: string; event: string; fields: LogFields }>;
 }
@@ -23,6 +24,7 @@ function depsWith(rec: Recorder, overrides: Partial<MediaDeps> = {}): MediaDeps 
     store: {
       load: () => Promise.resolve(SOURCE),
       save: (source, patch) => (rec.saved.push({ source, patch }), Promise.resolve()),
+      dropImage: (source) => (rec.dropped.push(source), Promise.resolve()),
     },
     storage: { upload: (path, webp) => (rec.uploads.push({ path, size: webp.length }), Promise.resolve()) },
     fetchImage: async () => await new Image(2160, 1080).fill(0x336699ff).encodeJPEG(80),
@@ -44,7 +46,7 @@ const outcome = async (res: Response) => [res.status, (await res.json()).outcome
 describe('media handler', () => {
   let rec: Recorder;
   beforeEach(() => {
-    rec = { saved: [], uploads: [], logs: [] };
+    rec = { saved: [], dropped: [], uploads: [], logs: [] };
   });
 
   it('stores a 1080-wide WebP under the owner and writes size and palette', async () => {
@@ -66,11 +68,11 @@ describe('media handler', () => {
   });
 
   it('skips an item that has nothing to fetch', async () => {
-    const res = await run(depsWith(rec, { store: { load: () => Promise.resolve(null), save: () => Promise.reject() } }));
+    const res = await run(depsWith(rec, { store: { load: () => Promise.resolve(null), save: () => Promise.reject(), dropImage: () => Promise.reject() } }));
     expect(await outcome(res)).toEqual([200, 'skipped']);
   });
 
-  it('leaves the item alone when the image is unusable, and logs why without the url', async () => {
+  it('drops an unusable image, so the app stops waiting for it, and logs why without the url', async () => {
     const svg = new TextEncoder().encode('<svg xmlns="http://www.w3.org/2000/svg"/>');
     const huge = await new Image(4000, 2000).fill(0xffffffff).encodeJPEG(10);
     const cases = [
@@ -83,10 +85,17 @@ describe('media handler', () => {
     const outcomes = await Promise.all(cases.map(async (deps) => outcome(await run(deps))));
     expect(outcomes).toEqual([[200, 'fetch_failed'], [200, 'not_an_image'], [200, 'too_many_pixels'], [200, 'decode_failed']]);
     expect([rec.saved.length, rec.uploads.length, JSON.stringify(rec.logs).includes('cdn.test')]).toEqual([0, 0, false]);
+    expect(rec.dropped).toEqual([SOURCE, SOURCE, SOURCE, SOURCE]);
+  });
+
+  it('answers 500 when dropping an unusable image fails', async () => {
+    const store = { load: () => Promise.resolve(SOURCE), save: () => Promise.reject(), dropImage: () => Promise.reject(new Error('db down')) };
+    const res = await run(depsWith(rec, { store, fetchImage: () => Promise.reject(new TypeError('offline')) }));
+    expect(await outcome(res)).toEqual([500, 'failed']);
   });
 
   it('answers 500 and logs only the error class when the item cannot be loaded', async () => {
-    const res = await run(depsWith(rec, { store: { load: () => Promise.reject(new TypeError('db down')), save: () => Promise.reject() } }));
+    const res = await run(depsWith(rec, { store: { load: () => Promise.reject(new TypeError('db down')), save: () => Promise.reject(), dropImage: () => Promise.reject() } }));
     expect(await outcome(res)).toEqual([500, 'failed']);
     expect(rec.logs.at(-1)?.fields).toEqual({ item_id: ITEM_ID, error: 'TypeError' });
   });
