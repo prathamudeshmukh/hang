@@ -4,6 +4,7 @@ import { beforeEach, describe, it } from 'node:test';
 import { createCollectionsRepository } from '../db/collectionsRepository.ts';
 import { createItemsRepository } from '../db/itemsRepository.ts';
 import { createOutboxRepository } from '../db/outboxRepository.ts';
+import { collections } from '../db/schema.ts';
 import { createTestDeps } from '../db/testing/testDb.ts';
 import type { ParsedShare } from './parseShare.ts';
 import { createShareCapture, type ShareCaptureDeps } from './shareCapture.ts';
@@ -29,6 +30,7 @@ function setup(overrides: Partial<ShareCaptureDeps> = {}) {
     items,
     collections,
     newId: () => `id-${++nextId}`,
+    thumbs: { fileUris: () => new Map([['old', 'file:///thumbs/old.webp']]) },
     push: () => {
       pushes += 1;
       return Promise.resolve();
@@ -39,7 +41,7 @@ function setup(overrides: Partial<ShareCaptureDeps> = {}) {
     },
     ...overrides,
   });
-  return { capture, collections, items, outbox, logged, pushCount: () => pushes };
+  return { capture, collections, items, outbox, logged, deps, pushCount: () => pushes };
 }
 
 describe('share capture: opening the sheet', () => {
@@ -127,7 +129,12 @@ describe('share capture: failures on open', () => {
   });
 
   it('redacts the URL from a store error before logging it', async () => {
-    const leaky = { save: () => { throw new Error(`Failed query: insert … params: ${LINK.url}`); }, file: () => undefined };
+    const leaky = {
+      save: () => { throw new Error(`Failed query: insert … params: ${LINK.url}`); },
+      file: () => undefined,
+      listLinks: () => [],
+      getById: () => undefined,
+    };
     const s = setup({ items: leaky });
     await s.capture.open(LINK);
     assert.deepEqual(s.logged.map((line) => line.detail), ['Error: Failed query: insert … params: <url>']);
@@ -193,5 +200,54 @@ describe('share capture: closing the sheet', () => {
     await failing.capture.close();
     assert.deepEqual(failing.logged.map((line) => line.message), ['Push after share failed']);
     assert.equal(failing.outbox.list().length, 1);
+  });
+});
+
+describe('share capture: a link Hang already has (#19)', () => {
+  let s: ReturnType<typeof setup>;
+  const AGAIN: ParsedShare = { kind: 'link', url: 'https://www.aeon.co/essays/on-boredom/?utm_source=twitter' };
+  beforeEach(() => {
+    s = setup();
+    s.items.save({ id: 'old', sourceUrl: LINK.url ?? '' });
+  });
+
+  it('opens on the item already saved instead of saving a second copy', async () => {
+    const opening = await s.capture.open(AGAIN);
+    assert.equal(opening.kind === 'existing' && opening.item.id, 'old');
+    assert.equal(s.items.listInbox().length, 1);
+  });
+
+  it('queues nothing new for the server', async () => {
+    const queued = s.outbox.list().length;
+    await s.capture.open(AGAIN);
+    assert.equal(s.outbox.list().length, queued);
+  });
+
+  it('says where it hangs, since when, whether it was read, and brings its print', async () => {
+    s.collections.create({ id: 'c1', name: 'Tech' });
+    s.items.file('old', 'c1');
+    s.items.markRead('old');
+    const opening = await s.capture.open(AGAIN);
+    assert.ok(opening.kind === 'existing');
+    const { place, createdAt, readAt, thumbUri } = opening.item;
+    assert.deepEqual({ place, hasDates: Boolean(createdAt && readAt), thumbUri }, {
+      place: { id: 'c1', name: 'Tech' },
+      hasDates: true,
+      thumbUri: 'file:///thumbs/old.webp',
+    });
+  });
+
+  it('saves a fresh copy when the earlier one sits in a deleted collection, where nothing shows it (#15)', async () => {
+    s.collections.create({ id: 'c1', name: 'Tech' });
+    s.items.file('old', 'c1');
+    s.deps.db.update(collections).set({ deletedAt: '2026-11-10T10:00:00.000Z' }).run();
+    const opening = await s.capture.open(AGAIN);
+    assert.equal(opening.kind, 'saved');
+  });
+
+  it('saves a fresh copy when the earlier one was deleted', async () => {
+    s.items.remove('old');
+    const opening = await s.capture.open(AGAIN);
+    assert.equal(opening.kind, 'saved');
   });
 });

@@ -20,6 +20,20 @@ export function dayLine(now: Date): string {
   return `${WEEKDAYS[now.getDay()]}, ${now.getDate()} ${MONTHS[now.getMonth()]}`;
 }
 
+const MONTHS_SHORT = MONTHS.map((month) => month.slice(0, 3));
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+const startOfDay = (date: Date) => new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
+
+/** A day in words (DESIGN.md §4): "today", "yesterday", "3 Nov", and "24 Dec 2025" once it isn't this year. */
+export function dayWords(date: Date, today: Date): string {
+  const daysAgo = Math.round((startOfDay(today) - startOfDay(date)) / DAY_MS);
+  if (daysAgo === 0) return 'today';
+  if (daysAgo === 1) return 'yesterday';
+  const day = `${date.getDate()} ${MONTHS_SHORT[date.getMonth()]}`;
+  return date.getFullYear() === today.getFullYear() ? day : `${day} ${date.getFullYear()}`;
+}
+
 /** The local calendar date as `YYYY-MM-DD`, the shape of the server's `date` columns. */
 export function dayKey(date: Date): string {
   const month = String(date.getMonth() + 1).padStart(2, '0');

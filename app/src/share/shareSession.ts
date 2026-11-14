@@ -3,6 +3,7 @@ import { createCollectionsRepository } from '@/db/collectionsRepository';
 import { newId } from '@/db/deviceIds';
 import { createItemsRepository } from '@/db/itemsRepository';
 import { systemClock } from '@/db/types';
+import { createThumbStore } from '@/thumbs/thumbStore';
 import { createShareCapture, type ShareCapture } from './shareCapture';
 
 const repositoryDeps = { db, clock: systemClock };
@@ -28,6 +29,7 @@ export function createAppShareCapture(): ShareCapture {
     items,
     collections,
     newId,
+    thumbs: createThumbStore(db),
     push: pushOutbox,
     logger: { warn: console.warn, error: console.error },
   });

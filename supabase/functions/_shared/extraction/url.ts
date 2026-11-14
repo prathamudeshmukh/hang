@@ -1,4 +1,5 @@
-const TRACKING_PARAM = /^(utm_[a-z]+|fbclid|gclid|dclid|mc_eid|mc_cid|igshid|si)$/i;
+import { TRACKING_PARAM } from '../links/linkKey.ts';
+
 const YOUTUBE_ID = /^[\w-]{11}$/;
 const YOUTUBE_HOSTS = new Set(['youtube.com', 'www.youtube.com', 'm.youtube.com', 'music.youtube.com']);
 const YOUTUBE_PATH_PREFIXES = ['/shorts/', '/embed/', '/live/'];

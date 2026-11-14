@@ -139,6 +139,11 @@ Rediscover's develop. No collection tint (DESIGN.md §3). Dev tools (`src/dev/`)
 `EXPO_PUBLIC_HANG_DEV_TOOLS=1` (`e2e/run.sh` sets it): `hang://dev/rediscover` backdates the newest ready item on the
 device so Rediscover has a pick.
 
+Duplicate shares (#19): `supabase/functions/_shared/links/linkKey.ts` says when two links are the same thing; the app
+imports it by relative path (Metro watches only that folder), so keep it dependency-free. `src/share/sameLink.ts`
+finds the live item a share already is, and the capture opens on it (`kind: 'existing'`) instead of saving. The one-off
+clean-up is `supabase/functions/scripts/dedupe/run.ts` (dry run unless `--apply`; needs the service-role key).
+
 Local store tests use better-sqlite3 with the real migrations (`src/db/testing/testDb.ts`); the device
 uses expo-sqlite. Both are synchronous Drizzle drivers, typed as `HangDb`.
 

@@ -240,6 +240,11 @@ Appears translucent over the source app, with a 40% black scrim.
 4. Collection chips (pills), last-used or AI pick selected (`ink` fill), plus a *＋ New* chip
 5. Footer: *Swipe down to leave it in Inbox* (note) · **Save** (vermilion pill)
 
+**A link it already has** (#19): the item's real print and title; the note says *already hanging in Tech · since
+3 Nov* (or *already in your Inbox · since yesterday*), or for a read one the finish stroke through *unread* then
+*read · 8 Nov · in Tech*. Its collection's chip is selected and there's no button: *Swipe down to leave it in Tech*.
+Picking another chip brings Save and *Moves it from Tech*. Re-sharing doesn't bump it in Recently saved.
+
 ### Swipe feed (screening room)
 
 Media fills the top ~56%; below it are the note, title (`title-l`) and a one-to-two-line summary.

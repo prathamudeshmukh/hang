@@ -76,6 +76,8 @@ export const SPACE = {
 export const STROKE = {
   /** Under a collection's title (DESIGN.md §7 "Entering a room"). */
   underline: 2,
+  /** The vermilion stroke through "unread" on a read item. */
+  finish: 1.5,
 } as const;
 
 export const MOTION = {
