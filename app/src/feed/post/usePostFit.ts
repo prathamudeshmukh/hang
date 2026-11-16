@@ -3,7 +3,7 @@ import type { LayoutChangeEvent } from 'react-native';
 import type { CardMedia } from '@/grid/cardModel';
 import { POST_FIT, type PostFitStep } from '@/theme/typeScale';
 import { fitStep, type MeasuredStep, type WordsFit } from './postFit';
-import { contentRoom, pictureBox, pictureCap, wordsRoom, type Box } from './postLayout';
+import { answerCap, contentRoom, pictureBox, wordsRoom, type Box } from './postLayout';
 
 type Slots = readonly (MeasuredStep | null)[];
 const UNMEASURED: Slots = POST_FIT.map(() => null);
@@ -12,6 +12,7 @@ const UNMEASURED: Slots = POST_FIT.map(() => null);
 function useMeasuredSteps(key: string) {
   const [state, setState] = useState<{ readonly key: string; readonly slots: Slots }>({ key, slots: UNMEASURED });
   const slots = state.key === key ? state.slots : UNMEASURED;
+  // The measure remounts on a new key, so a result can only belong to the key it was set under.
   const onMeasured = useCallback(
     (at: number, step: MeasuredStep) =>
       setState((previous) => {
@@ -21,7 +22,7 @@ function useMeasuredSteps(key: string) {
     [key],
   );
   const measured = slots.every((slot) => slot !== null) ? (slots as readonly MeasuredStep[]) : null;
-  return { measured, onMeasured };
+  return { measured, onMeasured, key };
 }
 
 function useLaidOutBox() {
@@ -35,6 +36,8 @@ function useLaidOutBox() {
 
 export interface PostFitInput {
   readonly words: string | null;
+  /** False when nobody signs: no imprint line, and no gap kept for one. */
+  readonly signed: boolean;
   readonly picture: CardMedia | null;
   readonly pageHeight: number;
   readonly fontScale: number;
@@ -53,17 +56,18 @@ export interface PostFit {
 const stepOfSize = (fit: WordsFit | null) => POST_FIT.find(({ size }) => size === fit?.size) ?? null;
 
 /** Lays a post page out: which `post-fit` step the words take, and the picture's box (DESIGN.md §8). */
-export function usePostFit({ words, picture, pageHeight, fontScale }: PostFitInput) {
+export function usePostFit({ words, signed, picture, pageHeight, fontScale }: PostFitInput) {
   const [body, onBodyLayout] = useLaidOutBox();
   const [imprint, onImprintLayout] = useLaidOutBox();
-  const { measured, onMeasured } = useMeasuredSteps(`${body?.width ?? 0}:${fontScale}:${words ?? ''}`);
+  const { measured, onMeasured, key: measureKey } = useMeasuredSteps(`${body?.width ?? 0}:${fontScale}:${words ?? ''}`);
   const fit = useMemo((): PostFit => {
-    const content = body && imprint ? contentRoom({ body: body.height, imprint: imprint.height }) : null;
-    const maxHeight = words ? pictureCap(pageHeight) : content;
+    const signing = signed ? (imprint?.height ?? null) : 0;
+    const content = body && signing !== null ? contentRoom({ body: body.height, imprint: signed ? signing : null }) : null;
+    const maxHeight = words && content !== null ? answerCap({ pageHeight, content, fontScale }) : content;
     const box = body && picture && maxHeight !== null ? pictureBox({ width: body.width, ratio: picture.naturalRatio, maxHeight }) : null;
     const wordsFit = words && content !== null && measured ? fitStep(wordsRoom(content, box?.height ?? null), measured) : null;
     const ready = words ? wordsFit !== null : content !== null;
     return { step: stepOfSize(wordsFit), maxLines: wordsFit?.maxLines ?? null, picture: box, ready, measuring: Boolean(words && body && !measured) };
-  }, [body, imprint, measured, picture, pageHeight, words]);
-  return { fit, onBodyLayout, onImprintLayout, onMeasured };
+  }, [body, imprint, measured, picture, pageHeight, words, signed, fontScale]);
+  return { fit, onBodyLayout, onImprintLayout, onMeasured, measureKey };
 }

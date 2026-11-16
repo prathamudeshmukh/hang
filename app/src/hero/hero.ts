@@ -24,6 +24,8 @@ export interface Stage {
   /** Going back: the feed fades off the wall over the flight, its text sooner (#33). */
   fadeFeedAway(): Promise<void>;
   setFeedOpacity(opacity: 0 | 1, durationMs: number): Promise<void>;
+  /** After a failed trip: the feed and everything on it shown at once, whatever the trip left hidden. */
+  recover(): void;
 }
 
 export interface HeroPorts {
@@ -167,7 +169,7 @@ export function createHero(ports: HeroPorts) {
       await work(on);
     } catch (error) {
       ports.warn(`Hero trip failed: ${error instanceof Error ? error.message : String(error)}`);
-      await on.setFeedOpacity(1, INSTANT);
+      on.recover();
       dispatch({ type: 'abort' });
     } finally {
       busy = false;

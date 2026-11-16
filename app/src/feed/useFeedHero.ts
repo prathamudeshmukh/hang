@@ -2,8 +2,7 @@ import { usePreventRemove } from 'expo-router';
 import { useCallback, useRef, useState, useSyncExternalStore } from 'react';
 import { useAnimatedStyle } from 'react-native-reanimated';
 import type { CardModel } from '@/grid/cardModel';
-import { hero, rememberFeedFrame, windowFeedFrame } from '@/hero/appHero';
-import type { FeedFrame } from '@/hero/geometry';
+import { feedFrame, hero, rememberFeedLayout } from '@/hero/appHero';
 import { feedOpacity, feedTextOpacity, feedTrailOpacity } from '@/hero/heroValues';
 import { hidesFeedMedia } from '@/hero/trip';
 
@@ -15,7 +14,6 @@ export const reportMediaDrawn = (id: string) => hero.feedDrawn(id);
  */
 export function useFeedHero() {
   const shown = useRef<CardModel | null>(null);
-  const frame = useRef<FeedFrame | null>(null);
   const [guarded, setGuarded] = useState(true);
 
   usePreventRemove(guarded, ({ repeat }) => {
@@ -23,18 +21,14 @@ export function useFeedHero() {
       setGuarded(false);
       repeat();
     };
-    hero.back({ card: shown.current, feed: frame.current ?? windowFeedFrame(), pop });
+    hero.back({ card: shown.current, feed: feedFrame(), pop });
   });
 
   const onShown = useCallback((card: CardModel | null) => {
     shown.current = card;
   }, []);
-  const onFrame = useCallback((next: FeedFrame) => {
-    frame.current = next;
-    rememberFeedFrame(next);
-  }, []);
   const opacity = useAnimatedStyle(() => ({ opacity: feedOpacity.value }));
-  return { onShown, onFrame, opacity };
+  return { onShown, onLayout: rememberFeedLayout, opacity };
 }
 
 /** The feed's words leave sooner than the feed on the way back (#33). */

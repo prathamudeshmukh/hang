@@ -115,6 +115,10 @@ describe('toFeedPage: a post page’s parts (#59)', () => {
     assert.equal(postOf({ text: '' }).words, 'Ada on X');
   });
 
+  it('keeps the title as words for a picture-only post nobody signs, as its print does', () => {
+    assert.equal(postOf({ text: '', handle: null }, WITH_THUMB).words, 'Ada on X');
+  });
+
   it('signs with the handle alone when there is no author', () => {
     assert.deepEqual(postOf({ text: 'hi' }).imprint, { author: null, handle: '@ada' });
   });

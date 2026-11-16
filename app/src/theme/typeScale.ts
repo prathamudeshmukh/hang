@@ -83,6 +83,11 @@ export function tokensOf(voice: Voice): readonly TypeToken[] {
   return (Object.keys(TYPE_SCALE) as TypeToken[]).filter((token) => TYPE_SCALE[token].voice === voice);
 }
 
-export function postFitStyle({ font, size, leading }: PostFitStep): TextStyleValues {
+/** CJK words fall back to a system face: set from the upright cut (or Android slants them) with room between lines. */
+const CJK_LEADING = 1.4;
+const UPRIGHT_OF: Record<PostFitStep['font'], string> = { [FONT_FILE.displayItalicBook]: FONT_FILE.displayBook, [FONT_FILE.displayItalic]: FONT_FILE.displayRegular };
+
+export function postFitStyle({ font, size, leading }: PostFitStep, cjk = false): TextStyleValues {
+  if (cjk) return { fontFamily: UPRIGHT_OF[font], fontSize: size, lineHeight: Math.round(size * Math.max(leading, CJK_LEADING)), letterSpacing: 0 };
   return { fontFamily: font, fontSize: size, lineHeight: Math.round(size * leading), letterSpacing: size * POST_FIT_TRACKING };
 }

@@ -47,6 +47,8 @@ interface StageInputs {
 function createStage(values: StageValues, { wallRaised, tuning }: StageInputs): Stage {
   const { from, to, progress, backdrop, flyerOpacity, colors } = values;
   const roomRaised = SCREENING_ROOM.raised;
+  /** A post page has no media box: its print lands in the screen's own color and melts into the page (#59). */
+  const roomColor = (flight: Flight) => (flight.look.landing.fit === 'words' ? SCREENING_ROOM.wall : roomRaised);
   return {
     board(flight: Flight) {
       from.set(flight.from);
@@ -55,7 +57,7 @@ function createStage(values: StageValues, { wallRaised, tuning }: StageInputs): 
       flyerOpacity.set(1);
       // Going back, the feed itself is the ground: it fades off the wall under the flyer (fadeFeedAway).
       backdrop.set(0);
-      colors.set(flight.direction === 'out' ? [wallRaised(), roomRaised] : [roomRaised, wallRaised()]);
+      colors.set(flight.direction === 'out' ? [wallRaised(), roomColor(flight)] : [roomColor(flight), wallRaised()]);
       if (flight.direction === 'out') feedTrailOpacity.set(0);
     },
     fly(flight: Flight) {
@@ -75,6 +77,11 @@ function createStage(values: StageValues, { wallRaised, tuning }: StageInputs): 
         feedTrailOpacity.set(withDelay(TRAIL_DELAY_MS, withTiming(1, QUICK)));
       }
       return animated((resolve) => flyerOpacity.set(withDelay(TEXT_DELAY_MS, withTiming(0, QUICK, () => scheduleOnRN(resolve)))));
+    },
+    recover() {
+      [feedOpacity, feedTextOpacity, feedTrailOpacity].forEach((value) => value.set(1));
+      flyerOpacity.set(0);
+      backdrop.set(0);
     },
     setFeedOpacity(opacity: 0 | 1, durationMs: number) {
       if (opacity === 1) feedTextOpacity.set(1);

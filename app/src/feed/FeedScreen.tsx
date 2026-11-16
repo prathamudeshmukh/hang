@@ -1,7 +1,7 @@
 import { NavigationBar } from 'expo-navigation-bar';
 import { StatusBar } from 'expo-status-bar';
 import { useCallback, useEffect, useRef, useState, type RefObject } from 'react';
-import { FlatList, useWindowDimensions, View, type LayoutChangeEvent, type ListViewToken } from 'react-native';
+import { FlatList, View, type LayoutChangeEvent, type ListViewToken } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { openItem } from '@/home/appItemActions';
@@ -19,7 +19,6 @@ import type { PageStep } from './pageA11y';
 import type { FeedSession } from './feedSession';
 import { useFeedStyles } from './feedStyles';
 import { MoveSheet } from './MoveSheet';
-import { postWordsTop } from './post/postLayout';
 import { TopShade } from './TopShade';
 import type { CardModel } from '@/grid/cardModel';
 import { reportMediaDrawn, useFeedHero, useFeedTextFade } from './useFeedHero';
@@ -143,13 +142,12 @@ export function FeedScreen({ session, sessionKey }: { readonly session: FeedSess
   const styles = useFeedStyles();
   const pages = useFeedPages(session, sessionKey);
   const [height, setHeight] = useState(0);
-  const { onShown, onFrame, opacity } = useFeedHero();
+  const { onShown, onLayout: reportLayout, opacity } = useFeedHero();
   const insets = useSafeAreaInsets();
-  const { fontScale } = useWindowDimensions();
   const onLayout = (event: LayoutChangeEvent) => {
     const { width, height: laidOut } = event.nativeEvent.layout;
     setHeight(laidOut);
-    onFrame({ width, height: laidOut, wordsTop: postWordsTop({ topInset: insets.top, fontScale }) });
+    reportLayout({ width, height: laidOut, topInset: insets.top });
   };
   useEffect(() => {
     if (pages.length === 0) onShown(null);

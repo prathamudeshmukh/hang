@@ -8,7 +8,7 @@ import { usePostStyles } from './postStyles';
 export function PostPicture({ id, media, box }: { readonly id: string; readonly media: CardMedia; readonly box: Box }) {
   const styles = usePostStyles();
   return (
-    <View style={[styles.picture, box]}>
+    <View style={[styles.picture, !media.uri && styles.waiting, box]}>
       {media.uri ? <Image source={{ uri: media.uri }} recyclingKey={id} style={styles.fill} contentFit="cover" accessible={false} /> : null}
     </View>
   );

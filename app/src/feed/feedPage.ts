@@ -1,5 +1,5 @@
 import { joinNote } from '../grid/catalogueNote.ts';
-import { sameCard, type CardMedia, type CardModel } from '../grid/cardModel.ts';
+import { postWords, sameCard, type CardMedia, type CardModel } from '../grid/cardModel.ts';
 import { actionFor, movedNote, type FeedAction } from './feedCopy.ts';
 
 export type FeedMedia =
@@ -59,13 +59,10 @@ export interface FeedPageExtras {
   readonly saved?: string | null;
 }
 
-function postMediaOf({ postText, media, title, site, author, handle }: CardModel): PostMedia {
-  return {
-    kind: 'post',
-    words: postText ?? (media ? null : (title ?? site)),
-    imprint: author || handle ? { author, handle } : null,
-    picture: media,
-  };
+/** The same words the post's print sets (#58), so a flight never lands words on a page without them. */
+function postMediaOf(card: CardModel): PostMedia {
+  const { author, handle } = card;
+  return { kind: 'post', words: postWords(card), imprint: author || handle ? { author, handle } : null, picture: card.media };
 }
 
 export function feedMediaOf(card: CardModel): FeedMedia {

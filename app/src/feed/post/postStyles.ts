@@ -14,6 +14,8 @@ export const usePostStyles = makeStyles(({ color }) => ({
   handle: { color: color.ink3 },
   seam: { height: HAIRLINE, backgroundColor: color.rule, marginVertical: POST_SEAM_GAP },
   picture: { borderRadius: RADIUS.print, overflow: 'hidden', backgroundColor: color.raised },
+  /** Fetching fills in (DESIGN.md §7): the box waits dashed until its thumbnail comes. */
+  waiting: { backgroundColor: 'transparent', borderWidth: 1, borderStyle: 'dashed', borderColor: color.ink3 },
   fill: { width: '100%', height: '100%' },
   pills: { flexDirection: 'row', gap: SPACE.chip },
   hidden: { opacity: 0 },

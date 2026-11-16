@@ -33,7 +33,7 @@ export function ActionText({ color = 'ink', ...props }: VoiceProps<ActionToken>)
 }
 
 /** A post page's words at one `post-fit` step (DESIGN.md §4): a name, in the italic display cut. */
-export function PostFitText({ step, style, ...rest }: TextProps & { readonly step: PostFitStep }) {
+export function PostFitText({ step, cjk = false, style, ...rest }: TextProps & { readonly step: PostFitStep; readonly cjk?: boolean }) {
   const theme = useTheme();
-  return <Text {...rest} style={[postFitStyle(step), { color: theme.color.ink }, style]} />;
+  return <Text {...rest} style={[postFitStyle(step, cjk), { color: theme.color.ink }, style]} />;
 }

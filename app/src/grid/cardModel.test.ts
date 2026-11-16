@@ -90,6 +90,11 @@ describe('toCardModel: notes', () => {
 });
 
 describe('toCardModel: content', () => {
+  it('folds X’s “math bold” letters back into plain ones, so the face sets them and TalkBack reads words (#59)', () => {
+    const card = toCardModel(ready({ kind: 'post', post: { text: 'like an \u{1D65E}\u{1D663}\u{1D669}ern ✓' } }), null, CARD_NOW);
+    assert.equal(card.postText, 'like an intern ✓');
+  });
+
   it('takes the post text only when it is text', () => {
     assert.equal(toCardModel(ready({ kind: 'post', post: { text: 'just setting up' } }), null, CARD_NOW).postText, 'just setting up');
     assert.equal(toCardModel(ready({ kind: 'post', post: { text: ['no'] } }), null, CARD_NOW).postText, null);

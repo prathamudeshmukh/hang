@@ -53,6 +53,9 @@ export function heroHarness({ reduceMotion = false, timeoutsFire = false, withSt
       calls.push('feed:away');
       return feedFade;
     },
+    recover: () => {
+      calls.push('recover');
+    },
     setFeedOpacity: (opacity, durationMs) => {
       calls.push(`feed:${opacity}:${durationMs}`);
       return Promise.resolve();

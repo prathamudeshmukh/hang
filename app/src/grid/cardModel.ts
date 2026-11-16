@@ -59,6 +59,14 @@ function textField(json: Record<string, unknown> | null, field: string): string 
   return typeof value === 'string' && value.length > 0 ? value : null;
 }
 
+/** Mathematical Alphanumeric Symbols: X's "bold" and "italic" letters, which no text face sets and TalkBack spells out. */
+const MATH_LETTERS = /[\u{1D400}-\u{1D7FF}]/gu;
+
+/** A post's words with those letters folded back into plain ones (#59). */
+function plainLetters(text: string | null): string | null {
+  return text?.replace(MATH_LETTERS, (letter) => letter.normalize('NFKC')) ?? null;
+}
+
 function variantOf(item: Item): CardVariant {
   if (item.status === 'failed') return 'failed';
   if (item.status !== 'ready') return 'pending';
@@ -166,7 +174,7 @@ export function toCardModel(item: Item, thumbUri: string | null, now: Date): Car
     site,
     note,
     media: variant === 'pending' ? null : mediaOf(item, thumbUri, now),
-    postText: textField(item.post, 'text'),
+    postText: plainLetters(textField(item.post, 'text')),
     byline,
     author,
     handle,

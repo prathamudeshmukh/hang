@@ -11,6 +11,7 @@ import { useFeedTextFade, useFeedTrailFade, useHiddenUnderFlyer } from '../useFe
 import { PostImprint } from './PostImprint';
 import { PostMeasure } from './PostMeasure';
 import { PostPicture } from './PostPicture';
+import { isMostlyCjk } from './postFit';
 import { POST_NOTE_TOP } from './postLayout';
 import { usePostStyles } from './postStyles';
 import { usePostFit, type PostFit } from './usePostFit';
@@ -25,7 +26,7 @@ interface WordsProps {
 function Words({ id, post, fit }: WordsProps) {
   if (post.words && fit.step) {
     return (
-      <PostFitText step={fit.step} testID="feed-post-words" numberOfLines={fit.maxLines ?? undefined} ellipsizeMode="tail">
+      <PostFitText step={fit.step} cjk={isMostlyCjk(post.words)} testID="feed-post-words" numberOfLines={fit.maxLines ?? undefined} ellipsizeMode="tail">
         {post.words}
       </PostFitText>
     );
@@ -53,7 +54,13 @@ export function PostPageView({ page, post, height, bottomInset, onOpen, onMove, 
   const trailFade = useFeedTrailFade();
   const { id } = page.card;
   const hidden = useHiddenUnderFlyer(id);
-  const { fit, onBodyLayout, onImprintLayout, onMeasured } = usePostFit({ words: post.words, picture: post.picture, pageHeight: height, fontScale });
+  const { fit, onBodyLayout, onImprintLayout, onMeasured, measureKey } = usePostFit({
+    words: post.words,
+    signed: post.imprint !== null,
+    picture: post.picture,
+    pageHeight: height,
+    fontScale,
+  });
   useEffect(() => {
     if (fit.ready) onMediaDrawn(id);
   }, [fit.ready, id, onMediaDrawn]);
@@ -74,13 +81,15 @@ export function PostPageView({ page, post, height, bottomInset, onOpen, onMove, 
           <NoteText testID="feed-note" numberOfLines={1}>{page.note}</NoteText>
         </Animated.View>
         <View style={styles.body} onLayout={onBodyLayout}>
-          {fit.measuring && post.words ? <PostMeasure words={post.words} onMeasured={onMeasured} /> : null}
+          {fit.measuring && post.words ? <PostMeasure key={measureKey} words={post.words} onMeasured={onMeasured} /> : null}
           <View style={[!fit.ready && styles.unsettled, hidden && styles.hidden]}>
             <Words id={id} post={post} fit={fit} />
           </View>
-          <Animated.View style={[!fit.ready && styles.unsettled, trailFade]}>
-            <PostImprint imprint={post.imprint} onLayout={onImprintLayout} />
-          </Animated.View>
+          <View style={!fit.ready && styles.unsettled}>
+            <Animated.View style={trailFade}>
+              <PostImprint imprint={post.imprint} onLayout={onImprintLayout} />
+            </Animated.View>
+          </View>
           <View style={!fit.ready && styles.unsettled}>
             <Answer id={id} post={post} fit={fit} />
           </View>

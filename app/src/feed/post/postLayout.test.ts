@@ -1,7 +1,7 @@
 /// <reference types="node" />
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
-import { contentRoom, pictureBox, pictureCap, postWordsTop, wordsPlace, wordsRoom } from './postLayout.ts';
+import { answerCap, contentRoom, pictureBox, pictureCap, postWordsTop, wordsPlace, wordsRoom } from './postLayout.ts';
 
 describe('postWordsTop', () => {
   it('starts the words under the status bar, the counter row, the note and one rhythm', () => {
@@ -54,6 +54,10 @@ describe('contentRoom', () => {
     assert.equal(contentRoom({ body: 500, imprint: 20 }), 500 - 14 - 16 - 20 - 24);
   });
 
+  it('keeps no gap for an imprint when nobody signs', () => {
+    assert.equal(contentRoom({ body: 500, imprint: null }), 500 - 14 - 24);
+  });
+
   it('is never negative on a page too short for anything', () => {
     assert.equal(contentRoom({ body: 30, imprint: 20 }), 0);
   });
@@ -66,5 +70,19 @@ describe('wordsRoom', () => {
 
   it('leaves the seam and the picture below the words', () => {
     assert.equal(wordsRoom(426, 200), 426 - 33 - 200);
+  });
+});
+
+describe('answerCap', () => {
+  it('is 40% of the page when the words have room to spare', () => {
+    assert.equal(answerCap({ pageHeight: 760, content: 600, fontScale: 1 }), 304);
+  });
+
+  it('leaves the seam and one smallest line of words, so the picture never pushes onto the pills', () => {
+    assert.equal(answerCap({ pageHeight: 700, content: 290, fontScale: 2 }), 290 - 33 - 54);
+  });
+
+  it('is never negative', () => {
+    assert.equal(answerCap({ pageHeight: 700, content: 20, fontScale: 2 }), 0);
   });
 });
