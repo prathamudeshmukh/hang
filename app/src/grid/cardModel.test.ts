@@ -79,9 +79,8 @@ describe('toCardModel: notes', () => {
     assert.equal(card.note, 'opens in TikTok');
   });
 
-  it('names a post by its handle, or its site without one', () => {
-    assert.equal(toCardModel(ready({ kind: 'post', post: { handle: 'jack', text: 'hi' } }), null, CARD_NOW).note, 'post · @jack');
-    assert.equal(toCardModel(ready({ kind: 'post', post: { handle: 42 } }), null, CARD_NOW).note, 'post · Aeon');
+  it('names an undated post by its site, never its handle (#59)', () => {
+    assert.equal(toCardModel(ready({ kind: 'post', post: { handle: 'jack', text: 'hi' } }), null, CARD_NOW).note, 'post · Aeon');
   });
 
   it('notes an image and a link by site', () => {
@@ -131,9 +130,19 @@ describe('toCardModel: posts show who said it (#58)', () => {
     assert.deepEqual(notes, ['post · 3 Nov', 'post · 24 Dec 2025']);
   });
 
-  it('keeps the handle in the note without a usable posted date', () => {
+  it('falls back to the site without a usable posted date: the handle signs the words instead (#59)', () => {
     const notes = [undefined, 'not a date'].map((posted_at) => toCardModel(post({ posted_at }), null, NOW).note);
-    assert.deepEqual(notes, ['post · @ada', 'post · @ada']);
+    assert.deepEqual(notes, ['post · Aeon', 'post · Aeon']);
+  });
+
+  it('keeps the author and the handle apart for the imprint (#59)', () => {
+    const card = toCardModel(post({ author: 'Ada Lovelace' }), null, NOW);
+    assert.deepEqual([card.author, card.handle], ['Ada Lovelace', '@ada']);
+  });
+
+  it('has neither author nor handle when the server gave none', () => {
+    const card = toCardModel(post({ handle: null }), null, NOW);
+    assert.deepEqual([card.author, card.handle], [null, null]);
   });
 
   it('says the author and the words in its label', () => {
@@ -141,12 +150,8 @@ describe('toCardModel: posts show who said it (#58)', () => {
     assert.equal(card.accessibilityLabel, 'post, Ada Lovelace, The engine might compose music, post · 3 Nov');
   });
 
-  it('does not say the handle twice when the note already has it', () => {
-    assert.equal(toCardModel(post({}), null, NOW).accessibilityLabel, 'post, The engine might compose music, post · @ada');
-  });
-
-  it('still says an author whose name only happens to sit inside the handle', () => {
-    assert.equal(toCardModel(post({ author: 'ada' }), null, NOW).accessibilityLabel, 'post, ada, The engine might compose music, post · @ada');
+  it('says the handle when there is no author', () => {
+    assert.equal(toCardModel(post({}), null, NOW).accessibilityLabel, 'post, @ada, The engine might compose music, post · Aeon');
   });
 
   it('leaves the byline off cards that are not posts', () => {

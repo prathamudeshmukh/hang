@@ -7,6 +7,8 @@ export const FONT_FILE = {
   textItalic: 'Newsreader-Text-Italic',
   displayBook: 'Newsreader-Display-Book',
   displayRegular: 'Newsreader-Display-Regular',
+  displayItalicBook: 'Newsreader-Display-Italic-Book',
+  displayItalic: 'Newsreader-Display-Italic',
   sansMedium: 'HankenGrotesk-Medium',
   sansSemiBold: 'HankenGrotesk-SemiBold',
 } as const;
@@ -36,6 +38,8 @@ export const TYPE_SCALE = {
   label: { voice: 'note', font: FONT_FILE.textItalic, size: 14, leading: 1.35, tracking: 0 },
   /** Post text on a card (#29): the post is the content, so it's set as a name in the italic cut. */
   post: { voice: 'name', font: FONT_FILE.textItalic, size: 15, leading: 1.35, tracking: 0 },
+  /** Who signs a post page's words, under the last line (#59): a name, upright. */
+  imprint: { voice: 'name', font: FONT_FILE.textRegular, size: 16, leading: 1.25, tracking: 0 },
   /** Who wrote a post, above its words on a card (#58): a name, a step under the words. */
   byline: { voice: 'name', font: FONT_FILE.textRegular, size: 14, leading: 1.3, tracking: 0 },
   action: { voice: 'action', font: FONT_FILE.sansSemiBold, size: 15, leading: 1.2, tracking: 0 },
@@ -44,6 +48,22 @@ export const TYPE_SCALE = {
 } as const satisfies Record<string, ScaleEntry>;
 
 export type TypeToken = keyof typeof TYPE_SCALE;
+
+/**
+ * `post-fit` (DESIGN.md §4): a post page's words take the largest step that fits, never a size in between (#59).
+ * Largest first; 40 and 36 are in the 350 weight, like the feed's titles.
+ */
+export const POST_FIT = [
+  { size: 40, leading: 1.06, font: FONT_FILE.displayItalicBook },
+  { size: 36, leading: 1.12, font: FONT_FILE.displayItalicBook },
+  { size: 30, leading: 1.17, font: FONT_FILE.displayItalic },
+  { size: 26, leading: 1.23, font: FONT_FILE.displayItalic },
+  { size: 22, leading: 1.32, font: FONT_FILE.displayItalic },
+  { size: 19, leading: 1.42, font: FONT_FILE.displayItalic },
+] as const;
+
+export type PostFitStep = (typeof POST_FIT)[number];
+const POST_FIT_TRACKING = -0.012;
 
 export interface TextStyleValues {
   readonly fontFamily: string;
@@ -61,4 +81,8 @@ export function textStyle(token: TypeToken): TextStyleValues {
 /** Tokens that belong to a voice, so a NoteText can never be set in an action face by mistake. */
 export function tokensOf(voice: Voice): readonly TypeToken[] {
   return (Object.keys(TYPE_SCALE) as TypeToken[]).filter((token) => TYPE_SCALE[token].voice === voice);
+}
+
+export function postFitStyle({ font, size, leading }: PostFitStep): TextStyleValues {
+  return { fontFamily: font, fontSize: size, lineHeight: Math.round(size * leading), letterSpacing: size * POST_FIT_TRACKING };
 }

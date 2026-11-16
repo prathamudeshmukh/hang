@@ -1,5 +1,5 @@
 import { memo } from 'react';
-import { View, type AccessibilityActionEvent } from 'react-native';
+import { View } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { Pill } from '@/theme/Pill';
 import { NameText, NoteText } from '@/theme/Text';
@@ -7,15 +7,11 @@ import { samePage, type FeedPage } from './feedPage';
 import { FeedMediaView } from './FeedMediaView';
 import { mediaHeight } from './feedLayout';
 import { useFeedStyles } from './feedStyles';
+import { PAGE_ACTIONS, stepOf, type PageStep } from './pageA11y';
+import { PostPageView } from './post/PostPageView';
 import { useFeedTextFade } from './useFeedHero';
 
 const TITLE_LINES = 3;
-const PAGE_ACTIONS = [
-  { name: 'next', label: 'Next' },
-  { name: 'previous', label: 'Previous' },
-] as const;
-
-export type PageStep = 'next' | 'previous';
 
 export interface FeedPageViewProps {
   readonly page: FeedPage;
@@ -29,13 +25,8 @@ export interface FeedPageViewProps {
   readonly onMediaDrawn: (id: string) => void;
 }
 
-function stepOf(event: AccessibilityActionEvent): PageStep | null {
-  const { actionName } = event.nativeEvent;
-  return actionName === 'next' || actionName === 'previous' ? actionName : null;
-}
-
-/** One screen of the feed: media, then note, title, summary and the Read/Watch/Open and Move pills (DESIGN.md §8). */
-export const FeedPageView = memo(function FeedPageView({ page, height, bottomInset, onOpen, onMove, onStep, onMediaDrawn }: FeedPageViewProps) {
+/** Media, then note, title, summary and the Read/Watch/Open and Move pills (DESIGN.md §8). */
+function MediaPageView({ page, height, bottomInset, onOpen, onMove, onStep, onMediaDrawn }: FeedPageViewProps) {
   const styles = useFeedStyles();
   const textFade = useFeedTextFade();
   return (
@@ -64,6 +55,12 @@ export const FeedPageView = memo(function FeedPageView({ page, height, bottomIns
       </Animated.View>
     </View>
   );
+}
+
+/** One screen of the feed; a post is its own page, set as a broadside (#59). */
+export const FeedPageView = memo(function FeedPageView(props: FeedPageViewProps) {
+  const { media } = props.page;
+  return media.kind === 'post' ? <PostPageView {...props} post={media} /> : <MediaPageView {...props} />;
 }, (previous, next) => {
   const { page, ...handlers } = previous;
   const { page: nextPage, ...nextHandlers } = next;

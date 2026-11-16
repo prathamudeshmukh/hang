@@ -1,4 +1,5 @@
 import { mediaHeight } from '../feed/feedLayout.ts';
+import { wordsPlace, type PostFrame } from '../feed/post/postLayout.ts';
 
 /** A window rect, as measureInWindow reports it. */
 export interface Rect {
@@ -13,8 +14,14 @@ export interface Size {
   readonly height: number;
 }
 
-/** Where a feed page draws its media: whole images fit inside the box, everything else fills it (#31). */
-export type Landing = { readonly fit: 'contain'; readonly ratio: number } | { readonly fit: 'cover' };
+/** The feed as laid out: its size, and where a post page's words begin (#59). */
+export type FeedFrame = PostFrame;
+
+/**
+ * Where a feed page draws its media: whole images fit inside the box, everything else fills it (#31);
+ * a post lands on its words' place instead (#59).
+ */
+export type Landing = { readonly fit: 'contain'; readonly ratio: number } | { readonly fit: 'cover' } | { readonly fit: 'words' };
 
 export type Axis = 'x' | 'y';
 
@@ -32,7 +39,8 @@ export function fittedRect(box: Rect, ratio: number): Rect {
 }
 
 /** The rect a flight to (or from) the feed uses, so the swap with the real image is pixel-identical. */
-export function landingRect(feed: Size, landing: Landing): Rect {
+export function landingRect(feed: FeedFrame, landing: Landing, print: Rect): Rect {
+  if (landing.fit === 'words') return wordsPlace(feed, print.height / print.width);
   const box = feedMediaRect(feed);
   return landing.fit === 'contain' ? fittedRect(box, landing.ratio) : box;
 }

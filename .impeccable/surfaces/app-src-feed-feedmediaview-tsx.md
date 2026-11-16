@@ -38,5 +38,6 @@ answers across one seam). seed:270728d6c8615ec7
 
 FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance
 
-Unresolved: the size steps and the minimum before clamping; whether multi-image posts show the first image or a strip;
-how the hero flight lands (grid print → words block).
+Resolved (#59, 2026-11-16): steps 40 · 36 · 30 · 26 · 22 · 19sp, clamp below 19; a strip in the design, the first
+picture only until #64; the flight lands on the words' place (measure-wide, top-aligned under the note). Built in
+`app/src/feed/post/` (`PostPageView.tsx`), not `FeedMediaView.tsx`.

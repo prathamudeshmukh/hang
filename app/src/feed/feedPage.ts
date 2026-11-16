@@ -7,8 +7,23 @@ export type FeedMedia =
   | { readonly kind: 'picture'; readonly media: CardMedia; readonly fit: 'contain' | 'cover'; readonly playable: boolean }
   /** No thumbnail: the title set large. */
   | { readonly kind: 'title' }
-  | { readonly kind: 'post' }
+  | PostMedia
   | { readonly kind: 'pending' };
+
+/** Who signs a post page's words (#59): the author's name and `@handle`, either of which may be missing. */
+export interface Imprint {
+  readonly author: string | null;
+  readonly handle: string | null;
+}
+
+/** A post page set as a broadside (DESIGN.md §8): the words, who signs them, the picture that answers them. */
+export interface PostMedia {
+  readonly kind: 'post';
+  /** Null for a picture-only post: the picture takes the words' place. */
+  readonly words: string | null;
+  readonly imprint: Imprint | null;
+  readonly picture: CardMedia | null;
+}
 
 /** A link has nothing behind it but the page, so its description gets room; elsewhere it's a teaser (#54). */
 const SUMMARY_LINES = { link: 5, other: 2 } as const;
@@ -44,9 +59,18 @@ export interface FeedPageExtras {
   readonly saved?: string | null;
 }
 
+function postMediaOf({ postText, media, title, site, author, handle }: CardModel): PostMedia {
+  return {
+    kind: 'post',
+    words: postText ?? (media ? null : (title ?? site)),
+    imprint: author || handle ? { author, handle } : null,
+    picture: media,
+  };
+}
+
 export function feedMediaOf(card: CardModel): FeedMedia {
   if (card.variant === 'pending') return { kind: 'pending' };
-  if (card.variant === 'post') return { kind: 'post' };
+  if (card.variant === 'post') return postMediaOf(card);
   if (!card.media) return { kind: 'title' };
   return { kind: 'picture', media: card.media, fit: card.variant === 'image' ? 'contain' : 'cover', playable: card.variant === 'video' };
 }

@@ -121,7 +121,9 @@ Feed (`src/feed/`, #31): grid cards, strip prints and Rediscover call `openFeed(
 through an in-memory `feedSession` (latest only; a restored route falls back to its start item), not the URL. `readFeed`
 keeps that order and re-reads contents live; `originsOf` lets a moved item say *moved to X*. Pages show `summary ?? description`; a link's runs to five lines and its
 note adds `savedNote` (*saved 3 days ago*, #54). Read/Watch/Open goes through
-`openItem` (records `last_opened_at`, opens the Custom Tab) until Phase 3. Everything inside `ScreeningRoom`
+`openItem` (records `last_opened_at`, opens the Custom Tab) until Phase 3. A post page (`src/feed/post/`, #59) is its own layout, set as a broadside: `PostMeasure`
+sets the words at all six `post-fit` steps unseen, pure `fitStep` picks the largest that fits the room `postLayout`
+works out, and the hero flies the print to `wordsPlace` (the feed reports `wordsTop` with its size). Everything inside `ScreeningRoom`
 (`src/theme/ScreeningRoom.tsx`) draws with the always-dark `SCREENING_ROOM` palette. `CollectionChips`
 (`src/collections/`) is shared by the share sheet and Move. E2E waits on `testID="feed"`, `feed-counter`, `feed-move`.
 

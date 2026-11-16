@@ -26,7 +26,7 @@ describe('toFeedPage media', () => {
     assert.deepEqual([page.media.kind, page.showTitle], ['title', false]);
   });
 
-  it('fills the media area with a post’s text', () => {
+  it('sets a post as the whole page, with no title below (#59)', () => {
     const page = pageOf({ status: 'ready', kind: 'post', post: { text: 'A thread' } });
     assert.deepEqual([page.media.kind, page.showTitle], ['post', false]);
   });
@@ -92,5 +92,34 @@ describe('toFeedPage link pages (#54)', () => {
   it('still says where a moved link went', () => {
     const page = pageOf(LINK, { summary: null, movedTo: 'Recipes', placeId: 'c2', saved: 'saved today' });
     assert.equal(page.note, 'moved to Recipes');
+  });
+});
+
+describe('toFeedPage: a post page’s parts (#59)', () => {
+  const postOf = (post: Record<string, unknown>, thumb: Partial<Item> = {}) => {
+    const { media } = pageOf({ status: 'ready', kind: 'post', title: 'Ada on X', post: { handle: 'ada', ...post }, ...thumb });
+    assert.ok(media.kind === 'post');
+    return media;
+  };
+
+  it('has the words, the imprint and the picture that answers them', () => {
+    const media = postOf({ text: 'A thread', author: 'Ada Lovelace' }, WITH_THUMB);
+    assert.deepEqual([media.words, media.imprint, media.picture?.uri], ['A thread', { author: 'Ada Lovelace', handle: '@ada' }, 'file:///thumb.jpg']);
+  });
+
+  it('has no words for a picture-only post: the picture takes their place', () => {
+    assert.deepEqual([postOf({ text: '' }, WITH_THUMB).words, postOf({ text: '' }, WITH_THUMB).picture !== null], [null, true]);
+  });
+
+  it('falls back to the title for a post with neither words nor picture, so the page is never empty', () => {
+    assert.equal(postOf({ text: '' }).words, 'Ada on X');
+  });
+
+  it('signs with the handle alone when there is no author', () => {
+    assert.deepEqual(postOf({ text: 'hi' }).imprint, { author: null, handle: '@ada' });
+  });
+
+  it('has no imprint when the server knew neither author nor handle', () => {
+    assert.equal(postOf({ text: 'hi', handle: null }).imprint, null);
   });
 });

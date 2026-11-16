@@ -139,7 +139,7 @@ Minimum rendered size is 12sp for anything functional. Everything scales with th
 
 ### Catalogue notes: format
 
-`11 min · Aeon` · `14 min · YouTube` · `post · @handle` · `saved in March` · `read · 8 Nov`
+`11 min · Aeon` · `14 min · YouTube` · `post · 3 Nov` · `saved in March` · `read · 8 Nov`
 
 - Lowercase except proper nouns; parts separated by ` · `
 - Durations: `N min` (round up); videos over an hour: `1 h 20`
@@ -225,7 +225,7 @@ Light tick on Save, on moving an item, and on the finish moment. Nowhere else.
 |---|---|
 | `article` | Lead image at its real aspect ratio (no image → title set in Newsreader on `raised`) · card title · *note: `9 min · site`* |
 | `video` | Thumbnail at its aspect ratio with a centred play triangle · title · *`14 min · YouTube`*. Cards that open another app show *`opens in TikTok`* |
-| `post` | Between two hairline rules: the author's name in upright Newsreader (14), then the text in Newsreader italic; media below, if any · *`post · 3 Nov`* (when it was posted). No name → `@handle` in its place; no date → *`post · @handle`* |
+| `post` | Between two hairline rules: the author's name in upright Newsreader (14), then the text in Newsreader italic; media below, if any · *`post · 3 Nov`* (when it was posted). No name → `@handle` in its place; no date → *`post · x.com`* (the site: the handle is already in the byline, #59) |
 | `image` | Image at its aspect ratio · title, if any · *`image · pinterest.com`* / *`image · screenshot`* |
 | `link` | Open Graph image · title · *`site`*. **No image: a wall label** on `raised`: the title in Newsreader (`title-s`, 4 lines), then the site's description in `label` (italic, `ink-2`, 4 lines); below it only *`site`*, so the site appears once. No description → the title alone |
 | pending | Dashed `ink-3` outline at a 4:5 ratio · *`fetching…`* · the raw URL below at 50% opacity |
@@ -291,9 +291,13 @@ post with its media on top, a tap-to-zoom image on the usual split page, and pil
   *@handle* in `screen-ink` at 64%. No name → *@handle* alone. Who said it signs the words; it never comes first.
 - **The picture answers:** across the seam, at its own shape, capped at 40% of the page height (a tall picture sits
   narrower, left-aligned). Several pictures sit in one strip at one height, in posting order; tapping one opens it
-  full screen, as image pages do. The words fit the space left above.
+  full screen, as image pages do. The words fit the space left above. For now only the first picture shows (#64).
+- **No words** (a picture-only post): the picture takes the words' place, at its own shape in the room they'd have
+  had, with no seam; the imprint signs under it.
+- **A tap on the words does nothing:** they're already read whole, and Open sits at the foot.
 - **No quote marks, boxes, avatars or counts.** The grid print's two rules fade out on the way in: the page has no frame.
-- **Arrival:** the hero flight lands the print on the words' place and scales it on the flight curve; its rules
+- **Arrival:** the hero flight lands the print on the words' place (the measure, top-aligned under the note, at the
+  print's own shape) and scales it on the flight curve; its rules
   fade, the words settle at their fitted size, and the imprint and pills fade in 120ms behind. Reduce motion: a
   120ms cross-fade.
 
