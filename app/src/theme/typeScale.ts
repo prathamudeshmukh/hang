@@ -34,6 +34,8 @@ export const TYPE_SCALE = {
   prompt: { voice: 'note', font: FONT_FILE.textItalic, size: 15, leading: 1.3, tracking: 0 },
   /** Post text on a card (#29): the post is the content, so it's set as a name in the italic cut. */
   post: { voice: 'name', font: FONT_FILE.textItalic, size: 15, leading: 1.35, tracking: 0 },
+  /** Who wrote a post, above its words on a card (#58): a name, a step under the words. */
+  byline: { voice: 'name', font: FONT_FILE.textRegular, size: 14, leading: 1.3, tracking: 0 },
   action: { voice: 'action', font: FONT_FILE.sansSemiBold, size: 15, leading: 1.2, tracking: 0 },
   actionS: { voice: 'action', font: FONT_FILE.sansSemiBold, size: 13, leading: 1.2, tracking: 0 },
   card: { voice: 'action', font: FONT_FILE.sansMedium, size: 13, leading: 1.25, tracking: 0 },

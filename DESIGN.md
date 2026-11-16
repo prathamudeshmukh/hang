@@ -128,6 +128,7 @@ Newsreader's optical-size axis is set automatically from the point size.
 | `title-s` | Newsreader | 18 / 1.15 | 400 | Section names, Rediscover, collection rows |
 | `body-read` | Newsreader | 17 / 1.6 | 400 | Reader body (user can adjust 15–21) |
 | `note` | Newsreader *italic* | 13 / 1.35 | 400 | Catalogue notes |
+| `byline` | Newsreader | 14 / 1.3 | 400 | A post card's author, above its words |
 | `action` | Hanken Grotesk | 15 / 1.2 | 600 | Buttons |
 | `action-s` | Hanken Grotesk | 13 / 1.2 | 600 | Chips, filters |
 | `card` | Hanken Grotesk | 13 / 1.25 | 500 | Card titles in the masonry grid |

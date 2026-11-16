@@ -2,11 +2,11 @@ import { View } from 'react-native';
 import { HeroFace } from '@/hero/HeroFace';
 import { Icon } from '@/theme/icons/Icon';
 import { ActionText, NameText, NoteText } from '@/theme/Text';
-import type { CardModel, CardVariant } from './cardModel';
+import { postWords, type CardModel, type CardVariant } from './cardModel';
 import { CardMediaBox } from './CardMediaBox';
 import { useGridStyles } from './gridStyles';
 
-const LINES = { cardTitle: 3, textCardTitle: 5, site: 2, post: 8, rawUrl: 2 } as const;
+const LINES = { cardTitle: 3, textCardTitle: 5, site: 2, byline: 1, post: 8, rawUrl: 2 } as const;
 
 type Body = (props: { readonly card: CardModel }) => React.JSX.Element;
 
@@ -61,13 +61,16 @@ function withMedia(Fallback: Body, options: { readonly playable?: boolean } = {}
   };
 }
 
+/** Between two rules: who said it, then what they said (#58); a picture-only post has just the name. */
 function PostCard({ card }: { readonly card: CardModel }) {
   const styles = useGridStyles();
+  const words = postWords(card);
   return (
     <>
       <HeroFace id={card.id} drawnOnLayout>
         <View style={styles.post}>
-          <NameText token="post" numberOfLines={LINES.post}>{card.postText ?? card.title ?? card.site}</NameText>
+          {card.byline ? <NameText token="byline" numberOfLines={LINES.byline}>{card.byline}</NameText> : null}
+          {words ? <NameText token="post" numberOfLines={LINES.post}>{words}</NameText> : null}
         </View>
         {card.media ? <View style={styles.postMedia}><CardMediaBox id={card.id} media={card.media} /></View> : null}
       </HeroFace>

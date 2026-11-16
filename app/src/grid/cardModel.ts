@@ -1,5 +1,6 @@
 import type { Item, ItemKind } from '../db/schema.ts';
 import { hostOf } from './host.ts';
+import { dayWords } from '../copy/dayWords.ts';
 import { durationNote, joinNote, minutesNote } from './catalogueNote.ts';
 
 /** Height over width. Taller is cropped from the top, wider from both sides (#29). */
@@ -37,6 +38,8 @@ export interface CardModel {
   /** Null makes a text card. */
   readonly media: CardMedia | null;
   readonly postText: string | null;
+  /** Who wrote a post (#58): the author's name, else `@handle`. Null on every other kind. */
+  readonly byline: string | null;
   readonly accessibilityLabel: string;
 }
 
@@ -61,14 +64,29 @@ function opensApp(item: Item): boolean {
   return item.embed?.playable_inline === false;
 }
 
-function noteFor(item: Item, variant: CardVariant, site: string): string {
+function handleOf(item: Item): string | null {
   const handle = textField(item.post, 'handle');
+  return handle ? `@${handle}` : null;
+}
+
+function bylineOf(item: Item, variant: CardVariant): string | null {
+  return variant === 'post' ? (textField(item.post, 'author') ?? handleOf(item)) : null;
+}
+
+/** When a post was written, in words; null when the server had no date (the oEmbed fallback) or a bad one. */
+function postedWords(item: Item, now: Date): string | null {
+  const postedAt = textField(item.post, 'posted_at');
+  const posted = postedAt === null ? null : new Date(postedAt);
+  return posted === null || Number.isNaN(posted.getTime()) ? null : dayWords(posted, now);
+}
+
+function noteFor(item: Item, variant: CardVariant, site: string, now: Date): string {
   const notes: Record<CardVariant, () => string> = {
     pending: () => FETCHING,
     failed: () => COULD_NOT_READ,
     article: () => joinNote([minutesNote(item.readingMin), site]),
     video: () => (opensApp(item) ? `opens in ${site}` : joinNote([durationNote(item.durationS), site])),
-    post: () => joinNote(['post', handle ? `@${handle}` : site]),
+    post: () => joinNote(['post', postedWords(item, now) ?? handleOf(item) ?? site]),
     image: () => joinNote(['image', site]),
     link: () => site,
   };
@@ -86,11 +104,19 @@ function mediaOf(item: Item, thumbUri: string | null, now: Date): CardMedia | nu
   return awaitsImage(item, now) ? { ratio: WAITING_RATIO, naturalRatio: WAITING_RATIO, uri: null } : null;
 }
 
-/** Kind, title, note (DESIGN.md §10), skipping what isn't known yet or is already said. */
-function describe(item: Item, { variant, title, site, note }: Pick<CardModel, 'variant' | 'title' | 'site' | 'note'>): string {
+type Described = Pick<CardModel, 'variant' | 'title' | 'site' | 'note' | 'byline'>;
+
+/** Kind, byline, title, note (DESIGN.md §10), skipping what isn't known yet or the note already says. */
+function describe(item: Item, { variant, title, site, note, byline }: Described): string {
   const kind = variant === 'pending' ? null : (item.kind ?? FALLBACK_KIND);
-  const name = title ?? (note.includes(site) ? null : site);
-  return [kind, name, note].filter((part) => part !== null).join(', ');
+  const unsaid = (part: string | null) => (part === null || note.includes(part) ? null : part);
+  return [kind, unsaid(byline), title ?? unsaid(site), note].filter((part) => part !== null).join(', ');
+}
+
+/** What a post print sets between its rules (#58): its words; a picture-only post has none, its name is enough. */
+export function postWords(card: CardModel): string | null {
+  if (card.postText) return card.postText;
+  return card.media ? null : (card.title ?? card.site);
 }
 
 /** Cards are rebuilt on every live-query refresh; this keeps unchanged ones from redrawing. */
@@ -103,6 +129,7 @@ export function sameCard(a: CardModel, b: CardModel): boolean {
     a.title === b.title &&
     a.note === b.note &&
     a.postText === b.postText &&
+    a.byline === b.byline &&
     a.media?.ratio === b.media?.ratio &&
     a.media?.naturalRatio === b.media?.naturalRatio &&
     a.media?.uri === b.media?.uri &&
@@ -110,12 +137,13 @@ export function sameCard(a: CardModel, b: CardModel): boolean {
   );
 }
 
-/** `now` decides whether a card still waits for its image (#34). */
+/** `now` decides whether a card still waits for its image (#34) and how a post's date is said (#58). */
 export function toCardModel(item: Item, thumbUri: string | null, now: Date): CardModel {
   const variant = variantOf(item);
   const site = item.siteName ?? hostOf(item.sourceUrl);
   const title = item.title ?? item.sharedTitle ?? null;
-  const note = noteFor(item, variant, site);
+  const note = noteFor(item, variant, site, now);
+  const byline = bylineOf(item, variant);
   return {
     id: item.id,
     url: item.sourceUrl,
@@ -125,6 +153,7 @@ export function toCardModel(item: Item, thumbUri: string | null, now: Date): Car
     note,
     media: variant === 'pending' ? null : mediaOf(item, thumbUri, now),
     postText: textField(item.post, 'text'),
-    accessibilityLabel: describe(item, { variant, title, site, note }),
+    byline,
+    accessibilityLabel: describe(item, { variant, title, site, note, byline }),
   };
 }
