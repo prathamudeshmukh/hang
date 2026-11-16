@@ -1,12 +1,12 @@
 import type { Item } from '../../db/schema.ts';
 import { toCardModel, type CardModel } from '../../grid/cardModel.ts';
 import { anItem, CARD_NOW } from '../../grid/testing/anItem.ts';
-import type { Rect, Size } from '../geometry.ts';
+import type { FeedFrame, Rect } from '../geometry.ts';
 import { createHero, type HeroPorts, type Stage } from '../hero.ts';
 import { createOrigins } from '../origins.ts';
 import type { Flight } from '../trip.ts';
 
-export const FEED: Size = { width: 400, height: 1000 };
+export const FEED: FeedFrame = { width: 400, height: 1000, wordsTop: 120 };
 export const CARD_RECT: Rect = { x: 20, y: 300, width: 180, height: 240 };
 export const SCOPE = 'inbox';
 
@@ -52,6 +52,9 @@ export function heroHarness({ reduceMotion = false, timeoutsFire = false, withSt
     fadeFeedAway: () => {
       calls.push('feed:away');
       return feedFade;
+    },
+    recover: () => {
+      calls.push('recover');
     },
     setFeedOpacity: (opacity, durationMs) => {
       calls.push(`feed:${opacity}:${durationMs}`);

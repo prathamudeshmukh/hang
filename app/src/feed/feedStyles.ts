@@ -25,10 +25,6 @@ export const useFeedStyles = makeStyles(({ color }) => ({
     justifyContent: 'center',
   },
   titleMedia: { justifyContent: 'flex-end', padding: SPACE.margin, paddingBottom: SPACE.rhythm * 2 },
-  /** Post text between two hairline rules (DESIGN.md §5), its media under it. */
-  post: { padding: SPACE.margin, gap: SPACE.rhythm, backgroundColor: color.wall },
-  postText: { borderTopWidth: 1, borderBottomWidth: 1, borderColor: color.rule, paddingVertical: SPACE.inset },
-  postPicture: { flex: 1 },
   pendingFrame: { flex: 1, padding: SPACE.margin, backgroundColor: color.wall },
   pending: {
     flex: 1,

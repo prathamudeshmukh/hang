@@ -7,7 +7,7 @@ import type { FeedPage } from './feedPage';
 import { useFeedStyles } from './feedStyles';
 import { useHiddenUnderFlyer } from './useFeedHero';
 
-const LINES = { title: 6, post: 10, rawUrl: 3 } as const;
+const LINES = { title: 6, rawUrl: 3 } as const;
 
 /** Cropped pictures keep their top, as on the grid, so a flight lands without the crop jumping (#32). */
 const TOP_ANCHORED = 'top';
@@ -34,19 +34,6 @@ function Picture({ id, media, fit, playable, onDrawn }: PictureProps) {
   );
 }
 
-function Post({ page }: { readonly page: FeedPage }) {
-  const styles = useFeedStyles();
-  const { card } = page;
-  return (
-    <View style={[styles.picture, styles.post]}>
-      <View style={styles.postText}>
-        <NameText token="post" numberOfLines={LINES.post}>{card.postText ?? card.title ?? card.site}</NameText>
-      </View>
-      {card.media?.uri ? <Image source={{ uri: card.media.uri }} style={styles.postPicture} contentFit="contain" accessible={false} /> : null}
-    </View>
-  );
-}
-
 function Pending({ page }: { readonly page: FeedPage }) {
   const styles = useFeedStyles();
   return (
@@ -66,7 +53,7 @@ interface FeedMediaViewProps {
   readonly onDrawn: (id: string) => void;
 }
 
-/** The top ~56% of a feed page, by kind (#31). */
+/** The top ~56% of a feed page, by kind (#31); a post has no media box (#59). */
 export function FeedMediaView({ page, height, onDrawn }: FeedMediaViewProps) {
   const styles = useFeedStyles();
   const { media, card } = page;
@@ -81,7 +68,6 @@ export function FeedMediaView({ page, height, onDrawn }: FeedMediaViewProps) {
           <NameText token="display" numberOfLines={LINES.title}>{card.title ?? card.site}</NameText>
         </View>
       ) : null}
-      {media.kind === 'post' ? <Post page={page} /> : null}
       {media.kind === 'pending' ? <Pending page={page} /> : null}
     </View>
   );

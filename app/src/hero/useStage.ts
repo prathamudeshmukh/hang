@@ -5,12 +5,14 @@ import { MOTION, SCREENING_ROOM } from '@/theme/tokens';
 import { flightPlan, type FlightTuning, type Timing } from './flightPlan';
 import type { Rect } from './geometry';
 import type { Stage } from './hero';
-import { feedOpacity, feedTextOpacity } from './heroValues';
+import { feedOpacity, feedTextOpacity, feedTrailOpacity } from './heroValues';
 import type { Direction, Flight } from './trip';
 
 const ZERO_RECT: Rect = { x: 0, y: 0, width: 0, height: 0 };
 /** DESIGN.md §7: the text (here, the feed showing through) comes in 60ms behind the image. */
 const TEXT_DELAY_MS = 60;
+/** DESIGN.md §8 *Post pages*: the imprint and pills fade in 120ms behind the words. */
+const TRAIL_DELAY_MS = 120;
 const timingOf = ({ durationMs, curve: [x1, y1, x2, y2] }: Timing) => ({ duration: durationMs, easing: Easing.bezier(x1, y1, x2, y2) });
 const BASE = timingOf({ durationMs: MOTION.baseMs, curve: MOTION.easing });
 const QUICK = timingOf({ durationMs: MOTION.quickMs, curve: MOTION.easing });
@@ -45,6 +47,8 @@ interface StageInputs {
 function createStage(values: StageValues, { wallRaised, tuning }: StageInputs): Stage {
   const { from, to, progress, backdrop, flyerOpacity, colors } = values;
   const roomRaised = SCREENING_ROOM.raised;
+  /** A post page has no media box: its print lands in the screen's own color and melts into the page (#59). */
+  const roomColor = (flight: Flight) => (flight.look.landing.fit === 'words' ? SCREENING_ROOM.wall : roomRaised);
   return {
     board(flight: Flight) {
       from.set(flight.from);
@@ -53,7 +57,8 @@ function createStage(values: StageValues, { wallRaised, tuning }: StageInputs): 
       flyerOpacity.set(1);
       // Going back, the feed itself is the ground: it fades off the wall under the flyer (fadeFeedAway).
       backdrop.set(0);
-      colors.set(flight.direction === 'out' ? [wallRaised(), roomRaised] : [roomRaised, wallRaised()]);
+      colors.set(flight.direction === 'out' ? [wallRaised(), roomColor(flight)] : [roomColor(flight), wallRaised()]);
+      if (flight.direction === 'out') feedTrailOpacity.set(0);
     },
     fly(flight: Flight) {
       const plan = flightPlan(tuning(), flight.direction);
@@ -67,8 +72,16 @@ function createStage(values: StageValues, { wallRaised, tuning }: StageInputs): 
       return Promise.all([text, feed]).then(() => undefined);
     },
     leave(direction: Direction) {
-      if (direction === 'out') backdrop.set(withDelay(TEXT_DELAY_MS, withTiming(0, QUICK)));
+      if (direction === 'out') {
+        backdrop.set(withDelay(TEXT_DELAY_MS, withTiming(0, QUICK)));
+        feedTrailOpacity.set(withDelay(TRAIL_DELAY_MS, withTiming(1, QUICK)));
+      }
       return animated((resolve) => flyerOpacity.set(withDelay(TEXT_DELAY_MS, withTiming(0, QUICK, () => scheduleOnRN(resolve)))));
+    },
+    recover() {
+      [feedOpacity, feedTextOpacity, feedTrailOpacity].forEach((value) => value.set(1));
+      flyerOpacity.set(0);
+      backdrop.set(0);
     },
     setFeedOpacity(opacity: 0 | 1, durationMs: number) {
       if (opacity === 1) feedTextOpacity.set(1);

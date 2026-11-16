@@ -1,11 +1,9 @@
 import { usePreventRemove } from 'expo-router';
 import { useCallback, useRef, useState, useSyncExternalStore } from 'react';
-import { Dimensions } from 'react-native';
 import { useAnimatedStyle } from 'react-native-reanimated';
 import type { CardModel } from '@/grid/cardModel';
-import { hero, rememberFeedSize } from '@/hero/appHero';
-import type { Size } from '@/hero/geometry';
-import { feedOpacity, feedTextOpacity } from '@/hero/heroValues';
+import { feedFrame, hero, rememberFeedLayout } from '@/hero/appHero';
+import { feedOpacity, feedTextOpacity, feedTrailOpacity } from '@/hero/heroValues';
 import { hidesFeedMedia } from '@/hero/trip';
 
 export const reportMediaDrawn = (id: string) => hero.feedDrawn(id);
@@ -16,7 +14,6 @@ export const reportMediaDrawn = (id: string) => hero.feedDrawn(id);
  */
 export function useFeedHero() {
   const shown = useRef<CardModel | null>(null);
-  const size = useRef<Size | null>(null);
   const [guarded, setGuarded] = useState(true);
 
   usePreventRemove(guarded, ({ repeat }) => {
@@ -24,23 +21,24 @@ export function useFeedHero() {
       setGuarded(false);
       repeat();
     };
-    hero.back({ card: shown.current, feed: size.current ?? Dimensions.get('window'), pop });
+    hero.back({ card: shown.current, feed: feedFrame(), pop });
   });
 
   const onShown = useCallback((card: CardModel | null) => {
     shown.current = card;
   }, []);
-  const onSize = useCallback((next: Size) => {
-    size.current = next;
-    rememberFeedSize(next);
-  }, []);
   const opacity = useAnimatedStyle(() => ({ opacity: feedOpacity.value }));
-  return { onShown, onSize, opacity };
+  return { onShown, onLayout: rememberFeedLayout, opacity };
 }
 
 /** The feed's words leave sooner than the feed on the way back (#33). */
 export function useFeedTextFade() {
   return useAnimatedStyle(() => ({ opacity: feedTextOpacity.value }));
+}
+
+/** A post page's imprint and pills: in behind the words after a flight, out with the text going back (#59). */
+export function useFeedTrailFade() {
+  return useAnimatedStyle(() => ({ opacity: feedTextOpacity.value * feedTrailOpacity.value }));
 }
 
 /** True while the flyer stands in for this page's media on the way back, so it isn't left behind. */

@@ -26,6 +26,8 @@ CUTS = [
     ("Newsreader-Text-Italic", NEWSREADER_ITALIC, {"opsz": TEXT_OPSZ, "wght": 400}),
     ("Newsreader-Display-Book", NEWSREADER, {"opsz": DISPLAY_OPSZ, "wght": 350}),
     ("Newsreader-Display-Regular", NEWSREADER, {"opsz": DISPLAY_OPSZ, "wght": 400}),
+    ("Newsreader-Display-Italic-Book", NEWSREADER_ITALIC, {"opsz": DISPLAY_OPSZ, "wght": 350}),
+    ("Newsreader-Display-Italic", NEWSREADER_ITALIC, {"opsz": DISPLAY_OPSZ, "wght": 400}),
     ("HankenGrotesk-Medium", HANKEN, {"wght": 500}),
     ("HankenGrotesk-SemiBold", HANKEN, {"wght": 600}),
 ]

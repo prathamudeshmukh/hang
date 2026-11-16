@@ -40,6 +40,9 @@ export interface CardModel {
   readonly postText: string | null;
   /** Who wrote a post (#58): the author's name, else `@handle`. Null on every other kind. */
   readonly byline: string | null;
+  /** A post's author's name and `@handle`, apart, for the feed page's imprint (#59). Null on every other kind. */
+  readonly author: string | null;
+  readonly handle: string | null;
   /** The page's own description; only an imageless link's wall label draws it (#58). */
   readonly description: string | null;
   readonly accessibilityLabel: string;
@@ -54,6 +57,14 @@ export function clampRatio({ width, height }: { readonly width: number | null; r
 function textField(json: Record<string, unknown> | null, field: string): string | null {
   const value = json?.[field];
   return typeof value === 'string' && value.length > 0 ? value : null;
+}
+
+/** Mathematical Alphanumeric Symbols: X's "bold" and "italic" letters, which no text face sets and TalkBack spells out. */
+const MATH_LETTERS = /[\u{1D400}-\u{1D7FF}]/gu;
+
+/** A post's words with those letters folded back into plain ones (#59). */
+function plainLetters(text: string | null): string | null {
+  return text?.replace(MATH_LETTERS, (letter) => letter.normalize('NFKC')) ?? null;
 }
 
 function variantOf(item: Item): CardVariant {
@@ -71,8 +82,8 @@ function handleOf(item: Item): string | null {
   return handle ? `@${handle}` : null;
 }
 
-function bylineOf(item: Item, variant: CardVariant): string | null {
-  return variant === 'post' ? (textField(item.post, 'author') ?? handleOf(item)) : null;
+function authorOf(item: Item, variant: CardVariant): string | null {
+  return variant === 'post' ? textField(item.post, 'author') : null;
 }
 
 /** When a post was written, in words; null when the server had no date (the oEmbed fallback) or a bad one. */
@@ -88,7 +99,7 @@ function noteFor(item: Item, variant: CardVariant, site: string, now: Date): str
     failed: () => COULD_NOT_READ,
     article: () => joinNote([minutesNote(item.readingMin), site]),
     video: () => (opensApp(item) ? `opens in ${site}` : joinNote([durationNote(item.durationS), site])),
-    post: () => joinNote(['post', postedWords(item, now) ?? handleOf(item) ?? site]),
+    post: () => joinNote(['post', postedWords(item, now) ?? site]),
     image: () => joinNote(['image', site]),
     link: () => site,
   };
@@ -106,7 +117,7 @@ function mediaOf(item: Item, thumbUri: string | null, now: Date): CardMedia | nu
   return awaitsImage(item, now) ? { ratio: WAITING_RATIO, naturalRatio: WAITING_RATIO, uri: null } : null;
 }
 
-/** Whether the note ends on this word, as `post · @ada` ends on `@ada` (and not on `ada`). */
+/** Whether the note ends on this word, as `link · Aeon` ends on `Aeon` (and not on `eon`). */
 function saysLast(note: string, part: string): boolean {
   return note === part || note.endsWith(` ${part}`);
 }
@@ -137,6 +148,7 @@ export function sameCard(a: CardModel, b: CardModel): boolean {
     a.note === b.note &&
     a.postText === b.postText &&
     a.byline === b.byline &&
+    a.handle === b.handle &&
     a.description === b.description &&
     a.media?.ratio === b.media?.ratio &&
     a.media?.naturalRatio === b.media?.naturalRatio &&
@@ -151,7 +163,9 @@ export function toCardModel(item: Item, thumbUri: string | null, now: Date): Car
   const site = item.siteName ?? hostOf(item.sourceUrl);
   const title = item.title ?? item.sharedTitle ?? null;
   const note = noteFor(item, variant, site, now);
-  const byline = bylineOf(item, variant);
+  const author = authorOf(item, variant);
+  const handle = variant === 'post' ? handleOf(item) : null;
+  const byline = author ?? handle;
   return {
     id: item.id,
     url: item.sourceUrl,
@@ -160,8 +174,10 @@ export function toCardModel(item: Item, thumbUri: string | null, now: Date): Car
     site,
     note,
     media: variant === 'pending' ? null : mediaOf(item, thumbUri, now),
-    postText: textField(item.post, 'text'),
+    postText: plainLetters(textField(item.post, 'text')),
     byline,
+    author,
+    handle,
     description: item.description,
     accessibilityLabel: describe(item, { variant, title, site, note, byline }),
   };

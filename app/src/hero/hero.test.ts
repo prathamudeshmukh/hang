@@ -28,6 +28,15 @@ describe('hero: out to the feed', () => {
     assert.equal(harness.hero.trip().phase, 'idle');
   });
 
+  it('flies a post’s print to the words’ place, at the print’s own shape (#59)', async () => {
+    const harness = withFace(heroHarness());
+    harness.hero.open({ ids: IDS, card: aCard({ kind: 'post', post: { text: 'A thread' } }), scope: SCOPE });
+    await flush();
+    harness.hero.flyerDrawn();
+    await flush();
+    assert.deepEqual(harness.flights[0].to, { x: 16, y: FEED.wordsTop, width: 368, height: 368 * (CARD_RECT.height / CARD_RECT.width) });
+  });
+
   it('waits for the flyer to draw before opening the feed, so mounting it can’t starve the boarding wait', async () => {
     const harness = withFace(heroHarness());
     harness.hero.open({ ids: IDS, card: aCard(), scope: SCOPE });
@@ -86,13 +95,13 @@ describe('hero: out to the feed', () => {
     assert.deepEqual(harness.calls, ['push']);
   });
 
-  it('puts everything down and shows the feed when the flight fails', async () => {
+  it('puts everything down and shows the feed, words, imprint and pills, when the flight fails', async () => {
     const harness = withFace(heroHarness({ failFlight: true }));
     harness.hero.open({ ids: IDS, card: aCard(), scope: SCOPE });
     await flush();
     harness.hero.flyerDrawn();
     await flush();
-    assert.deepEqual([harness.hero.trip().phase, harness.calls.at(-1), harness.warnings.length], ['idle', 'feed:1:0', 1]);
+    assert.deepEqual([harness.hero.trip().phase, harness.calls.at(-1), harness.warnings.length], ['idle', 'recover', 1]);
   });
 });
 
@@ -146,7 +155,7 @@ describe('hero: back to the wall', () => {
   it('shows the feed again and keeps it when the flight back fails', async () => {
     const harness = await openedHarness({ failFlight: true });
     await flyBackToB(harness);
-    assert.deepEqual([harness.calls.includes('pop'), harness.calls.at(-1), harness.hero.trip().phase], [false, 'feed:1:0', 'idle']);
+    assert.deepEqual([harness.calls.includes('pop'), harness.calls.at(-1), harness.hero.trip().phase], [false, 'recover', 'idle']);
   });
 
   it('cross-fades back over 340ms when there is nothing to land on (moved away)', async () => {

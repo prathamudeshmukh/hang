@@ -1,9 +1,9 @@
 import { Text, type TextProps } from 'react-native';
 import { useTheme } from './theme';
 import type { Palette } from './tokens';
-import { textStyle, type TypeToken } from './typeScale';
+import { postFitStyle, textStyle, type PostFitStep, type TypeToken } from './typeScale';
 
-type NameToken = 'display' | 'titleL' | 'title' | 'titleS' | 'bodyRead' | 'post' | 'byline';
+type NameToken = 'display' | 'titleL' | 'title' | 'titleS' | 'bodyRead' | 'post' | 'byline' | 'imprint';
 type ActionToken = 'action' | 'actionS' | 'card';
 type InkColor = keyof Pick<Palette, 'ink' | 'ink2' | 'ink3' | 'accent' | 'screenInk'>;
 
@@ -30,4 +30,10 @@ export function NoteText({ color = 'ink3', token = 'note', ...props }: Partial<V
 /** Anything you do: buttons, filters, small card titles, inputs (Hanken Grotesk). */
 export function ActionText({ color = 'ink', ...props }: VoiceProps<ActionToken>) {
   return <VoiceText {...props} color={color} />;
+}
+
+/** A post page's words at one `post-fit` step (DESIGN.md §4): a name, in the italic display cut. */
+export function PostFitText({ step, cjk = false, style, ...rest }: TextProps & { readonly step: PostFitStep; readonly cjk?: boolean }) {
+  const theme = useTheme();
+  return <Text {...rest} style={[postFitStyle(step, cjk), { color: theme.color.ink }, style]} />;
 }

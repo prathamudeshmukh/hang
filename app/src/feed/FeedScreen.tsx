@@ -14,7 +14,8 @@ import { shownId } from './currentPage';
 import { counterText } from './feedCopy';
 import { originsOf, readFeed } from './feedList';
 import type { FeedPage } from './feedPage';
-import { FeedPageView, type PageStep } from './FeedPageView';
+import { FeedPageView } from './FeedPageView';
+import type { PageStep } from './pageA11y';
 import type { FeedSession } from './feedSession';
 import { useFeedStyles } from './feedStyles';
 import { MoveSheet } from './MoveSheet';
@@ -141,11 +142,12 @@ export function FeedScreen({ session, sessionKey }: { readonly session: FeedSess
   const styles = useFeedStyles();
   const pages = useFeedPages(session, sessionKey);
   const [height, setHeight] = useState(0);
-  const { onShown, onSize, opacity } = useFeedHero();
+  const { onShown, onLayout: reportLayout, opacity } = useFeedHero();
+  const insets = useSafeAreaInsets();
   const onLayout = (event: LayoutChangeEvent) => {
     const { width, height: laidOut } = event.nativeEvent.layout;
     setHeight(laidOut);
-    onSize({ width, height: laidOut });
+    reportLayout({ width, height: laidOut, topInset: insets.top });
   };
   useEffect(() => {
     if (pages.length === 0) onShown(null);

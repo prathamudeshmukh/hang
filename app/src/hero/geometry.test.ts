@@ -3,7 +3,8 @@ import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 import { centringShift, feedMediaRect, fittedRect, insetRect, isFullyInside, landingRect } from './geometry.ts';
 
-const FEED = { width: 400, height: 1000 };
+const FEED = { width: 400, height: 1000, wordsTop: 120 };
+const PRINT = { x: 20, y: 300, width: 180, height: 90 };
 const VIEWPORT = { x: 0, y: 0, width: 400, height: 800 };
 
 describe('feedMediaRect', () => {
@@ -28,11 +29,15 @@ describe('fittedRect', () => {
 
 describe('landingRect', () => {
   it('lands a whole (contain) image on its fitted rect', () => {
-    assert.deepEqual(landingRect(FEED, { fit: 'contain', ratio: 0.5 }), { x: 0, y: 180, width: 400, height: 200 });
+    assert.deepEqual(landingRect(FEED, { fit: 'contain', ratio: 0.5 }, PRINT), { x: 0, y: 180, width: 400, height: 200 });
   });
 
   it('lands everything else on the media box', () => {
-    assert.deepEqual(landingRect(FEED, { fit: 'cover' }), { x: 0, y: 0, width: 400, height: 560 });
+    assert.deepEqual(landingRect(FEED, { fit: 'cover' }, PRINT), { x: 0, y: 0, width: 400, height: 560 });
+  });
+
+  it('lands a post on the words’ place, at the print’s shape (#59)', () => {
+    assert.deepEqual(landingRect(FEED, { fit: 'words' }, PRINT), { x: 16, y: 120, width: 368, height: 184 });
   });
 });
 

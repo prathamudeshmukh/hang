@@ -1,7 +1,7 @@
 import type { CardModel } from '../grid/cardModel.ts';
 import { MOTION } from '../theme/tokens.ts';
-import { landingRect, type Rect, type Size } from './geometry.ts';
-import { landingOf, lookOf } from './look.ts';
+import { landingRect, type FeedFrame, type Rect } from './geometry.ts';
+import { lookOf } from './look.ts';
 import type { FaceKey, Origins, Scope } from './origins.ts';
 import { IDLE, inAir, nextTrip, type Direction, type Flight, type Trip, type TripEvent } from './trip.ts';
 
@@ -24,14 +24,16 @@ export interface Stage {
   /** Going back: the feed fades off the wall over the flight, its text sooner (#33). */
   fadeFeedAway(): Promise<void>;
   setFeedOpacity(opacity: 0 | 1, durationMs: number): Promise<void>;
+  /** After a failed trip: the feed and everything on it shown at once, whatever the trip left hidden. */
+  recover(): void;
 }
 
 export interface HeroPorts {
   readonly origins: Origins;
   readonly pushFeed: (ids: readonly string[], start: string) => void;
   readonly reduceMotion: () => boolean;
-  /** The feed's size as last laid out (the window until then). */
-  readonly feedSize: () => Size;
+  /** The feed as last laid out (the window until then). */
+  readonly feedSize: () => FeedFrame;
   readonly delay: (ms: number) => Promise<void>;
   readonly nextFrame: () => Promise<void>;
   readonly warn: (message: string) => void;
@@ -47,7 +49,7 @@ export interface OpenRequest {
 export interface BackRequest {
   /** The page on screen; null when nothing is left in the feed. */
   readonly card: CardModel | null;
-  readonly feed: Size;
+  readonly feed: FeedFrame;
   /** Removes the feed screen without any native animation. */
   readonly pop: () => void;
 }
@@ -121,7 +123,7 @@ export function createHero(ports: HeroPorts) {
     const look = lookOf(request.card);
     feedDrawnLatch = createLatch();
     await on.setFeedOpacity(0, INSTANT);
-    await board(on, { id: request.card.id, scope: request.scope, direction: 'out', look, from, to: landingRect(ports.feedSize(), landingOf(look)) });
+    await board(on, { id: request.card.id, scope: request.scope, direction: 'out', look, from, to: landingRect(ports.feedSize(), look.landing, from) });
     // Mounting the feed keeps JS busy for a while: only once the flyer is drawn, while it flies on the UI thread.
     await waitForFlyer();
     ports.pushFeed(request.ids, request.card.id);
@@ -140,7 +142,7 @@ export function createHero(ports: HeroPorts) {
 
   async function flyBack(on: Stage, { card, feed, pop }: BackRequest & { readonly card: CardModel }, at: FaceKey, to: Rect) {
     const look = lookOf(card);
-    await board(on, { id: card.id, scope: at.scope, direction: 'back', look, from: landingRect(feed, landingOf(look)), to });
+    await board(on, { id: card.id, scope: at.scope, direction: 'back', look, from: landingRect(feed, look.landing, to), to });
     await waitForFlyer();
     const fadedAway = on.fadeFeedAway();
     await flyAndLand(on);
@@ -167,7 +169,7 @@ export function createHero(ports: HeroPorts) {
       await work(on);
     } catch (error) {
       ports.warn(`Hero trip failed: ${error instanceof Error ? error.message : String(error)}`);
-      await on.setFeedOpacity(1, INSTANT);
+      on.recover();
       dispatch({ type: 'abort' });
     } finally {
       busy = false;
