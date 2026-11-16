@@ -150,6 +150,20 @@ describe('toCardModel: posts show who said it (#58)', () => {
   });
 });
 
+describe('toCardModel: link descriptions (#58)', () => {
+  it('carries the page description for the wall label', () => {
+    assert.equal(toCardModel(ready({ kind: 'link', description: 'Why we drift' }), null, CARD_NOW).description, 'Why we drift');
+  });
+
+  it('has none for links saved before descriptions were kept', () => {
+    assert.equal(toCardModel(ready({ kind: 'link' }), null, CARD_NOW).description, null);
+  });
+
+  it('leaves the description out of the label: the feed page reads it', () => {
+    assert.equal(toCardModel(ready({ kind: 'link', description: 'Why we drift' }), null, CARD_NOW).accessibilityLabel, 'link, On boredom, Aeon');
+  });
+});
+
 describe('postWords', () => {
   const PICTURE = 'file:///thumbs/p.webp';
   const card = (fields: Record<string, unknown>, thumb: string | null) =>
@@ -182,6 +196,11 @@ describe('sameCard', () => {
   it('sees a byline arriving', () => {
     const post = ready({ kind: 'post', post: { handle: 'ada' } });
     assert.equal(sameCard(toCardModel(post, null, CARD_NOW), toCardModel({ ...post, post: { handle: 'ada', author: 'Ada' } }, null, CARD_NOW)), false);
+  });
+
+  it('sees a description arriving', () => {
+    const link = ready({ kind: 'link' });
+    assert.equal(sameCard(toCardModel(link, null, CARD_NOW), toCardModel({ ...link, description: 'Why we drift' }, null, CARD_NOW)), false);
   });
 
   it('sees a changed note', () => {

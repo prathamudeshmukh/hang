@@ -40,6 +40,8 @@ export interface CardModel {
   readonly postText: string | null;
   /** Who wrote a post (#58): the author's name, else `@handle`. Null on every other kind. */
   readonly byline: string | null;
+  /** The page's own description, set under the title of an imageless link (#58). */
+  readonly description: string | null;
   readonly accessibilityLabel: string;
 }
 
@@ -130,6 +132,7 @@ export function sameCard(a: CardModel, b: CardModel): boolean {
     a.note === b.note &&
     a.postText === b.postText &&
     a.byline === b.byline &&
+    a.description === b.description &&
     a.media?.ratio === b.media?.ratio &&
     a.media?.naturalRatio === b.media?.naturalRatio &&
     a.media?.uri === b.media?.uri &&
@@ -154,6 +157,7 @@ export function toCardModel(item: Item, thumbUri: string | null, now: Date): Car
     media: variant === 'pending' ? null : mediaOf(item, thumbUri, now),
     postText: textField(item.post, 'text'),
     byline,
+    description: item.description,
     accessibilityLabel: describe(item, { variant, title, site, note, byline }),
   };
 }

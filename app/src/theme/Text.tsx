@@ -23,7 +23,7 @@ export function NameText({ color = 'ink', ...props }: VoiceProps<NameToken>) {
 }
 
 /** Anything about a thing: sources, durations, dates, counts, empty states (Newsreader italic). */
-export function NoteText({ color = 'ink3', token = 'note', ...props }: Partial<VoiceProps<'note' | 'prompt'>> & TextProps) {
+export function NoteText({ color = 'ink3', token = 'note', ...props }: Partial<VoiceProps<'note' | 'prompt' | 'label'>> & TextProps) {
   return <VoiceText {...props} token={token} color={color} />;
 }
 
