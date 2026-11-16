@@ -1,0 +1,62 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "cream-palette",
+        "value": "*",
+        "files": [
+          ".lavish/collection-tint-directions.html"
+        ],
+        "createdAt": "2026-11-13T12:51:31.031Z",
+        "reason": "Mock reproduces Hang's approved wall token #F7F5F0 (DESIGN.md §3, approved 2026-11-08)"
+      },
+      {
+        "rule": "cream-palette",
+        "value": "*",
+        "files": [
+          ".lavish/collection-identity-directions.html"
+        ],
+        "createdAt": "2026-11-13T13:08:44.161Z",
+        "reason": "Mock reproduces Hang's approved wall token #F7F5F0 (DESIGN.md §3, approved 2026-11-08)"
+      },
+      {
+        "rule": "cream-palette",
+        "value": "*",
+        "files": [
+          ".lavish/share-already-hanging.html"
+        ],
+        "createdAt": "2026-11-14T06:02:01.238Z",
+        "reason": "Mock reproduces Hang's approved wall token #F7F5F0 (DESIGN.md §3, approved 2026-11-08)"
+      },
+      {
+        "rule": "cream-palette",
+        "value": "*",
+        "files": [
+          ".lavish/link-feed-page.html"
+        ],
+        "createdAt": "2026-11-14T08:18:44.283Z",
+        "reason": "Hang's own light wall token #F7F5F0 (app/src/theme/tokens.ts:29, DESIGN.md); mockup reproduces the app palette"
+      },
+      {
+        "rule": "cream-palette",
+        "value": "*",
+        "files": [
+          ".lavish/print-opened.html"
+        ],
+        "createdAt": "2026-11-16T08:23:33.916Z",
+        "reason": "Hang's approved wall color #F7F5F0 (DESIGN.md §3, approved 2026-11-08); the mockup reproduces the app's real palette"
+      },
+      {
+        "rule": "cream-palette",
+        "value": "*",
+        "files": [
+          ".lavish/post-feed-page.html"
+        ],
+        "createdAt": "2026-11-16T08:32:08.410Z",
+        "reason": "Hang's approved wall color #F7F5F0 (DESIGN.md §3, approved 2026-11-08); the mockup reproduces the app's real palette"
+      }
+    ]
+  }
+}

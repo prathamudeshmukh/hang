@@ -68,10 +68,10 @@ back to a generic link card (Open Graph image, title, site), never to a broken s
 | 5 | Filing | **Inbox + one home collection per item.** No tags (as a user-facing concept) in v1 |
 | 6 | Share flow | Translucent bottom sheet over the source app; last-used collection pre-selected; AI pick replaces it if ready in under ~1.5s; swipe down leaves it in the Inbox |
 | 7 | Browsing | Home → collection **masonry grid** → full-screen **swipe feed** → reader. Shuffle on every collection |
-| 8 | Reader | WebView + own CSS template; light, sepia and dark themes; font size; remembered position; finish moment. Highlights in v2 |
+| 8 | Reader | WebView + own CSS template; light, sepia and dark themes; font size; remembered position; finish moment. An article's feed page shows its opening lines and Read continues from there (DESIGN.md §8). Highlights in v2 |
 | 9 | Content sources | **ContentSource adapter registry.** One adapter per source; each resolves to one of five card kinds |
 | 10 | Video | YouTube, Vimeo and direct files play inline (YouTube autoplays muted in the feed); everything else is a rich card that opens the platform's app. **No re-hosting** |
-| 11 | Posts (X) | Saved as a copy at save time and rendered as a native card; falls back to "open in X" |
+| 11 | Posts (X) | Saved as a copy at save time and rendered as a native card; in the feed the post fills the page (DESIGN.md §8) and Open goes to the original |
 | 12 | Images | Both image links (Open Graph image extracted) and shared files (uploaded to Storage) |
 | 13 | AI | **Claude Haiku 5.5**, one structured call per item → collection, title, summary, tags (with vision for images) |
 | 14 | Offline | Local SQLite copy of metadata, article text and downscaled images; offline shares queue; simple pull-and-push sync |
