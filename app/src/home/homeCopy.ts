@@ -1,7 +1,8 @@
+import { MONTHS } from '../copy/calendar.ts';
+
 /** Home's words for times, dates and counts (DESIGN.md §9). English only, so no Intl dependency on Hermes. */
 
 const WEEKDAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'] as const;
-const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'] as const;
 const COUNT_WORDS = ['none', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve'] as const;
 
 const MORNING_FROM_HOUR = 5;
@@ -18,20 +19,6 @@ export function greetingFor(now: Date): string {
 
 export function dayLine(now: Date): string {
   return `${WEEKDAYS[now.getDay()]}, ${now.getDate()} ${MONTHS[now.getMonth()]}`;
-}
-
-const MONTHS_SHORT = MONTHS.map((month) => month.slice(0, 3));
-const DAY_MS = 24 * 60 * 60 * 1000;
-
-const startOfDay = (date: Date) => new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
-
-/** A day in words (DESIGN.md §4): "today", "yesterday", "3 Nov", and "24 Dec 2025" once it isn't this year. */
-export function dayWords(date: Date, today: Date): string {
-  const daysAgo = Math.round((startOfDay(today) - startOfDay(date)) / DAY_MS);
-  if (daysAgo === 0) return 'today';
-  if (daysAgo === 1) return 'yesterday';
-  const day = `${date.getDate()} ${MONTHS_SHORT[date.getMonth()]}`;
-  return date.getFullYear() === today.getFullYear() ? day : `${day} ${date.getFullYear()}`;
 }
 
 /** The local calendar date as `YYYY-MM-DD`, the shape of the server's `date` columns. */
