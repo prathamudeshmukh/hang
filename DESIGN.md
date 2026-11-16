@@ -131,6 +131,7 @@ Newsreader's optical-size axis is set automatically from the point size.
 | `action` | Hanken Grotesk | 15 / 1.2 | 600 | Buttons |
 | `action-s` | Hanken Grotesk | 13 / 1.2 | 600 | Chips, filters |
 | `card` | Hanken Grotesk | 13 / 1.25 | 500 | Card titles in the masonry grid |
+| `post-fit` | Newsreader *italic* | 40 · 36 · 30 · 26 · 22 · 19, leading 1.06–1.42 | 350 (40, 36) / 400 | A post page's words: the largest step that fits (§8) |
 
 Minimum rendered size is 12sp for anything functional. Everything scales with the system font size.
 
@@ -222,13 +223,18 @@ Light tick on Save, on moving an item, and on the finish moment. Nowhere else.
 |---|---|
 | `article` | Lead image at its real aspect ratio (no image → title set in Newsreader on `raised`) · card title · *note: `9 min · site`* |
 | `video` | Thumbnail at its aspect ratio with a centred play triangle · title · *`14 min · YouTube`*. Cards that open another app show *`opens in TikTok`* |
-| `post` | Text in Newsreader italic between two hairline rules; media below, if any · *`post · @handle`* |
-| `image` | Image only, at its aspect ratio · optional title · *`image · pinterest.com`* / *`screenshot`* |
-| `link` | Open Graph image or the site name set large · title · *`site`* |
+| `post` | Between two hairline rules: the author's name in upright Newsreader (14), then the text in Newsreader italic; media below, if any · *`post · 3 Nov`* (when it was posted). No name → `@handle` in its place; no date → *`post · @handle`* |
+| `image` | Image at its aspect ratio · title, if any · *`image · pinterest.com`* / *`image · screenshot`* |
+| `link` | Open Graph image · title · *`site`*. **No image: a wall label** on `raised`: the title in Newsreader (`title-s`, 4 lines), then the site's description in italic `ink-2` (4 lines); below it only *`site`*, so the site appears once. No description → the title alone |
 | pending | Dashed `ink-3` outline at a 4:5 ratio · *`fetching…`* · the raw URL below at 50% opacity |
 | failed | Same as `link` from whatever was found; *`couldn't read this · retry`* |
 
 Grid: 2 columns, 10dp gutter, 14dp vertical rhythm, 16dp screen margins.
+
+Reviewed kind by kind on 2026-11-16 (`.lavish/print-kinds.html`). Posts gained their author and links their wall label.
+Mocked and turned down: serif titles and a "first page" for articles; a film-black mat or a corner stamp instead of
+the play disc on videos; a hanging quote mark for posts (breaks the ruled post); a bare print or source-only note for
+images; the host as a nameplate for links (every link from one site still looks the same).
 
 ### Share sheet
 
@@ -253,6 +259,44 @@ lines, and the note adds how long it has hung (*aeon.co · saved 3 days ago*: to
 week, 2–4 weeks ago, then *in March*, or *in March 2025* from another year). Other kinds keep their note and two lines.
 Actions are pills: **Read/Watch** (filled `screen-ink`), **Later**, **Move**. Swipe up
 for the next item. The counter appears as a note in the top-right: *4 of 12*.
+
+**By kind, once opened** (chosen 2026-11-16, `.lavish/print-opened.html`). The main pill keeps one plain word:
+**Read**, **Watch** or **Open**, whether or not it leaves Hang.
+
+| Kind | Feed page | Main pill |
+|---|---|---|
+| `article` | Its **opening lines** in `body-read` (`ink-2`) take the summary's place, so reading starts on the feed; no reader text → the summary | **Read** (or a tap on the text) continues in the reader at the next line; no reader text → Custom Tab |
+| `video` | Plays **muted** once its page settles, with a hairline progress line along the bottom of the frame; it stops when you swipe away | **Watch** (or a tap on the frame) goes full screen in the screening room, with sound. Videos that can't play inline open their app |
+| `post` | **The post is the page, set as a broadside** (see *Post pages* below) | **Move** is filled; **Open** (to the post on its site) is the outlined pill, since the snapshot is usually enough |
+| `image` | **Full bleed**: the image fills the page, fit whole on `screen`; the note and pills sit on a shade at the bottom. Tap hides them, pinch zooms | **Move** is filled; **Open** goes to the source |
+| `link` | As above (#54) | **Open** → Custom Tab |
+
+Turned down: Read going straight to the reader (an article first shows a summary), video playing only when asked, a
+post with its media on top, a tap-to-zoom image on the usual split page, and pills that name their destination
+(*Open in X*, *Watch in TikTok*).
+
+**Post pages: a broadside** (approved 2026-11-16, `.lavish/post-feed-page.html`; the contract is in
+`.impeccable/surfaces/app-src-feed-feedmediaview-tsx.md`). The words are sized until they own the page.
+
+- **Order, top to bottom:** the note (*post · 3 Nov*; no posted date → *post · x.com*), the words, the imprint,
+  then (with media) one `rule` hairline seam and the pictures. Pills at the foot; the spare room sits above them.
+- **One fitted size:** the words are Newsreader italic at the largest step of **40 · 36 · 30 · 26 · 22 · 19sp** that
+  fits between the note and the imprint (the `post-fit` ladder, §4). 40 and 36 use the 350 weight. The ladder is the
+  only freedom: sizes are never in-between.
+- **Never scrolls:** swiping is the feed's navigation. Below 19sp the words stop with an ellipsis, and Open has the
+  rest. At large system font scales the same ladder scales and clamps the same way.
+- **Imprint, not a header:** directly under the last line, the author's name in upright Newsreader 16 then
+  *@handle* in `screen-ink` at 64%. No name → *@handle* alone. Who said it signs the words; it never comes first.
+- **The picture answers:** across the seam, at its own shape, capped at 40% of the page height (a tall picture sits
+  narrower, left-aligned). Several pictures sit in one strip at one height, in posting order; tapping one opens it
+  full screen, as image pages do. The words fit the space left above.
+- **No quote marks, boxes, avatars or counts.** The grid print's two rules fade out on the way in: the page has no frame.
+- **Arrival:** the hero flight lands the print on the words' place and scales it on the flight curve; its rules
+  fade, the words settle at their fitted size, and the imprint and pills fade in 120ms behind. Reduce motion: a
+  120ms cross-fade.
+
+Mocked and turned down for post pages: a pull quote (centred, no rules), the grid print scaled up between rules, a
+signed letter with a square avatar, an epigraph (small, isolated) and subtitles over the picture.
 
 ### Reader
 
