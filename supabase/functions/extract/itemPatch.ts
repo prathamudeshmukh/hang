@@ -1,5 +1,6 @@
 import type { Embed, Extracted, PostSnapshot } from '../_shared/extraction/types.ts';
 import { hostLabel, stripTracking } from '../_shared/extraction/url.ts';
+import { cleanDescription } from './description.ts';
 import type { ClaimedItem, EmbedJson, ItemPatch, PostJson } from './types.ts';
 
 const MAX_TITLE_LENGTH = 500;
@@ -68,6 +69,7 @@ export function toItemPatch(item: ClaimedItem, extracted: Extracted): ItemPatch 
     raw_title: rawTitle,
     site_name: clean(extracted.siteName) ?? hostLabel(canonical),
     author: clean(extracted.author),
+    description: cleanDescription({ description: extracted.description, title: extracted.title }),
     duration_s: wholeNumber(extracted.durationSeconds),
     reading_min: wholeNumber(extracted.readingMinutes),
     image_url: leadImage(extracted),

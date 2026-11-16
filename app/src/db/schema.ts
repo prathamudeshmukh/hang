@@ -43,6 +43,8 @@ export const items = sqliteTable(
     title: text('title'),
     rawTitle: text('raw_title'),
     summary: text('summary'),
+    /** The page's own description (#54): shown in the feed until AI writes `summary`. */
+    description: text('description'),
     tags: text('tags', { mode: 'json' }).$type<readonly string[]>(),
     siteName: text('site_name'),
     author: text('author'),

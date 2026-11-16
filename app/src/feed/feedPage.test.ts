@@ -70,3 +70,27 @@ describe('toFeedPage text', () => {
     assert.equal(page.accessibilityLabel, 'article, On boredom, 9 min · aeon.co');
   });
 });
+
+describe('toFeedPage link pages (#54)', () => {
+  const LINK = { status: 'ready', kind: 'link', siteName: 'aeon.co' } as const;
+
+  it('adds how long a link has hung to its note', () => {
+    const page = pageOf(LINK, { ...UNMOVED, saved: 'saved 3 days ago' });
+    assert.equal(page.note, 'aeon.co · saved 3 days ago');
+  });
+
+  it('gives a link’s description five lines and everything else two', () => {
+    const lines = [pageOf(LINK).summaryLines, pageOf({ status: 'ready', kind: 'article' }).summaryLines];
+    assert.deepEqual(lines, [5, 2]);
+  });
+
+  it('keeps other kinds’ notes as they are', () => {
+    const page = pageOf({ status: 'ready', kind: 'article', readingMin: 9 }, { ...UNMOVED, saved: 'saved 3 days ago' });
+    assert.equal(page.note, '9 min · aeon.co');
+  });
+
+  it('still says where a moved link went', () => {
+    const page = pageOf(LINK, { summary: null, movedTo: 'Recipes', placeId: 'c2', saved: 'saved today' });
+    assert.equal(page.note, 'moved to Recipes');
+  });
+});

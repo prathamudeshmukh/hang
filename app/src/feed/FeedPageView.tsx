@@ -9,7 +9,7 @@ import { mediaHeight } from './feedLayout';
 import { useFeedStyles } from './feedStyles';
 import { useFeedTextFade } from './useFeedHero';
 
-const LINES = { title: 3, summary: 2 } as const;
+const TITLE_LINES = 3;
 const PAGE_ACTIONS = [
   { name: 'next', label: 'Next' },
   { name: 'previous', label: 'Previous' },
@@ -54,8 +54,8 @@ export const FeedPageView = memo(function FeedPageView({ page, height, bottomIns
       <Animated.View style={[styles.text, { paddingBottom: bottomInset }, textFade]}>
         <View style={styles.words}>
           <NoteText testID="feed-note" numberOfLines={1}>{page.note}</NoteText>
-          {page.showTitle && page.card.title ? <NameText token="titleL" numberOfLines={LINES.title}>{page.card.title}</NameText> : null}
-          {page.summary ? <NameText token="bodyRead" color="ink2" numberOfLines={LINES.summary}>{page.summary}</NameText> : null}
+          {page.showTitle && page.card.title ? <NameText token="titleL" numberOfLines={TITLE_LINES}>{page.card.title}</NameText> : null}
+          {page.summary ? <NameText token="bodyRead" color="ink2" numberOfLines={page.summaryLines}>{page.summary}</NameText> : null}
         </View>
         <View style={styles.pills}>
           <Pill kind="filled" label={page.action} testID="feed-open" onPress={() => onOpen(page)} />

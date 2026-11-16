@@ -48,6 +48,21 @@ describe('readFeed', () => {
     assert.deepEqual([page.card.title, page.summary], ['On boredom', 'Why we drift.']);
   });
 
+  it('shows the page’s own description until there is a summary (#54)', () => {
+    const ids = ['a', 'b'];
+    const origins = originsOf(s.sources, ids);
+    s.update('a', { status: 'ready', kind: 'link', description: 'A single-binary TUI for SQLite files.' });
+    s.update('b', { status: 'ready', kind: 'link', description: 'From the page.', summary: 'From the AI.' });
+    assert.deepEqual(readFeed(s.sources, { ids, origins }, CARD_NOW).map((page) => page.summary), ['A single-binary TUI for SQLite files.', 'From the AI.']);
+  });
+
+  it('tells a link how long it has hung', () => {
+    const ids = ['a'];
+    s.update('a', { status: 'ready', kind: 'link', siteName: 'aeon.co' });
+    const [page] = readFeed(s.sources, { ids, origins: originsOf(s.sources, ids) }, CARD_NOW);
+    assert.match(page.note, /^aeon\.co · saved /);
+  });
+
   it('drops an item deleted since the feed opened', () => {
     const ids = ['a', 'b', 'c'];
     const origins = originsOf(s.sources, ids);

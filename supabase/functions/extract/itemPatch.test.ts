@@ -25,7 +25,17 @@ describe('toItemPatch', () => {
 
   it('clears every derived field it has no value for, so a rerun overwrites stale data', () => {
     const patch = toItemPatch(item, { ...link, title: 't' });
-    expect(patch).toMatchObject({ author: null, duration_s: null, reading_min: null, embed: null, post: null });
+    expect(patch).toMatchObject({ author: null, description: null, duration_s: null, reading_min: null, embed: null, post: null });
+  });
+
+  it('keeps the page\'s description for every kind, cleaned', () => {
+    const description = '  A single-binary TUI for poking at   SQLite files.  ';
+    const kinds = (['link', 'article'] as const).map((kind) => toItemPatch(item, { ...link, kind, title: 'sqlite-tui', description }).description);
+    expect(kinds).toEqual(['A single-binary TUI for poking at SQLite files.', 'A single-binary TUI for poking at SQLite files.']);
+  });
+
+  it('drops a description that only repeats the title', () => {
+    expect(toItemPatch(item, { ...link, title: 'The Case for Slow Software', description: 'The case for slow software.' }).description).toBeNull();
   });
 
   it('never writes the user fields', () => {

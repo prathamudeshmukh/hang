@@ -13,6 +13,7 @@ const BLANK_ITEM: Item = {
   title: null,
   rawTitle: null,
   summary: null,
+  description: null,
   tags: null,
   siteName: null,
   author: null,

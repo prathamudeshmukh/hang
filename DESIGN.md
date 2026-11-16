@@ -248,6 +248,9 @@ Picking another chip brings Save and *Moves it from Tech*. Re-sharing doesn't bu
 ### Swipe feed (screening room)
 
 Media fills the top ~56%; below it are the note, title (`title-l`) and a one-to-two-line summary.
+**Link pages** (#54): a link has nothing behind *Open* but the site, so its page says more: the description runs to five
+lines, and the note adds how long it has hung (*aeon.co · saved 3 days ago*: today, yesterday, 2–6 days ago, last
+week, 2–4 weeks ago, then *in March*, or *in March 2025* from another year). Other kinds keep their note and two lines.
 Actions are pills: **Read/Watch** (filled `screen-ink`), **Later**, **Move**. Swipe up
 for the next item. The counter appears as a note in the top-right: *4 of 12*.
 
