@@ -303,6 +303,8 @@ post with its media on top, a tap-to-zoom image on the usual split page, and pil
 
 Mocked and turned down for post pages: a pull quote (centred, no rules), the grid print scaled up between rules, a
 signed letter with a square avatar, an epigraph (small, isolated) and subtitles over the picture.
+The flight carries a blank print that fades into the screen as it lands (chosen 2026-11-16, #59); flying the print's own
+words and scaling them into the page was turned down as not worth new flight code.
 
 ### Reader
 
