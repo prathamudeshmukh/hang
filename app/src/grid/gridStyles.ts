@@ -36,8 +36,10 @@ export const useGridStyles = makeStyles(({ color }) => ({
     justifyContent: 'center',
   },
   textCard: { borderRadius: RADIUS.print, backgroundColor: color.raised, padding: SPACE.inset, gap: SPACE.inset },
+  /** A wall label's description reads as part of its title, so it sits closer than a text card's parts. */
+  wallLabel: { gap: SPACE.caption },
   /** Post cards are drawn with top and bottom rules, not boxes (DESIGN.md §5). */
-  post: { borderTopWidth: 1, borderBottomWidth: 1, borderColor: color.rule, paddingVertical: SPACE.inset },
+  post: { borderTopWidth: 1, borderBottomWidth: 1, borderColor: color.rule, paddingVertical: SPACE.inset, gap: SPACE.tight },
   postMedia: { marginTop: SPACE.caption },
   pending: {
     aspectRatio: PENDING_RATIO,

@@ -3,7 +3,7 @@ import { useTheme } from './theme';
 import type { Palette } from './tokens';
 import { textStyle, type TypeToken } from './typeScale';
 
-type NameToken = 'display' | 'titleL' | 'title' | 'titleS' | 'bodyRead' | 'post';
+type NameToken = 'display' | 'titleL' | 'title' | 'titleS' | 'bodyRead' | 'post' | 'byline';
 type ActionToken = 'action' | 'actionS' | 'card';
 type InkColor = keyof Pick<Palette, 'ink' | 'ink2' | 'ink3' | 'accent' | 'screenInk'>;
 
@@ -23,7 +23,7 @@ export function NameText({ color = 'ink', ...props }: VoiceProps<NameToken>) {
 }
 
 /** Anything about a thing: sources, durations, dates, counts, empty states (Newsreader italic). */
-export function NoteText({ color = 'ink3', token = 'note', ...props }: Partial<VoiceProps<'note' | 'prompt'>> & TextProps) {
+export function NoteText({ color = 'ink3', token = 'note', ...props }: Partial<VoiceProps<'note' | 'prompt' | 'label'>> & TextProps) {
   return <VoiceText {...props} token={token} color={color} />;
 }
 

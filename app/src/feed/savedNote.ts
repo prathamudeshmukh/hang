@@ -1,17 +1,10 @@
-const DAY_MS = 24 * 60 * 60 * 1000;
+import { DAY_MS, MONTHS, localMidnight } from '../copy/calendar.ts';
+
 const DAYS_PER_WEEK = 7;
 /** Below a week, count days; up to this many days, count weeks; past it, name the month (#54). */
 const LAST_DAY_COUNTED = 6;
 const LAST_DAY_OF_LAST_WEEK = 13;
 const LAST_DAY_IN_WEEKS = 34;
-const MONTHS = [
-  'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December',
-] as const;
-
-function localMidnight(date: Date): number {
-  return new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
-}
 
 /** Calendar days in the device's timezone; rounding absorbs a daylight-saving hour. */
 function calendarDaysBetween(earlier: Date, later: Date): number {

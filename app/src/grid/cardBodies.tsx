@@ -2,11 +2,11 @@ import { View } from 'react-native';
 import { HeroFace } from '@/hero/HeroFace';
 import { Icon } from '@/theme/icons/Icon';
 import { ActionText, NameText, NoteText } from '@/theme/Text';
-import type { CardModel, CardVariant } from './cardModel';
+import { postWords, type CardModel, type CardVariant } from './cardModel';
 import { CardMediaBox } from './CardMediaBox';
 import { useGridStyles } from './gridStyles';
 
-const LINES = { cardTitle: 3, textCardTitle: 5, site: 2, post: 8, rawUrl: 2 } as const;
+const LINES = { cardTitle: 3, textCardTitle: 5, labelTitle: 4, description: 4, site: 2, byline: 1, post: 8, rawUrl: 2 } as const;
 
 type Body = (props: { readonly card: CardModel }) => React.JSX.Element;
 
@@ -34,7 +34,7 @@ function TitleCard({ card }: { readonly card: CardModel }) {
   );
 }
 
-/** No image size known: the site name set large, the title below (links, failed reads, images without a thumbnail). */
+/** No image size known: the site name set large, the title below (failed reads, images without a thumbnail, untitled links). */
 function SiteCard({ card }: { readonly card: CardModel }) {
   const styles = useGridStyles();
   return (
@@ -43,6 +43,21 @@ function SiteCard({ card }: { readonly card: CardModel }) {
         <NameText token="title" numberOfLines={LINES.site}>{card.site}</NameText>
       </HeroFace>
       <Caption card={card} />
+    </>
+  );
+}
+
+/** An imageless link (#58): its title, then what the page says about itself; the site only in the note below. */
+function WallLabelCard({ card }: { readonly card: CardModel }) {
+  const styles = useGridStyles();
+  if (!card.title) return <SiteCard card={card} />;
+  return (
+    <>
+      <HeroFace id={card.id} drawnOnLayout style={[styles.textCard, styles.wallLabel]}>
+        <NameText token="titleS" numberOfLines={LINES.labelTitle}>{card.title}</NameText>
+        {card.description ? <NoteText token="label" color="ink2" numberOfLines={LINES.description}>{card.description}</NoteText> : null}
+      </HeroFace>
+      <Caption card={card} withTitle={false} />
     </>
   );
 }
@@ -61,13 +76,16 @@ function withMedia(Fallback: Body, options: { readonly playable?: boolean } = {}
   };
 }
 
+/** Between two rules: who said it, then what they said (#58); a picture-only post has just the name. */
 function PostCard({ card }: { readonly card: CardModel }) {
   const styles = useGridStyles();
+  const words = postWords(card);
   return (
     <>
       <HeroFace id={card.id} drawnOnLayout>
         <View style={styles.post}>
-          <NameText token="post" numberOfLines={LINES.post}>{card.postText ?? card.title ?? card.site}</NameText>
+          {card.byline ? <NameText token="byline" numberOfLines={LINES.byline}>{card.byline}</NameText> : null}
+          {words ? <NameText token="post" numberOfLines={LINES.post}>{words}</NameText> : null}
         </View>
         {card.media ? <View style={styles.postMedia}><CardMediaBox id={card.id} media={card.media} /></View> : null}
       </HeroFace>
@@ -96,7 +114,7 @@ export const CARD_BODIES: Readonly<Record<CardVariant, Body>> = {
   video: withMedia(TitleCard, { playable: true }),
   post: PostCard,
   image: withMedia(SiteCard),
-  link: withMedia(SiteCard),
+  link: withMedia(WallLabelCard),
   failed: withMedia(SiteCard),
   pending: PendingCard,
 };

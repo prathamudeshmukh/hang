@@ -128,6 +128,8 @@ Newsreader's optical-size axis is set automatically from the point size.
 | `title-s` | Newsreader | 18 / 1.15 | 400 | Section names, Rediscover, collection rows |
 | `body-read` | Newsreader | 17 / 1.6 | 400 | Reader body (user can adjust 15–21) |
 | `note` | Newsreader *italic* | 13 / 1.35 | 400 | Catalogue notes |
+| `byline` | Newsreader | 14 / 1.3 | 400 | A post card's author, above its words |
+| `label` | Newsreader *italic* | 14 / 1.35 | 400 | An imageless link's description on its wall label, in `ink-2` |
 | `action` | Hanken Grotesk | 15 / 1.2 | 600 | Buttons |
 | `action-s` | Hanken Grotesk | 13 / 1.2 | 600 | Chips, filters |
 | `card` | Hanken Grotesk | 13 / 1.25 | 500 | Card titles in the masonry grid |
@@ -225,7 +227,7 @@ Light tick on Save, on moving an item, and on the finish moment. Nowhere else.
 | `video` | Thumbnail at its aspect ratio with a centred play triangle · title · *`14 min · YouTube`*. Cards that open another app show *`opens in TikTok`* |
 | `post` | Between two hairline rules: the author's name in upright Newsreader (14), then the text in Newsreader italic; media below, if any · *`post · 3 Nov`* (when it was posted). No name → `@handle` in its place; no date → *`post · @handle`* |
 | `image` | Image at its aspect ratio · title, if any · *`image · pinterest.com`* / *`image · screenshot`* |
-| `link` | Open Graph image · title · *`site`*. **No image: a wall label** on `raised`: the title in Newsreader (`title-s`, 4 lines), then the site's description in italic `ink-2` (4 lines); below it only *`site`*, so the site appears once. No description → the title alone |
+| `link` | Open Graph image · title · *`site`*. **No image: a wall label** on `raised`: the title in Newsreader (`title-s`, 4 lines), then the site's description in `label` (italic, `ink-2`, 4 lines); below it only *`site`*, so the site appears once. No description → the title alone |
 | pending | Dashed `ink-3` outline at a 4:5 ratio · *`fetching…`* · the raw URL below at 50% opacity |
 | failed | Same as `link` from whatever was found; *`couldn't read this · retry`* |
 

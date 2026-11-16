@@ -1,7 +1,7 @@
 /// <reference types="node" />
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
-import { clampRatio, MAX_RATIO, MIN_RATIO, sameCard, toCardModel } from './cardModel.ts';
+import { clampRatio, MAX_RATIO, MIN_RATIO, postWords, sameCard, toCardModel } from './cardModel.ts';
 import { anItem, CARD_NOW } from './testing/anItem.ts';
 
 const THUMB = 'file:///thumbs/i1.webp';
@@ -117,6 +117,79 @@ describe('toCardModel: content', () => {
   });
 });
 
+describe('toCardModel: posts show who said it (#58)', () => {
+  const NOW = new Date('2026-11-16T09:00:00');
+  const post = (fields: Record<string, unknown>) => ready({ kind: 'post', title: 'The engine might compose music', post: { handle: 'ada', text: 'The engine might compose music', ...fields } });
+
+  it('names the author, else the handle, else nobody', () => {
+    const bylines = [{ author: 'Ada Lovelace' }, {}, { handle: null }].map((fields) => toCardModel(post(fields), null, NOW).byline);
+    assert.deepEqual(bylines, ['Ada Lovelace', '@ada', null]);
+  });
+
+  it('dates the note from when it was posted, with the year once it is not this one', () => {
+    const notes = ['2026-11-03T10:00:00', '2025-12-24T10:00:00'].map((posted_at) => toCardModel(post({ posted_at }), null, NOW).note);
+    assert.deepEqual(notes, ['post · 3 Nov', 'post · 24 Dec 2025']);
+  });
+
+  it('keeps the handle in the note without a usable posted date', () => {
+    const notes = [undefined, 'not a date'].map((posted_at) => toCardModel(post({ posted_at }), null, NOW).note);
+    assert.deepEqual(notes, ['post · @ada', 'post · @ada']);
+  });
+
+  it('says the author and the words in its label', () => {
+    const card = toCardModel(post({ author: 'Ada Lovelace', posted_at: '2026-11-03T10:00:00' }), null, NOW);
+    assert.equal(card.accessibilityLabel, 'post, Ada Lovelace, The engine might compose music, post · 3 Nov');
+  });
+
+  it('does not say the handle twice when the note already has it', () => {
+    assert.equal(toCardModel(post({}), null, NOW).accessibilityLabel, 'post, The engine might compose music, post · @ada');
+  });
+
+  it('still says an author whose name only happens to sit inside the handle', () => {
+    assert.equal(toCardModel(post({ author: 'ada' }), null, NOW).accessibilityLabel, 'post, ada, The engine might compose music, post · @ada');
+  });
+
+  it('leaves the byline off cards that are not posts', () => {
+    assert.equal(toCardModel(ready({ kind: 'article', post: { author: 'Ada' } }), null, NOW).byline, null);
+  });
+});
+
+describe('toCardModel: link descriptions (#58)', () => {
+  it('carries the page description for the wall label', () => {
+    assert.equal(toCardModel(ready({ kind: 'link', description: 'Why we drift' }), null, CARD_NOW).description, 'Why we drift');
+  });
+
+  it('has none for links saved before descriptions were kept', () => {
+    assert.equal(toCardModel(ready({ kind: 'link' }), null, CARD_NOW).description, null);
+  });
+
+  it('leaves the description out of the label: the feed page reads it', () => {
+    assert.equal(toCardModel(ready({ kind: 'link', description: 'Why we drift' }), null, CARD_NOW).accessibilityLabel, 'link, On boredom, Aeon');
+  });
+});
+
+describe('postWords', () => {
+  const PICTURE = 'file:///thumbs/p.webp';
+  const card = (fields: Record<string, unknown>, thumb: string | null) =>
+    toCardModel(ready({ kind: 'post', title: null, post: { author: 'Ada', ...fields }, thumbW: thumb ? 100 : null, thumbH: thumb ? 100 : null }), thumb, CARD_NOW);
+
+  it('is the post text when there is some', () => {
+    assert.equal(postWords(card({ text: 'hello' }, PICTURE)), 'hello');
+  });
+
+  it('is nothing for a picture-only post: the name and the picture fill the print', () => {
+    assert.equal(postWords(card({ text: '' }, PICTURE)), null);
+  });
+
+  it('falls back to the site for a post with neither words nor picture', () => {
+    assert.equal(postWords(card({ text: '' }, null)), 'Aeon');
+  });
+
+  it('falls back to the site for a picture-only post with no name, so the rules are never empty', () => {
+    assert.equal(postWords(card({ text: '', author: null }, PICTURE)), 'Aeon');
+  });
+});
+
 describe('sameCard', () => {
   const item = ready({ kind: 'image', thumbW: 100, thumbH: 100 });
 
@@ -126,6 +199,16 @@ describe('sameCard', () => {
 
   it('sees a thumbnail landing', () => {
     assert.equal(sameCard(toCardModel(item, null, CARD_NOW), toCardModel(item, THUMB, CARD_NOW)), false);
+  });
+
+  it('sees a byline arriving', () => {
+    const post = ready({ kind: 'post', post: { handle: 'ada' } });
+    assert.equal(sameCard(toCardModel(post, null, CARD_NOW), toCardModel({ ...post, post: { handle: 'ada', author: 'Ada' } }, null, CARD_NOW)), false);
+  });
+
+  it('sees a description arriving', () => {
+    const link = ready({ kind: 'link' });
+    assert.equal(sameCard(toCardModel(link, null, CARD_NOW), toCardModel({ ...link, description: 'Why we drift' }, null, CARD_NOW)), false);
   });
 
   it('sees a changed note', () => {

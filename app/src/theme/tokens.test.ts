@@ -51,6 +51,6 @@ describe('type scale (DESIGN.md §4)', () => {
   });
 
   it('groups tokens by voice', () => {
-    assert.deepEqual([tokensOf('note'), tokensOf('action')], [['note', 'prompt'], ['action', 'actionS', 'card']]);
+    assert.deepEqual([tokensOf('note'), tokensOf('action')], [['note', 'prompt', 'label'], ['action', 'actionS', 'card']]);
   });
 });

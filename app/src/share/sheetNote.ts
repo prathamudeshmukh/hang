@@ -1,4 +1,4 @@
-import { dayWords } from '../home/homeCopy.ts';
+import { dayWords } from '../copy/dayWords.ts';
 import type { ExistingItem, ExistingOpening, ShareOpening } from './shareCapture.ts';
 
 const NOT_SAVED_NOTES = {
