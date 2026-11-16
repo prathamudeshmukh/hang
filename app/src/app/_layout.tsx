@@ -4,7 +4,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import * as SystemUI from 'expo-system-ui';
-import { View } from 'react-native';
+import { useWindowDimensions, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { authSession } from '@/auth/appSession';
 import { useAuth } from '@/auth/useAuth';
@@ -36,6 +36,7 @@ function DatabaseFailed({ error }: { readonly error: Error }) {
 export default function RootLayout() {
   const styles = useStyles();
   const theme = useTheme();
+  const { fontScale } = useWindowDimensions();
   const database = useDatabaseReady();
   const { status } = useAuth();
   const signedIn = status.kind === 'signedIn' || status.kind === 'signingOut';
@@ -69,7 +70,10 @@ export default function RootLayout() {
       {database.status === 'failed' ? (
         <DatabaseFailed error={database.error} />
       ) : (
-        <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: theme.color.wall } }}>
+        // MainActivity handles font-scale changes itself (#65), and text already on screen keeps its old size until it
+        // is laid out again: a new key remounts every screen at the new scale. The navigation state lives above the
+        // Stack, so the same screens come back, the feed included.
+        <Stack key={`font-scale-${fontScale}`} screenOptions={{ headerShown: false, contentStyle: { backgroundColor: theme.color.wall } }}>
           <Stack.Protected guard={signedIn}>
             <Stack.Screen name="index" />
             <Stack.Screen name="inbox" />
