@@ -40,7 +40,7 @@ export interface CardModel {
   readonly postText: string | null;
   /** Who wrote a post (#58): the author's name, else `@handle`. Null on every other kind. */
   readonly byline: string | null;
-  /** The page's own description, set under the title of an imageless link (#58). */
+  /** The page's own description; only an imageless link's wall label draws it (#58). */
   readonly description: string | null;
   readonly accessibilityLabel: string;
 }
@@ -106,19 +106,24 @@ function mediaOf(item: Item, thumbUri: string | null, now: Date): CardMedia | nu
   return awaitsImage(item, now) ? { ratio: WAITING_RATIO, naturalRatio: WAITING_RATIO, uri: null } : null;
 }
 
+/** Whether the note ends on this word, as `post · @ada` ends on `@ada` (and not on `ada`). */
+function saysLast(note: string, part: string): boolean {
+  return note === part || note.endsWith(` ${part}`);
+}
+
 type Described = Pick<CardModel, 'variant' | 'title' | 'site' | 'note' | 'byline'>;
 
 /** Kind, byline, title, note (DESIGN.md §10), skipping what isn't known yet or the note already says. */
 function describe(item: Item, { variant, title, site, note, byline }: Described): string {
   const kind = variant === 'pending' ? null : (item.kind ?? FALLBACK_KIND);
-  const unsaid = (part: string | null) => (part === null || note.includes(part) ? null : part);
+  const unsaid = (part: string | null) => (part === null || saysLast(note, part) ? null : part);
   return [kind, unsaid(byline), title ?? unsaid(site), note].filter((part) => part !== null).join(', ');
 }
 
-/** What a post print sets between its rules (#58): its words; a picture-only post has none, its name is enough. */
+/** What a post print sets between its rules (#58): its words; a picture-only post has none when its name fills the rules. */
 export function postWords(card: CardModel): string | null {
   if (card.postText) return card.postText;
-  return card.media ? null : (card.title ?? card.site);
+  return card.media && card.byline ? null : (card.title ?? card.site);
 }
 
 /** Cards are rebuilt on every live-query refresh; this keeps unchanged ones from redrawing. */

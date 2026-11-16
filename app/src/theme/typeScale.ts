@@ -32,9 +32,9 @@ export const TYPE_SCALE = {
   note: { voice: 'note', font: FONT_FILE.textItalic, size: 13, leading: 1.35, tracking: 0 },
   /** Share sheet prompt (DESIGN.md §8): prompts are notes (§4). */
   prompt: { voice: 'note', font: FONT_FILE.textItalic, size: 15, leading: 1.3, tracking: 0 },
-  /** Post text on a card (#29): the post is the content, so it's set as a name in the italic cut. */
   /** An imageless link's description on its wall label (#58): about the page, a step over the caption's note. */
   label: { voice: 'note', font: FONT_FILE.textItalic, size: 14, leading: 1.35, tracking: 0 },
+  /** Post text on a card (#29): the post is the content, so it's set as a name in the italic cut. */
   post: { voice: 'name', font: FONT_FILE.textItalic, size: 15, leading: 1.35, tracking: 0 },
   /** Who wrote a post, above its words on a card (#58): a name, a step under the words. */
   byline: { voice: 'name', font: FONT_FILE.textRegular, size: 14, leading: 1.3, tracking: 0 },

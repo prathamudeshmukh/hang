@@ -145,6 +145,10 @@ describe('toCardModel: posts show who said it (#58)', () => {
     assert.equal(toCardModel(post({}), null, NOW).accessibilityLabel, 'post, The engine might compose music, post · @ada');
   });
 
+  it('still says an author whose name only happens to sit inside the handle', () => {
+    assert.equal(toCardModel(post({ author: 'ada' }), null, NOW).accessibilityLabel, 'post, ada, The engine might compose music, post · @ada');
+  });
+
   it('leaves the byline off cards that are not posts', () => {
     assert.equal(toCardModel(ready({ kind: 'article', post: { author: 'Ada' } }), null, NOW).byline, null);
   });
@@ -179,6 +183,10 @@ describe('postWords', () => {
 
   it('falls back to the site for a post with neither words nor picture', () => {
     assert.equal(postWords(card({ text: '' }, null)), 'Aeon');
+  });
+
+  it('falls back to the site for a picture-only post with no name, so the rules are never empty', () => {
+    assert.equal(postWords(card({ text: '', author: null }, PICTURE)), 'Aeon');
   });
 });
 
