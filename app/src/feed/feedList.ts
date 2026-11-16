@@ -5,6 +5,7 @@ import { toCardModel } from '../grid/cardModel.ts';
 import type { ThumbStore } from '../thumbs/thumbStore.ts';
 import { toFeedPage, type FeedPage } from './feedPage.ts';
 import { placeName } from './moveChoices.ts';
+import { savedNote } from './savedNote.ts';
 
 export interface FeedSources {
   readonly items: Pick<ItemsRepository, 'listByIds'>;
@@ -38,7 +39,8 @@ export function readFeed(sources: FeedSources, { ids, origins }: FeedSnapshot, n
   return liveItems(sources, ids).map((item) => {
     const moved = origins.has(item.id) && origins.get(item.id) !== item.collectionId;
     return toFeedPage(toCardModel(item, thumbs.get(item.id) ?? null, now), {
-      summary: item.summary,
+      summary: item.summary ?? item.description,
+      saved: savedNote(item.createdAt, now),
       ...(moved ? { movedTo: placeName(collections, item.collectionId) } : {}),
       placeId: item.collectionId,
     });

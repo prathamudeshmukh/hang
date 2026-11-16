@@ -35,6 +35,8 @@ export interface ItemPatch {
   readonly raw_title: string | null;
   readonly site_name: string | null;
   readonly author: string | null;
+  /** The page's own description, cleaned (#54); the feed shows it until AI writes `summary`. */
+  readonly description: string | null;
   readonly duration_s: number | null;
   readonly reading_min: number | null;
   /** Lead image to thumbnail; setting it triggers the `media` function. */

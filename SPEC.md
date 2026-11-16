@@ -188,6 +188,12 @@ back to a generic link card (Open Graph image, title, site), never to a broken s
 
 Adding a source = one new adapter file + fixtures + tests. No other code changes.
 
+**Description** (decided 2026-11-14, #54): `extract` keeps the page's own description for every kind whose adapter reads one (page meta: `generic`,
+`article`, `imagePage`, `externalVideo`; YouTube, Vimeo, X and direct files have none)
+(`extract/description.ts`): whitespace collapsed, dropped if under 20 characters or the title again (ignoring case and
+punctuation), capped at 500 characters on a word. It is an extracted fact like `raw_title`: AI writes `summary` and
+reads `description` as input; the feed shows `summary ?? description`. Items saved before it aren't backfilled.
+
 ### Sync
 
 - The server is the source of truth. Every syncable row has `updated_at` (server-set) and
@@ -238,6 +244,7 @@ items (
   title           text,              -- AI-cleaned, falls back to extracted
   raw_title       text,
   summary         text,              -- 1–2 lines, AI
+  description     text,              -- the page's own (og:description), cleaned; ≤ 500 chars (#54)
   tags            text[],            -- AI, search-only
   site_name       text,
   author          text,

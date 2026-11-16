@@ -34,6 +34,7 @@ const itemRow = z.object({
   title: optionalText,
   raw_title: optionalText,
   summary: optionalText,
+  description: optionalText,
   tags: z.array(z.string()).nullish(),
   site_name: optionalText,
   author: optionalText,

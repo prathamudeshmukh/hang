@@ -119,7 +119,8 @@ is the "Recently saved" label, present only while something is unsorted.
 
 Feed (`src/feed/`, #31): grid cards, strip prints and Rediscover call `openFeed(ids, start)` (`appFeed.ts`); the ids go
 through an in-memory `feedSession` (latest only; a restored route falls back to its start item), not the URL. `readFeed`
-keeps that order and re-reads contents live; `originsOf` lets a moved item say *moved to X*. Read/Watch/Open goes through
+keeps that order and re-reads contents live; `originsOf` lets a moved item say *moved to X*. Pages show `summary ?? description`; a link's runs to five lines and its
+note adds `savedNote` (*saved 3 days ago*, #54). Read/Watch/Open goes through
 `openItem` (records `last_opened_at`, opens the Custom Tab) until Phase 3. Everything inside `ScreeningRoom`
 (`src/theme/ScreeningRoom.tsx`) draws with the always-dark `SCREENING_ROOM` palette. `CollectionChips`
 (`src/collections/`) is shared by the share sheet and Move. E2E waits on `testID="feed"`, `feed-counter`, `feed-move`.
