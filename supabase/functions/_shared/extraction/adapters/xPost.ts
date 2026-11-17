@@ -8,6 +8,9 @@ const STATUS_PATH = /^\/(\w{1,15})\/status\/(\d+)/;
 const MIRROR = 'https://api.fxtwitter.com';
 const OEMBED = 'https://publish.twitter.com/oembed?omit_script=true&url=';
 const TITLE_MAX = 90;
+const PHOTO_HOST = 'pbs.twimg.com';
+/** X's `large` cut is at most 2048px a side, inside the thumbnail step's pixel cap; `orig` can be 12MP and gets dropped (#69). */
+const PHOTO_SIZE = 'large';
 
 interface StatusRef { readonly user: string; readonly id: string }
 
@@ -17,6 +20,13 @@ function statusRef(url: URL): StatusRef | undefined {
   return match?.[1] && match[2] ? { user: match[1], id: match[2] } : undefined;
 }
 
+function sizedPhoto(address: string): string {
+  const url = new URL(address);
+  if (url.hostname !== PHOTO_HOST) return address;
+  url.searchParams.set('name', PHOTO_SIZE);
+  return url.toString();
+}
+
 async function fromMirror(ctx: ExtractContext, ref: StatusRef): Promise<PostSnapshot> {
   const { tweet } = postMirrorSchema.parse(await ctx.fetchJson(`${MIRROR}/${ref.user}/status/${ref.id}`));
   return {
@@ -24,7 +34,7 @@ async function fromMirror(ctx: ExtractContext, ref: StatusRef): Promise<PostSnap
     handle: tweet.author.screen_name,
     avatarUrl: tweet.author.avatar_url,
     text: tweet.text,
-    mediaUrls: (tweet.media?.photos ?? []).map((photo) => photo.url).filter((u): u is string => u !== undefined),
+    mediaUrls: (tweet.media?.photos ?? []).map((photo) => photo.url).filter((u): u is string => u !== undefined).map(sizedPhoto),
     postedAt: tweet.created_at,
   };
 }
