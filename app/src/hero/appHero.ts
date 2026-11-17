@@ -1,7 +1,9 @@
 import { AccessibilityInfo, Dimensions, PixelRatio } from 'react-native';
 import { initialWindowMetrics } from 'react-native-safe-area-context';
-import { pushFeedRoute } from '@/feed/appFeed';
+import { feedContent, pushFeedRoute } from '@/feed/appFeed';
+import { feedBottomInset } from '@/feed/feedLayout';
 import { postWordsTop } from '@/feed/post/postLayout';
+import { textBlockBottom, textBlockTop } from '@/feed/text/textLayout';
 import type { FeedFrame, Size } from './geometry';
 import { nextFrame } from './frames';
 import { createHero } from './hero';
@@ -10,8 +12,14 @@ import { createOrigins } from './origins';
 export const heroOrigins = createOrigins();
 
 let reduceMotion = false;
-/** The feed as last laid out, with the top inset it was laid out under. */
-let lastFeed: (Size & { readonly topInset: number }) | null = null;
+interface FeedLayout extends Size {
+  readonly topInset: number;
+  /** The room kept under the pills. */
+  readonly bottomInset: number;
+}
+
+/** The feed as last laid out, with the insets it was laid out under. */
+let lastFeed: FeedLayout | null = null;
 
 const warn = (message: string) => console.warn(message);
 
@@ -24,8 +32,8 @@ AccessibilityInfo.addEventListener('reduceMotionChanged', (enabled) => {
   reduceMotion = enabled;
 });
 
-/** The feed reports its laid-out size and top inset, so later flights land on its real media box, not an estimate. */
-export function rememberFeedLayout(layout: Size & { readonly topInset: number }): void {
+/** The feed reports its laid-out size and insets, so later flights land on its real media box, not an estimate. */
+export function rememberFeedLayout(layout: FeedLayout): void {
   lastFeed = layout;
 }
 
@@ -35,8 +43,19 @@ export function rememberFeedLayout(layout: Size & { readonly topInset: number })
  * out: the window, under the launch's safe-area inset.
  */
 export function feedFrame(): FeedFrame {
-  const { width, height, topInset } = lastFeed ?? { ...Dimensions.get('window'), topInset: initialWindowMetrics?.insets.top ?? 0 };
-  return { width, height, wordsTop: postWordsTop({ topInset, fontScale: PixelRatio.getFontScale() }) };
+  const launch = initialWindowMetrics?.insets;
+  const { width, height, topInset, bottomInset } = lastFeed ?? {
+    ...Dimensions.get('window'),
+    topInset: launch?.top ?? 0,
+    bottomInset: feedBottomInset(launch?.bottom ?? 0),
+  };
+  return {
+    width,
+    height,
+    wordsTop: postWordsTop({ topInset, fontScale: PixelRatio.getFontScale() }),
+    textTop: textBlockTop(topInset),
+    textBottom: textBlockBottom({ height, bottomInset }),
+  };
 }
 
 export const hero = createHero({
@@ -44,6 +63,7 @@ export const hero = createHero({
   pushFeed: pushFeedRoute,
   reduceMotion: () => reduceMotion,
   feedSize: feedFrame,
+  hasOpening: (id) => feedContent.hasOpening(id),
   delay: (ms) => new Promise((resolve) => setTimeout(resolve, ms)),
   nextFrame,
   warn,

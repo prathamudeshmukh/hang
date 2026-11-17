@@ -1,4 +1,5 @@
 import { errorName, readItemRequest, reply, STATUS } from '../_shared/edge/itemRequest.ts';
+import { toItemContent } from './itemContent.ts';
 import { toItemPatch } from './itemPatch.ts';
 import type { ClaimedItem, ExtractItem, ItemStore, Logger } from './types.ts';
 
@@ -13,6 +14,8 @@ async function extractAndSave(item: ClaimedItem, deps: ExtractDeps): Promise<Res
   try {
     const { extracted, errors } = await deps.extractItem(item);
     errors.forEach(({ adapter }) => deps.log.warn('extract.adapter_failed', { item_id: item.id, adapter }));
+    const content = toItemContent(item, extracted);
+    if (content) await deps.store.saveContent(content);
     await deps.store.complete(item.id, toItemPatch(item, extracted));
     deps.log.info('extract.ready', { item_id: item.id, adapter: extracted.adapter, kind: extracted.kind });
     return reply(STATUS.ok, 'ready');

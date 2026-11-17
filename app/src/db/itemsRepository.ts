@@ -1,5 +1,6 @@
 import { and, count, desc, eq, inArray, isNull, lt, or, type SQL } from 'drizzle-orm';
 import type { RediscoverFields, RediscoverWindow } from '../home/rediscover.ts';
+import { chunksOf } from './chunks.ts';
 import { enqueue } from './outboxRepository.ts';
 import { toServerShape } from './rowShape.ts';
 import { collections, items, type Item } from './schema.ts';
@@ -17,13 +18,6 @@ export interface NewItem {
 type ItemUserFields = Partial<Pick<Item, 'collectionId' | 'readAt' | 'progress' | 'lastOpenedAt' | 'rediscoveredOn' | 'deletedAt'>>;
 
 const live = isNull(items.deletedAt);
-/** Under SQLite's oldest bound-parameter limit (999), so any build takes it. */
-const IDS_PER_QUERY = 500;
-
-function chunksOf(ids: readonly string[]): readonly (readonly string[])[] {
-  return Array.from({ length: Math.ceil(ids.length / IDS_PER_QUERY) }, (_, n) => ids.slice(n * IDS_PER_QUERY, (n + 1) * IDS_PER_QUERY));
-}
-
 function assertCollectionExists(tx: HangDb, collectionId: string): void {
   const found = tx.select({ id: collections.id }).from(collections)
     .where(and(eq(collections.id, collectionId), isNull(collections.deletedAt))).get();

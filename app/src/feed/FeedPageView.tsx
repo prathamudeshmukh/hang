@@ -9,6 +9,8 @@ import { mediaHeight } from './feedLayout';
 import { useFeedStyles } from './feedStyles';
 import { PAGE_ACTIONS, stepOf, type PageStep } from './pageA11y';
 import { PostPageView } from './post/PostPageView';
+import { OpeningText } from './text/OpeningText';
+import { TextPageView } from './text/TextPageView';
 import { useFeedTextFade } from './useFeedHero';
 
 const TITLE_LINES = 3;
@@ -25,7 +27,7 @@ export interface FeedPageViewProps {
   readonly onMediaDrawn: (id: string) => void;
 }
 
-/** Media, then note, title, summary and the Read/Watch/Open and Move pills (DESIGN.md §8). */
+/** Media, then note, title, summary (or an article's opening, #61) and the Read/Watch/Open and Move pills (DESIGN.md §8). */
 function MediaPageView({ page, height, bottomInset, onOpen, onMove, onStep, onMediaDrawn }: FeedPageViewProps) {
   const styles = useFeedStyles();
   const textFade = useFeedTextFade();
@@ -43,10 +45,11 @@ function MediaPageView({ page, height, bottomInset, onOpen, onMove, onStep, onMe
         <FeedMediaView page={page} height={mediaHeight(height)} onDrawn={onMediaDrawn} />
       </View>
       <Animated.View style={[styles.text, { paddingBottom: bottomInset }, textFade]}>
-        <View style={styles.words}>
+        <View style={[styles.words, page.opening && styles.wordsFilling]}>
           <NoteText testID="feed-note" numberOfLines={1}>{page.note}</NoteText>
           {page.showTitle && page.card.title ? <NameText token="titleL" numberOfLines={TITLE_LINES}>{page.card.title}</NameText> : null}
           {page.summary ? <NameText token="bodyRead" color="ink2" numberOfLines={page.summaryLines}>{page.summary}</NameText> : null}
+          {page.opening ? <OpeningText opening={page.opening} onPress={() => onOpen(page)} /> : null}
         </View>
         <View style={styles.pills}>
           <Pill kind="filled" label={page.action} testID="feed-open" onPress={() => onOpen(page)} />
@@ -57,10 +60,12 @@ function MediaPageView({ page, height, bottomInset, onOpen, onMove, onStep, onMe
   );
 }
 
-/** One screen of the feed; a post is its own page, set as a broadside (#59). */
+/** One screen of the feed; a post is its own page, set as a broadside (#59), and an imageless article a text page (#61). */
 export const FeedPageView = memo(function FeedPageView(props: FeedPageViewProps) {
-  const { media } = props.page;
-  return media.kind === 'post' ? <PostPageView {...props} post={media} /> : <MediaPageView {...props} />;
+  const { media, opening } = props.page;
+  if (media.kind === 'post') return <PostPageView {...props} post={media} />;
+  if (media.kind === 'none' && opening) return <TextPageView {...props} opening={opening} />;
+  return <MediaPageView {...props} />;
 }, (previous, next) => {
   const { page, ...handlers } = previous;
   const { page: nextPage, ...nextHandlers } = next;

@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 import { centringShift, feedMediaRect, fittedRect, insetRect, isFullyInside, landingRect } from './geometry.ts';
 
-const FEED = { width: 400, height: 1000, wordsTop: 120 };
+const FEED = { width: 400, height: 1000, wordsTop: 120, textTop: 80, textBottom: 880 };
 const PRINT = { x: 20, y: 300, width: 180, height: 90 };
 const VIEWPORT = { x: 0, y: 0, width: 400, height: 800 };
 
@@ -38,6 +38,10 @@ describe('landingRect', () => {
 
   it('lands a post on the words’ place, at the print’s shape (#59)', () => {
     assert.deepEqual(landingRect(FEED, { fit: 'words' }, PRINT), { x: 16, y: 120, width: 368, height: 184 });
+  });
+
+  it('lands an imageless article on its text block (#61)', () => {
+    assert.deepEqual(landingRect(FEED, { fit: 'text' }, PRINT), { x: 16, y: 80, width: 368, height: 800 });
   });
 });
 

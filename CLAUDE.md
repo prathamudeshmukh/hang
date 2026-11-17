@@ -123,7 +123,8 @@ is the "Recently saved" label, present only while something is unsorted.
 
 Feed (`src/feed/`, #31): grid cards, strip prints and Rediscover call `openFeed(ids, start)` (`appFeed.ts`); the ids go
 through an in-memory `feedSession` (latest only; a restored route falls back to its start item), not the URL. `readFeed`
-keeps that order and re-reads contents live; `originsOf` lets a moved item say *moved to X*. Pages show `summary ?? description`; a link's runs to five lines and its
+keeps that order and re-reads contents live; `originsOf` lets a moved item say *moved to X*. Pages show `summary ?? description`, except an article with reader text, which opens on its first lines (#61:
+`db/contentRepository.ts` reads the start of `item_content.text`; an imageless one is a text page, `src/feed/text/`); a link's runs to five lines and its
 note adds `savedNote` (*saved 3 days ago*, #54). Read/Watch/Open goes through
 `openItem` (records `last_opened_at`, opens the Custom Tab) until Phase 3. A post page (`src/feed/post/`, #59) is its own layout, set as a broadside: `PostMeasure`
 sets the words at all six `post-fit` steps unseen, pure `fitStep` picks the largest that fits the room `postLayout`
@@ -150,6 +151,10 @@ Duplicate shares (#19): `supabase/functions/_shared/links/linkKey.ts` says when 
 imports it by relative path (Metro watches only that folder), so keep it dependency-free. `src/share/sameLink.ts`
 finds the live item a share already is, and the capture opens on it (`kind: 'existing'`) instead of saving. The one-off
 clean-up is `supabase/functions/scripts/dedupe/run.ts` (dry run unless `--apply`; needs the service-role key).
+
+Reader text (#61): `extract` writes `item_content` for articles (`text` = the `<p>` paragraphs, blank-line separated,
+without the title or byline; `_shared/extraction/paragraphs.ts`) before the item turns ready. Articles saved before
+that get theirs from `supabase/functions/scripts/backfill-content/run.ts` (dry run unless `--apply`; service-role key).
 
 Local store tests use better-sqlite3 with the real migrations (`src/db/testing/testDb.ts`); the device
 uses expo-sqlite. Both are synchronous Drizzle drivers, typed as `HangDb`.

@@ -27,6 +27,14 @@ describe('lookOf', () => {
     assert.deepEqual(lookOf(cardOf({ kind: 'post', post: { text: 'A thread' }, ...TALL })), { kind: 'frame', landing: { fit: 'words' } });
   });
 
+  it('flies an empty frame to the text block for an imageless article with an opening (#61)', () => {
+    assert.deepEqual(lookOf(cardOf({ kind: 'article', title: 'On boredom' }), true), { kind: 'frame', landing: { fit: 'text' } });
+  });
+
+  it('still flies an article’s picture when it has an opening', () => {
+    assert.deepEqual(lookOf(cardOf({ kind: 'article', ...TALL }), true), { kind: 'picture', uri: THUMB, landing: { fit: 'cover' } });
+  });
+
   it('flies an empty frame while the thumbnail is not on the device yet', () => {
     assert.equal(lookOf(cardOf({ kind: 'image', ...TALL }, null)), FRAME);
   });

@@ -37,6 +37,15 @@ describe('hero: out to the feed', () => {
     assert.deepEqual(harness.flights[0].to, { x: 16, y: FEED.wordsTop, width: 368, height: 368 * (CARD_RECT.height / CARD_RECT.width) });
   });
 
+  it('flies an imageless article with an opening to its text block (#61)', async () => {
+    const harness = withFace(heroHarness({ withOpening: ['a'] }));
+    harness.hero.open({ ids: IDS, card: aCard({ kind: 'article', thumbW: null, thumbH: null }), scope: SCOPE });
+    await flush();
+    harness.hero.flyerDrawn();
+    await flush();
+    assert.deepEqual(harness.flights[0].to, { x: 16, y: FEED.textTop, width: 368, height: FEED.textBottom - FEED.textTop });
+  });
+
   it('waits for the flyer to draw before opening the feed, so mounting it can’t starve the boarding wait', async () => {
     const harness = withFace(heroHarness());
     harness.hero.open({ ids: IDS, card: aCard(), scope: SCOPE });

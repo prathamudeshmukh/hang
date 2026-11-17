@@ -3,8 +3,9 @@ import assert from 'node:assert/strict';
 import { beforeEach, describe, it } from 'node:test';
 import { eq } from 'drizzle-orm';
 import { createCollectionsRepository } from '../db/collectionsRepository.ts';
+import { createContentRepository } from '../db/contentRepository.ts';
 import { createItemsRepository } from '../db/itemsRepository.ts';
-import { items, type Item } from '../db/schema.ts';
+import { itemContent, items, type Item } from '../db/schema.ts';
 import { createTestDeps } from '../db/testing/testDb.ts';
 import { createThumbStore } from '../thumbs/thumbStore.ts';
 import { CARD_NOW } from '../grid/testing/anItem.ts';
@@ -18,12 +19,14 @@ function setup() {
     items: createItemsRepository(deps),
     collections: createCollectionsRepository(deps),
     thumbs: createThumbStore(deps.db),
+    content: createContentRepository(deps.db),
   };
   sources.collections.create({ id: 'c1', name: 'Reading' });
   sources.collections.create({ id: 'c2', name: 'Recipes' });
   const save = (id: string, collectionId: string | null = 'c1') => sources.items.save({ id, sourceUrl: URL, collectionId });
   const update = (id: string, changes: Partial<Item>) => deps.db.update(items).set(changes).where(eq(items.id, id)).run();
-  return { ...sources, sources, save, update };
+  const addText = (itemId: string, text: string) => deps.db.insert(itemContent).values({ itemId, text }).run();
+  return { ...sources, sources, save, update, addText };
 }
 
 const idsOf = (pages: readonly { readonly card: { readonly id: string } }[]) => pages.map(({ card }) => card.id);
@@ -68,6 +71,17 @@ describe('readFeed', () => {
     const origins = originsOf(s.sources, ids);
     s.items.remove('b');
     assert.deepEqual(idsOf(readFeed(s.sources, { ids, origins }, CARD_NOW)), ['a', 'c']);
+  });
+});
+
+describe('readFeed openings (#61)', () => {
+  it('opens an article on its reader text', () => {
+    const s = setup();
+    s.save('a');
+    s.update('a', { status: 'ready', kind: 'article', summary: 'From the AI.' });
+    s.addText('a', 'First paragraph.\n\nSecond.');
+    const [page] = readFeed(s.sources, { ids: ['a'], origins: originsOf(s.sources, ['a']) }, CARD_NOW);
+    assert.deepEqual([page?.opening?.text, page?.summary], ['First paragraph.\n\nSecond.', null]);
   });
 });
 

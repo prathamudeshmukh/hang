@@ -15,6 +15,13 @@ describe('article adapter', () => {
     expect(result?.contentHtml).not.toContain('<nav');
   });
 
+  it('keeps the running text as paragraphs, without the title or byline (#61)', async () => {
+    const ctx = makeContext('https://mag.test/essays/hyperlink', { page: htmlPage(fixture('article.html'), 'https://mag.test/essays/hyperlink') });
+    const text = (await article.extract(ctx))?.contentText ?? '';
+    expect(text.startsWith('There was a time when the web pointed outward.')).toBe(true);
+    expect(text.split('\n\n')).toHaveLength(5);
+  });
+
   it('declines short marketing pages', async () => {
     const ctx = makeContext('https://acme.test/', { page: htmlPage(fixture('landing.html')) });
     expect(await article.extract(ctx)).toBeNull();

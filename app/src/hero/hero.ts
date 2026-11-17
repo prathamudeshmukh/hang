@@ -34,6 +34,8 @@ export interface HeroPorts {
   readonly reduceMotion: () => boolean;
   /** The feed as last laid out (the window until then). */
   readonly feedSize: () => FeedFrame;
+  /** Whether the item has reader text, which turns an imageless article's page into a text page (#61). */
+  readonly hasOpening: (id: string) => boolean;
   readonly delay: (ms: number) => Promise<void>;
   readonly nextFrame: () => Promise<void>;
   readonly warn: (message: string) => void;
@@ -120,7 +122,7 @@ export function createHero(ports: HeroPorts) {
   }
 
   async function flyOut(on: Stage, request: OpenRequest, from: Rect) {
-    const look = lookOf(request.card);
+    const look = lookOf(request.card, ports.hasOpening(request.card.id));
     feedDrawnLatch = createLatch();
     await on.setFeedOpacity(0, INSTANT);
     await board(on, { id: request.card.id, scope: request.scope, direction: 'out', look, from, to: landingRect(ports.feedSize(), look.landing, from) });
@@ -141,7 +143,7 @@ export function createHero(ports: HeroPorts) {
   }
 
   async function flyBack(on: Stage, { card, feed, pop }: BackRequest & { readonly card: CardModel }, at: FaceKey, to: Rect) {
-    const look = lookOf(card);
+    const look = lookOf(card, ports.hasOpening(card.id));
     await board(on, { id: card.id, scope: at.scope, direction: 'back', look, from: landingRect(feed, look.landing, to), to });
     await waitForFlyer();
     const fadedAway = on.fadeFeedAway();

@@ -17,6 +17,7 @@ import type { FeedPage } from './feedPage';
 import { FeedPageView } from './FeedPageView';
 import type { PageStep } from './pageA11y';
 import type { FeedSession } from './feedSession';
+import { feedBottomInset } from './feedLayout';
 import { useFeedStyles } from './feedStyles';
 import { MoveSheet } from './MoveSheet';
 import { TopShade } from './TopShade';
@@ -93,7 +94,7 @@ function Pager({ session, pages, height, onShown }: PagerProps) {
   // Only the id: the sheet reads the page live, so a re-file by sync shows the right place.
   const [movingId, setMovingId] = useState<string | null>(null);
   const [initialIndex] = useState(() => Math.max(0, pages.findIndex(({ card }) => card.id === session.start)));
-  const bottomInset = insets.bottom + SPACE.rhythm;
+  const bottomInset = feedBottomInset(insets.bottom);
   const startMove = useCallback((page: FeedPage) => setMovingId(page.card.id), []);
   const renderItem = useCallback(
     ({ item }: { readonly item: FeedPage }) => <FeedPageView page={item} height={height} bottomInset={bottomInset} onOpen={openPage} onMove={startMove} onStep={step} onMediaDrawn={reportMediaDrawn} />,
@@ -147,7 +148,7 @@ export function FeedScreen({ session, sessionKey }: { readonly session: FeedSess
   const onLayout = (event: LayoutChangeEvent) => {
     const { width, height: laidOut } = event.nativeEvent.layout;
     setHeight(laidOut);
-    reportLayout({ width, height: laidOut, topInset: insets.top });
+    reportLayout({ width, height: laidOut, topInset: insets.top, bottomInset: feedBottomInset(insets.bottom) });
   };
   useEffect(() => {
     if (pages.length === 0) onShown(null);
