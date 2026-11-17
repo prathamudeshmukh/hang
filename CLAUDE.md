@@ -104,6 +104,10 @@ Design foundations (`src/theme/`, #28): tokens for light and dark (`tokens.ts`),
 hard-codes a color, font or size. Fonts are static cuts of Google's OFL variable fonts (Android can't set font axes):
 `scripts/build-fonts.py` rebuilds `assets/fonts/` with fonttools 4.55. `android/` is generated: after changing `app.json`
 plugins (fonts, `expo-navigation-bar`), run `npx expo prebuild --platform android --no-install` before a native build.
+`plugins/withConfigChanges.js` (#65) keeps `MainActivity` alive through font scale, display size, language and bold-text
+changes: a recreated activity mounts a second React root and leaves expo-router's global `router` unbound. The root
+`<Stack>` is keyed on `fontScale` so text already on screen is laid out again. RN only reads a new font scale on resume,
+so test it by leaving Hang, changing the setting and coming back. Plugin tests run with `npm test`.
 
 Auth (`src/auth/`): `authSession.ts` is plain TS with injected ports (Google, Supabase auth, local account,
 sync); `appSession.ts` wires the real ones and is the only file that imports native modules.

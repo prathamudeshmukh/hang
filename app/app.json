@@ -28,6 +28,7 @@
     "plugins": [
       "expo-router",
       "./plugins/withShareActivity.js",
+      "./plugins/withConfigChanges.js",
       "expo-sqlite",
       "expo-secure-store",
       [
