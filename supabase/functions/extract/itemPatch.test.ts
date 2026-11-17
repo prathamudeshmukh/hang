@@ -4,7 +4,7 @@ import type { Extracted } from '../_shared/extraction/types.ts';
 import { toItemPatch } from './itemPatch.ts';
 import type { ClaimedItem } from './types.ts';
 
-const item: ClaimedItem = { id: 'i1', sourceUrl: 'https://www.mag.test/a?utm_source=x&id=7', sharedTitle: null };
+const item: ClaimedItem = { id: 'i1', userId: 'u1', sourceUrl: 'https://www.mag.test/a?utm_source=x&id=7', sharedTitle: null };
 const link: Extracted = { kind: 'link', adapter: 'generic', url: 'https://www.mag.test/a?utm_source=x&id=7' };
 
 describe('toItemPatch', () => {

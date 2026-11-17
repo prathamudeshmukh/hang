@@ -2,14 +2,15 @@ import { expect } from '@std/expect';
 import { beforeEach, describe, it } from '@std/testing/bdd';
 import type { ExtractionResult } from '../_shared/extraction/registry.ts';
 import { makeExtractHandler } from './handler.ts';
-import type { ClaimedItem, ExtractErrorCode, ItemPatch, ItemStore, LogFields, Logger } from './types.ts';
+import type { ClaimedItem, ContentRow, ExtractErrorCode, ItemPatch, ItemStore, LogFields, Logger } from './types.ts';
 
 const SECRET = 'test-secret-value';
 const ITEM_ID = '0192f0a1-2b3c-7d4e-8f90-123456789abc';
-const CLAIMED: ClaimedItem = { id: ITEM_ID, sourceUrl: 'https://blocked.test/p', sharedTitle: 'Shared headline' };
+const CLAIMED: ClaimedItem = { id: ITEM_ID, userId: 'u1', sourceUrl: 'https://blocked.test/p', sharedTitle: 'Shared headline' };
 
 interface Recorder {
   readonly completed: Array<{ id: string; patch: ItemPatch }>;
+  readonly contents: ContentRow[];
   readonly failed: Array<{ id: string; code: ExtractErrorCode }>;
   readonly logs: Array<{ level: string; event: string; fields: LogFields }>;
 }
@@ -17,6 +18,10 @@ interface Recorder {
 function fakeStore(rec: Recorder, claimed: ClaimedItem | null, completeError?: Error): ItemStore {
   return {
     claim: () => Promise.resolve(claimed),
+    saveContent: (content) => {
+      rec.contents.push(content);
+      return Promise.resolve();
+    },
     complete: (id, patch) => {
       if (completeError) return Promise.reject(completeError);
       rec.completed.push({ id, patch });
@@ -39,6 +44,10 @@ const blockedResult: ExtractionResult = {
   errors: [{ adapter: 'article', message: 'HTTP 403' }],
 };
 
+const articleResult = {
+  kind: 'article', adapter: 'article', url: 'https://mag.test/a', title: 'Hello', contentHtml: '<p>Hello there.</p>', contentText: 'Hello there.',
+} as const;
+
 function request(body: unknown, secret = SECRET): Request {
   return new Request('http://fn.test/extract', {
     method: 'POST',
@@ -50,7 +59,7 @@ function request(body: unknown, secret = SECRET): Request {
 describe('extract handler', () => {
   let rec: Recorder;
   beforeEach(() => {
-    rec = { completed: [], failed: [], logs: [] };
+    rec = { completed: [], contents: [], failed: [], logs: [] };
   });
 
   const handler = (claimed: ClaimedItem | null = CLAIMED, opts: { completeError?: Error; result?: ExtractionResult } = {}) =>
@@ -87,6 +96,18 @@ describe('extract handler', () => {
     const res = await handler()(request({ item_id: ITEM_ID }));
     expect(res.status).toBe(200);
     expect(rec.completed[0]?.patch).toMatchObject({ status: 'ready', kind: 'link', title: 'Shared headline' });
+  });
+
+  it("saves an article's reader text with the item (#61)", async () => {
+    const result: ExtractionResult = { extracted: { ...articleResult }, errors: [] };
+    await handler(CLAIMED, { result })(request({ item_id: ITEM_ID }));
+    expect(rec.contents).toEqual([{ item_id: ITEM_ID, user_id: 'u1', html: '<p>Hello there.</p>', text: 'Hello there.', word_count: 2 }]);
+    expect(rec.completed[0]?.patch.kind).toBe('article');
+  });
+
+  it('saves no reader text for a link', async () => {
+    await handler()(request({ item_id: ITEM_ID }));
+    expect(rec.contents).toEqual([]);
   });
 
   it('logs adapter errors with the item id and never the url', async () => {

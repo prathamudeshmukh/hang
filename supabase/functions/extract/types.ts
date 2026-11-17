@@ -4,6 +4,7 @@ import type { CardKind } from '../_shared/extraction/types.ts';
 /** The row as the function sees it after claiming it (status moved pending → extracting). */
 export interface ClaimedItem {
   readonly id: string;
+  readonly userId: string;
   readonly sourceUrl: string;
   readonly sharedTitle: string | null;
 }
@@ -45,12 +46,23 @@ export interface ItemPatch {
   readonly post: PostJson | null;
 }
 
+/** SPEC §5 `item_content`: an article's reader html and its paragraphs as plain text (#61). */
+export interface ContentRow {
+  readonly item_id: string;
+  readonly user_id: string;
+  readonly html: string;
+  readonly text: string;
+  readonly word_count: number;
+}
+
 /** Short codes only: never a URL or a stack trace (SPEC §7). */
 export type ExtractErrorCode = 'internal';
 
 export interface ItemStore {
   /** Atomically moves a live `pending` row to `extracting`; null if there's nothing to do. */
   readonly claim: (id: string) => Promise<ClaimedItem | null>;
+  /** Written before the item turns ready, so a device never pulls a ready article whose text is still missing. */
+  readonly saveContent: (content: ContentRow) => Promise<void>;
   readonly complete: (id: string, patch: ItemPatch) => Promise<void>;
   readonly fail: (id: string, code: ExtractErrorCode) => Promise<void>;
 }
