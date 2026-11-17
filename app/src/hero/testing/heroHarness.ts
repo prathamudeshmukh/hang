@@ -6,7 +6,7 @@ import { createHero, type HeroPorts, type Stage } from '../hero.ts';
 import { createOrigins } from '../origins.ts';
 import type { Flight } from '../trip.ts';
 
-export const FEED: FeedFrame = { width: 400, height: 1000, wordsTop: 120 };
+export const FEED: FeedFrame = { width: 400, height: 1000, wordsTop: 120, textTop: 80, textBottom: 880 };
 export const CARD_RECT: Rect = { x: 20, y: 300, width: 180, height: 240 };
 export const SCOPE = 'inbox';
 
@@ -25,10 +25,12 @@ interface HarnessOptions {
   readonly failFlight?: boolean;
   /** The feed's fade on the way back never finishes, until `finishFeedFade` is called. */
   readonly holdFeedFade?: boolean;
+  /** Ids whose items have reader text (#61). */
+  readonly withOpening?: readonly string[];
 }
 
 /** A hero with a recording stage and fake navigation, origins and clock. */
-export function heroHarness({ reduceMotion = false, timeoutsFire = false, withStage = true, failFlight = false, holdFeedFade = false }: HarnessOptions = {}) {
+export function heroHarness({ reduceMotion = false, timeoutsFire = false, withStage = true, failFlight = false, holdFeedFade = false, withOpening = [] }: HarnessOptions = {}) {
   const calls: string[] = [];
   const flights: Flight[] = [];
   const pushes: { readonly ids: readonly string[]; readonly start: string }[] = [];
@@ -70,6 +72,7 @@ export function heroHarness({ reduceMotion = false, timeoutsFire = false, withSt
     },
     reduceMotion: () => reduceMotion,
     feedSize: () => FEED,
+    hasOpening: (id) => withOpening.includes(id),
     delay: () => (timeoutsFire ? Promise.resolve() : new Promise(() => undefined)),
     nextFrame: () => Promise.resolve(),
     warn: (message) => warnings.push(message),

@@ -1,4 +1,5 @@
 import type { CollectionsRepository } from '../db/collectionsRepository.ts';
+import type { ContentRepository } from '../db/contentRepository.ts';
 import type { ItemsRepository } from '../db/itemsRepository.ts';
 import type { Item } from '../db/schema.ts';
 import { toCardModel } from '../grid/cardModel.ts';
@@ -11,6 +12,7 @@ export interface FeedSources {
   readonly items: Pick<ItemsRepository, 'listByIds'>;
   readonly collections: Pick<CollectionsRepository, 'list'>;
   readonly thumbs: Pick<ThumbStore, 'fileUris'>;
+  readonly content: Pick<ContentRepository, 'openings'>;
 }
 
 /** Where each item hung when the feed opened, so a move shows as *moved to X*. */
@@ -36,10 +38,12 @@ export function originsOf(sources: FeedSources, ids: readonly string[]): Origins
 export function readFeed(sources: FeedSources, { ids, origins }: FeedSnapshot, now: Date): readonly FeedPage[] {
   const thumbs = sources.thumbs.fileUris();
   const collections = sources.collections.list();
+  const openings = sources.content.openings(ids);
   return liveItems(sources, ids).map((item) => {
     const moved = origins.has(item.id) && origins.get(item.id) !== item.collectionId;
     return toFeedPage(toCardModel(item, thumbs.get(item.id) ?? null, now), {
       summary: item.summary ?? item.description,
+      opening: openings.get(item.id) ?? null,
       saved: savedNote(item.createdAt, now),
       ...(moved ? { movedTo: placeName(collections, item.collectionId) } : {}),
       placeId: item.collectionId,

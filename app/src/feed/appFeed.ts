@@ -2,6 +2,7 @@ import * as Haptics from 'expo-haptics';
 import { router } from 'expo-router';
 import { Alert } from 'react-native';
 import { db } from '@/db/client';
+import { createContentRepository } from '@/db/contentRepository';
 import { createItemsRepository } from '@/db/itemsRepository';
 import { systemClock } from '@/db/types';
 import { appCollections } from '@/home/appListSources';
@@ -16,7 +17,8 @@ const feedSessions = createFeedSessions(() => `${Date.now()}-${++opened}`);
 const warn = (message: string) => console.warn(message);
 const items = createItemsRepository({ db, clock: systemClock });
 
-export const feedSources: FeedSources = { items, collections: appCollections, thumbs: createThumbStore(db) };
+export const feedContent = createContentRepository(db);
+export const feedSources: FeedSources = { items, collections: appCollections, thumbs: createThumbStore(db), content: feedContent };
 
 /** Pushes the feed route on the list as the opener shows it, starting at `start`. Openers go through the hero (#32). */
 export function pushFeedRoute(ids: readonly string[], start: string): void {

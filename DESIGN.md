@@ -267,7 +267,7 @@ for the next item. The counter appears as a note in the top-right: *4 of 12*.
 
 | Kind | Feed page | Main pill |
 |---|---|---|
-| `article` | Its **opening lines** in `body-read` (`ink-2`) take the summary's place, so reading starts on the feed; no reader text → the summary | **Read** (or a tap on the text) continues in the reader at the next line; no reader text → Custom Tab |
+| `article` | Its **opening lines** in `body-read` (`ink-2`) take the summary's place, so reading starts on the feed: as many whole lines as fit between title and pills, cut with an ellipsis, a blank line between paragraphs, no drop cap. With no picture it's a **text page**: no media box, the note and title (`title-l`) sit where a post's note does and the opening runs down to the pills; the print's frame lands on that text block. No reader text → the summary (#61) | **Read** (or a tap on the text) continues in the reader at the next line; no reader text → Custom Tab |
 | `video` | Plays **muted** once its page settles, with a hairline progress line along the bottom of the frame; it stops when you swipe away | **Watch** (or a tap on the frame) goes full screen in the screening room, with sound. Videos that can't play inline open their app |
 | `post` | **The post is the page, set as a broadside** (see *Post pages* below) | **Move** is filled; **Open** (to the post on its site) is the outlined pill, since the snapshot is usually enough |
 | `image` | **Full bleed**: the image fills the page, fit whole on `screen`; the note and pills sit on a shade at the bottom. Tap hides them, pinch zooms | **Move** is filled; **Open** goes to the source |

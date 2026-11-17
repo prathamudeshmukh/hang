@@ -127,3 +127,41 @@ describe('toFeedPage: a post page’s parts (#59)', () => {
     assert.equal(postOf({ text: 'hi', handle: null }).imprint, null);
   });
 });
+
+describe('toFeedPage: an article’s opening lines (#61)', () => {
+  const ARTICLE = { status: 'ready', kind: 'article', title: 'On boredom', ...WITH_THUMB } as const;
+  const OPENING = 'In the reading room there is a man asleep.\n\nNobody asks him to leave.';
+  const withOpening = { summary: 'Why we drift.', opening: OPENING, placeId: null } satisfies FeedPageExtras;
+
+  it('shows the opening in place of the summary', () => {
+    const page = pageOf(ARTICLE, withOpening);
+    assert.deepEqual([page.opening?.text, page.summary], [OPENING, null]);
+  });
+
+  it('keeps the summary when the article has no reader text', () => {
+    const page = pageOf(ARTICLE, { ...withOpening, opening: null });
+    assert.deepEqual([page.opening, page.summary], [null, 'Why we drift.']);
+  });
+
+  it('gives TalkBack only the first paragraph', () => {
+    assert.equal(pageOf(ARTICLE, withOpening).opening?.spoken, 'In the reading room there is a man asleep.');
+  });
+
+  it('makes an imageless article with an opening a text page, with its title in the words', () => {
+    const page = pageOf({ ...ARTICLE, thumbW: null, thumbH: null }, withOpening);
+    assert.deepEqual([page.media.kind, page.showTitle], ['none', true]);
+  });
+
+  it('keeps the large title for an imageless article without reader text', () => {
+    assert.equal(pageOf({ ...ARTICLE, thumbW: null, thumbH: null }, { ...withOpening, opening: null }).media.kind, 'title');
+  });
+
+  it('ignores reader text on other kinds', () => {
+    const page = pageOf({ status: 'ready', kind: 'link' }, withOpening);
+    assert.deepEqual([page.opening, page.summary], [null, 'Why we drift.']);
+  });
+
+  it('sees the opening arrive by sync', () => {
+    assert.equal(samePage(pageOf(ARTICLE, { ...withOpening, opening: null }), pageOf(ARTICLE, withOpening)), false);
+  });
+});

@@ -1,5 +1,6 @@
 import { makeStyles } from '@/theme/theme';
 import { RADIUS, SPACE } from '@/theme/tokens';
+import { TEXT_PILLS_GAP } from './text/textLayout';
 
 const PLAY_DISC = SPACE.touch * 1.5;
 const FADED = 0.5;
@@ -42,6 +43,8 @@ export const useFeedStyles = makeStyles(({ color }) => ({
   hidden: { opacity: 0 },
   text: { flex: 1, justifyContent: 'space-between', paddingHorizontal: SPACE.margin, paddingTop: SPACE.rhythm },
   words: { gap: SPACE.caption },
+  /** An article's opening takes the room the pills leave (#61). */
+  wordsFilling: { flex: 1, marginBottom: TEXT_PILLS_GAP },
   pills: { flexDirection: 'row', gap: SPACE.chip },
   counter: {
     position: 'absolute',
