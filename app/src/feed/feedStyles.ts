@@ -12,7 +12,6 @@ export const useFeedStyles = makeStyles(({ color }) => ({
   page: { backgroundColor: color.wall },
   media: { width: '100%', backgroundColor: color.raised, overflow: 'hidden' },
   picture: { width: '100%', height: '100%' },
-  letterbox: { backgroundColor: color.wall },
   playDisc: {
     position: 'absolute',
     alignSelf: 'center',

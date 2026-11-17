@@ -19,6 +19,9 @@ import type { PageStep } from './pageA11y';
 import type { FeedSession } from './feedSession';
 import { feedBottomInset } from './feedLayout';
 import { useFeedStyles } from './feedStyles';
+import { createImageViewer } from './image/imageChrome';
+import { ImageViewerProvider, useImageViewer, useViewerState } from './image/imageViewerContext';
+import { useChromeFade } from './image/useImageChrome';
 import { MoveSheet } from './MoveSheet';
 import { TopShade } from './TopShade';
 import type { CardModel } from '@/grid/cardModel';
@@ -60,13 +63,14 @@ function useStep(list: RefObject<FlatList<FeedPage> | null>, index: number, tota
   }, [list]);
 }
 
-function Counter({ text }: { readonly text: string | null }) {
+function Counter({ text, hidden }: { readonly text: string | null; readonly hidden: boolean }) {
   const styles = useFeedStyles();
   const insets = useSafeAreaInsets();
   const textFade = useFeedTextFade();
+  const chromeFade = useChromeFade(hidden);
   if (text === null) return null;
   return (
-    <Animated.View style={[styles.counter, { top: insets.top + SPACE.tight }, textFade]} pointerEvents="none">
+    <Animated.View style={[styles.counter, { top: insets.top + SPACE.tight }, textFade, chromeFade]} pointerEvents="none">
       <NoteText testID="feed-counter" color="ink">{text}</NoteText>
     </Animated.View>
   );
@@ -91,6 +95,12 @@ function Pager({ session, pages, height, onShown }: PagerProps) {
   const step = useStep(list, index, pages.length);
   const shownCard = pages[index]?.card ?? null;
   useEffect(() => onShown(shownCard), [onShown, shownCard]);
+  const viewer = useImageViewer();
+  const { chromeHidden, zoomed } = useViewerState(viewer);
+  const shownId = shownCard?.id;
+  useEffect(() => {
+    if (shownId) viewer.show(shownId);
+  }, [viewer, shownId]);
   // Only the id: the sheet reads the page live, so a re-file by sync shows the right place.
   const [movingId, setMovingId] = useState<string | null>(null);
   const [initialIndex] = useState(() => Math.max(0, pages.findIndex(({ card }) => card.id === session.start)));
@@ -109,6 +119,7 @@ function Pager({ session, pages, height, onShown }: PagerProps) {
         keyExtractor={(page) => page.card.id}
         renderItem={renderItem}
         pagingEnabled
+        scrollEnabled={!zoomed}
         showsVerticalScrollIndicator={false}
         initialScrollIndex={initialIndex}
         getItemLayout={(_, at) => ({ length: height, offset: height * at, index: at })}
@@ -118,8 +129,9 @@ function Pager({ session, pages, height, onShown }: PagerProps) {
         onViewableItemsChanged={onViewableItemsChanged}
         viewabilityConfig={VISIBLE_TO_COUNT}
       />
-      <TopShade />
-      <Counter text={counterText(index, pages.length)} />
+      <StatusBar style="light" hidden={chromeHidden} />
+      <TopShade hidden={chromeHidden} />
+      <Counter text={counterText(index, pages.length)} hidden={chromeHidden} />
       <MoveSheetHost page={pages.find(({ card }) => card.id === movingId) ?? null} onClose={() => setMovingId(null)} />
     </>
   );
@@ -143,7 +155,8 @@ export function FeedScreen({ session, sessionKey }: { readonly session: FeedSess
   const styles = useFeedStyles();
   const pages = useFeedPages(session, sessionKey);
   const [height, setHeight] = useState(0);
-  const { onShown, onLayout: reportLayout, opacity } = useFeedHero();
+  const [viewer] = useState(createImageViewer);
+  const { onShown, onLayout: reportLayout, opacity } = useFeedHero(viewer);
   const insets = useSafeAreaInsets();
   const onLayout = (event: LayoutChangeEvent) => {
     const { width, height: laidOut } = event.nativeEvent.layout;
@@ -164,7 +177,11 @@ export function FeedScreen({ session, sessionKey }: { readonly session: FeedSess
             <NoteText token="prompt">{NOTHING_LEFT}</NoteText>
           </View>
         ) : null}
-        {pages.length > 0 && height > 0 ? <Pager session={session} pages={pages} height={height} onShown={onShown} /> : null}
+        {pages.length > 0 && height > 0 ? (
+          <ImageViewerProvider value={viewer}>
+            <Pager session={session} pages={pages} height={height} onShown={onShown} />
+          </ImageViewerProvider>
+        ) : null}
       </Animated.View>
     </ScreeningRoom>
   );

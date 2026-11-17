@@ -15,16 +15,15 @@ const TOP_ANCHORED = 'top';
 interface PictureProps {
   readonly id: string;
   readonly media: CardMedia;
-  readonly fit: 'contain' | 'cover';
   readonly playable: boolean;
   readonly onDrawn: () => void;
 }
 
-function Picture({ id, media, fit, playable, onDrawn }: PictureProps) {
+function Picture({ id, media, playable, onDrawn }: PictureProps) {
   const styles = useFeedStyles();
   return (
-    <View style={[styles.picture, fit === 'contain' && styles.letterbox]}>
-      {media.uri ? <Image source={{ uri: media.uri }} recyclingKey={id} style={styles.picture} contentFit={fit} contentPosition={TOP_ANCHORED} onDisplay={onDrawn} accessible={false} /> : null}
+    <View style={styles.picture}>
+      {media.uri ? <Image source={{ uri: media.uri }} recyclingKey={id} style={styles.picture} contentFit="cover" contentPosition={TOP_ANCHORED} onDisplay={onDrawn} accessible={false} /> : null}
       {playable ? (
         <View style={styles.playDisc}>
           <Icon name="play" />
@@ -53,7 +52,7 @@ interface FeedMediaViewProps {
   readonly onDrawn: (id: string) => void;
 }
 
-/** The top ~56% of a feed page, by kind (#31); a post has no media box (#59). */
+/** The top ~56% of a feed page, by kind (#31); a post (#59) and an image (#60) have no media box. */
 export function FeedMediaView({ page, height, onDrawn }: FeedMediaViewProps) {
   const styles = useFeedStyles();
   const { media, card } = page;
@@ -62,7 +61,7 @@ export function FeedMediaView({ page, height, onDrawn }: FeedMediaViewProps) {
   const hidden = useHiddenUnderFlyer(card.id);
   return (
     <View style={[styles.media, { height }, hidden && styles.hidden]} onLayout={hasImage ? undefined : drawn}>
-      {media.kind === 'picture' ? <Picture id={card.id} media={media.media} fit={media.fit} playable={media.playable} onDrawn={drawn} /> : null}
+      {media.kind === 'picture' ? <Picture id={card.id} media={media.media} playable={media.playable} onDrawn={drawn} /> : null}
       {media.kind === 'title' ? (
         <View style={[styles.picture, styles.titleMedia]}>
           <NameText token="display" numberOfLines={LINES.title}>{card.title ?? card.site}</NameText>

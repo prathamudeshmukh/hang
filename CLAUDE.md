@@ -139,6 +139,12 @@ is the only Reanimated part. Prints register as `HeroFace`s under a `HeroScope` 
 `home:rediscover`), and each wall registers an origin that reveals a print under the opaque feed (`useOrigins.ts`).
 The feed route is `transparentModal` with no native animation, so the wall stays drawn under it.
 
+Image pages (`src/feed/image/`, #60): `ImagePageView` draws the image whole on the page with a bottom `Shade`;
+`ZoomableImage` (reusable, #64) does pinch, double-tap and pan through `useZoom`, whose math is pure in `zoom.ts`,
+and loads `card.original` (the item's `image_url`) once zoomed. `imageChrome.ts` is the feed-wide viewer (one per
+open feed, via context): which page's chrome is hidden and whether it's zoomed; the Pager hides the counter, top
+shade and status bar from it, stops paging while zoomed, and `useFeedHero` asks it to zoom out before a back closes the feed.
+
 Rewards (`src/rewards/`, #34): each reward's trigger is a pure function (`roomEntry`, `rediscoverEntry`;
 `textJustArrived`/`thumbJustArrived` in `src/grid/arrival.ts`, kept per cell by `useArrival`). `RoomUnderline` draws
 the ink underline once the push settles (`useAfterArrival`), `TextArrival` and `CardMediaBox` play "fetching fills in"

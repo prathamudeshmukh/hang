@@ -55,6 +55,15 @@ describe('toCardModel: media', () => {
     assert.deepEqual(card.media, { ratio: 1.6, naturalRatio: 3, uri: THUMB });
   });
 
+  it('carries the original image, for zooming past the thumbnail (#60)', () => {
+    const card = toCardModel(ready({ kind: 'image', imageUrl: 'https://example.com/full.png' }), THUMB, CARD_NOW);
+    assert.equal(card.original, 'https://example.com/full.png');
+  });
+
+  it('has no original when the server found no image', () => {
+    assert.equal(toCardModel(ready({ kind: 'image', imageUrl: null }), THUMB, CARD_NOW).original, null);
+  });
+
   it('has no media without a thumbnail size, so it becomes a text card', () => {
     assert.equal(toCardModel(ready({ kind: 'article' }), THUMB, CARD_NOW).media, null);
   });

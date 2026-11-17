@@ -8,6 +8,7 @@ import { FeedMediaView } from './FeedMediaView';
 import { mediaHeight } from './feedLayout';
 import { useFeedStyles } from './feedStyles';
 import { PAGE_ACTIONS, stepOf, type PageStep } from './pageA11y';
+import { ImagePageView } from './image/ImagePageView';
 import { PostPageView } from './post/PostPageView';
 import { OpeningText } from './text/OpeningText';
 import { TextPageView } from './text/TextPageView';
@@ -60,10 +61,11 @@ function MediaPageView({ page, height, bottomInset, onOpen, onMove, onStep, onMe
   );
 }
 
-/** One screen of the feed; a post is its own page, set as a broadside (#59), and an imageless article a text page (#61). */
+/** One screen of the feed; a post is set as a broadside (#59), an image fills the page (#60), an imageless article is a text page (#61). */
 export const FeedPageView = memo(function FeedPageView(props: FeedPageViewProps) {
   const { media, opening } = props.page;
   if (media.kind === 'post') return <PostPageView {...props} post={media} />;
+  if (media.kind === 'image') return <ImagePageView {...props} image={media} />;
   if (media.kind === 'none' && opening) return <TextPageView {...props} opening={opening} />;
   return <MediaPageView {...props} />;
 }, (previous, next) => {

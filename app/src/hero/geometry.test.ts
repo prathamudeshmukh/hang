@@ -28,8 +28,12 @@ describe('fittedRect', () => {
 });
 
 describe('landingRect', () => {
-  it('lands a whole (contain) image on its fitted rect', () => {
-    assert.deepEqual(landingRect(FEED, { fit: 'contain', ratio: 0.5 }, PRINT), { x: 0, y: 180, width: 400, height: 200 });
+  it('lands a whole (contain) image on its rect fitted to the whole page (#60)', () => {
+    assert.deepEqual(landingRect(FEED, { fit: 'contain', ratio: 0.5 }, PRINT), { x: 0, y: 400, width: 400, height: 200 });
+  });
+
+  it('lands a tall whole image on the page’s full height, centred across', () => {
+    assert.deepEqual(landingRect(FEED, { fit: 'contain', ratio: 5 }, PRINT), { x: 100, y: 0, width: 200, height: 1000 });
   });
 
   it('lands everything else on the media box', () => {

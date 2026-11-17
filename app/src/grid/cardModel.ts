@@ -37,6 +37,8 @@ export interface CardModel {
   readonly note: string;
   /** Null makes a text card. */
   readonly media: CardMedia | null;
+  /** The image the server found, at its source: an image page loads it when zoomed past the thumbnail (#60). */
+  readonly original: string | null;
   readonly postText: string | null;
   /** Who wrote a post (#58): the author's name, else `@handle`. Null on every other kind. */
   readonly byline: string | null;
@@ -153,6 +155,7 @@ export function sameCard(a: CardModel, b: CardModel): boolean {
     a.media?.ratio === b.media?.ratio &&
     a.media?.naturalRatio === b.media?.naturalRatio &&
     a.media?.uri === b.media?.uri &&
+    a.original === b.original &&
     a.accessibilityLabel === b.accessibilityLabel
   );
 }
@@ -174,6 +177,7 @@ export function toCardModel(item: Item, thumbUri: string | null, now: Date): Car
     site,
     note,
     media: variant === 'pending' ? null : mediaOf(item, thumbUri, now),
+    original: item.imageUrl,
     postText: plainLetters(textField(item.post, 'text')),
     byline,
     author,

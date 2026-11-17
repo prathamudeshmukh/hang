@@ -5,18 +5,21 @@ import type { CardModel } from '@/grid/cardModel';
 import { feedFrame, hero, rememberFeedLayout } from '@/hero/appHero';
 import { feedOpacity, feedTextOpacity, feedTrailOpacity } from '@/hero/heroValues';
 import { hidesFeedMedia } from '@/hero/trip';
+import type { ImageViewer } from './image/imageChrome';
 
 export const reportMediaDrawn = (id: string) => hero.feedDrawn(id);
 
 /**
  * The feed's side of the hero (#32): every way out (back button, gesture, a pop from code) goes through
  * the hero, which flies the page on screen back to its print and then removes the feed itself.
+ * A zoomed image takes the first back to zoom out (#60).
  */
-export function useFeedHero() {
+export function useFeedHero(viewer: ImageViewer) {
   const shown = useRef<CardModel | null>(null);
   const [guarded, setGuarded] = useState(true);
 
   usePreventRemove(guarded, ({ repeat }) => {
+    if (viewer.backZoomsOut()) return;
     const pop = () => {
       setGuarded(false);
       repeat();
