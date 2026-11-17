@@ -28,6 +28,27 @@ describe('xPost adapter', () => {
     expect(result?.post).toMatchObject({ handle: 'someone', text: MIRROR_BODY.tweet.text, mediaUrls: ['https://pbs.test/p1.jpg'] });
   });
 
+  describe('pictures on X’s image host', () => {
+    const withPhoto = (url: string) => ({ ...MIRROR_BODY, tweet: { ...MIRROR_BODY.tweet, media: { photos: [{ url }] } } });
+    const extractWithPhoto = (url: string) => xPost.extract(makeContext(POST_URL, { json: { [MIRROR]: withPhoto(url) } }));
+
+    it('asks for the large size, not the original, so the thumbnail step can take it (#69)', async () => {
+      const result = await extractWithPhoto('https://pbs.twimg.com/media/HXLACIpWAAEhYGU.jpg?name=orig');
+      expect(result?.imageUrl).toBe('https://pbs.twimg.com/media/HXLACIpWAAEhYGU.jpg?name=large');
+      expect(result?.post?.mediaUrls).toEqual(['https://pbs.twimg.com/media/HXLACIpWAAEhYGU.jpg?name=large']);
+    });
+
+    it('adds the large size to an address that names none, keeping its format', async () => {
+      const result = await extractWithPhoto('https://pbs.twimg.com/media/abc?format=png');
+      expect(result?.imageUrl).toBe('https://pbs.twimg.com/media/abc?format=png&name=large');
+    });
+
+    it('leaves a picture on another host as it is', async () => {
+      const result = await extractWithPhoto('https://images.example/p.jpg?name=orig');
+      expect(result?.imageUrl).toBe('https://images.example/p.jpg?name=orig');
+    });
+  });
+
   it('uses the first line of text as the title, truncated', async () => {
     const long = { ...MIRROR_BODY, tweet: { ...MIRROR_BODY.tweet, text: 'x'.repeat(200), media: undefined } };
     const result = await xPost.extract(makeContext(POST_URL, { json: { [MIRROR]: long } }));
