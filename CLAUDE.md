@@ -100,7 +100,8 @@ npm run db:generate    # after changing src/db/schema.ts: new SQLite migration i
 npm run icon           # after changing scripts/icon/iconArt.ts: re-renders the icon and splash PNGs
 ```
 
-App icon (#74): the mosaic, drawn as tiles in `scripts/icon/iconArt.ts` and rendered with `@resvg/resvg-js` into
+App icon (#74): the mosaic. Its tiles live in `src/theme/hangMark.ts`, shared by `<HangMark size>` (the four-tile
+mark, for use inside the app) and `scripts/icon/iconArt.ts`, which is rendered with `@resvg/resvg-js` into
 `assets/images` (icon, adaptive foreground over the wall colour, monochrome for themed icons, splash). The PNGs are
 committed; prebuild copies them into `android/`, so re-render, prebuild and rebuild to see a change on the phone.
 
