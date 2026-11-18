@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="lavish-design" content="off">
+<title>App Icon Round Two</title>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300..700;1,6..72,300..700&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--wall:#EDF0EA;--deep:#E2E7DE;--raised:#F9FAF6;--ink:#151D18;--ink-2:#46524A;--ink-3:#5A665E;--rule:#D6DCD2;--accent:#C23B20;
+  --serif:'Newsreader',Georgia,serif;--sans:'Hanken Grotesk',system-ui,sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--deep);color:var(--ink);font-family:var(--sans);line-height:1.5;padding:48px 16px 96px}
+.wrap{max-width:1240px;margin:0 auto}
+h1{font-family:var(--serif);font-weight:400;font-size:clamp(32px,4.5vw,50px);letter-spacing:-.025em;line-height:1}
+h2{font-family:var(--serif);font-weight:400;font-size:28px;letter-spacing:-.02em;margin:48px 0 4px}
+.lede{color:var(--ink-2);max-width:780px;margin-top:10px}
+.note{color:var(--ink-3);font-family:var(--serif);font-style:italic;font-size:15px}
+.took{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:16px;max-width:900px}
+@media (max-width:720px){.took{grid-template-columns:1fr}}
+.took div{background:var(--raised);border:1px solid var(--rule);border-radius:12px;padding:12px 14px;font-size:14px;min-width:0}
+.took b{display:block;font-family:var(--serif);font-weight:400;font-size:18px}
+.glance{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:18px;margin-top:20px}
+@media (max-width:860px){.glance{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.g{background:var(--wall);border:1px solid var(--rule);border-radius:14px;padding:14px;text-align:center;min-width:0}
+.g .pair{display:flex;justify-content:center;gap:12px;flex-wrap:wrap}
+.g figure,.row figure{display:flex;flex-direction:column;align-items:center;gap:4px}
+.g figcaption,.row figcaption{font-size:12px;color:var(--ink-3)}
+.g .name{font-family:var(--serif);font-size:19px;line-height:1.1;margin-top:10px}
+.dir{background:var(--wall);border:1px solid var(--rule);border-radius:16px;padding:20px;margin-top:22px}
+.dir header{display:flex;flex-wrap:wrap;gap:4px 14px;align-items:baseline}
+.dir header .name{font-family:var(--serif);font-size:26px;line-height:1.1}
+.variants{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin-top:14px}
+@media (max-width:900px){.variants{grid-template-columns:1fr}}
+.v{border-top:1px solid var(--rule);padding-top:12px;min-width:0}
+.v .vid{font-weight:600;font-size:13px}
+.v .vid span{color:var(--ink-3);font-weight:400}
+.row{display:flex;flex-wrap:wrap;gap:14px;align-items:flex-end;margin-top:10px}
+.ctx{display:flex;flex-wrap:wrap;gap:14px;margin-top:14px}
+.launcher{background:linear-gradient(160deg,#6E7B74,#3F4A52);border-radius:14px;padding:14px 12px 10px;display:flex;gap:14px;flex-wrap:wrap}
+.app{display:flex;flex-direction:column;align-items:center;gap:4px;width:56px}
+.app span{font-size:11px;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.4)}
+.share{background:#FBFBFD;border:1px solid #DDDDE3;border-radius:18px 18px 0 0;padding:10px 12px 12px;min-width:0}
+.share .h{font-size:12px;color:#444;margin-bottom:8px}
+.share .tiles{display:flex;gap:12px;flex-wrap:wrap}
+.share .app span{color:#222;text-shadow:none}
+.g svg,.row figure svg{filter:drop-shadow(0 1px 2px rgba(21,29,24,.22)) drop-shadow(0 0 .5px rgba(21,29,24,.3))}
+.phone{width:84px;height:168px;border-radius:14px;border:3px solid #2A2A2A;display:flex;align-items:center;justify-content:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>App icon, round two</h1>
+  <p class="lede">#74. None of the first ten landed. These take a few ideas from Tangent's icon, not its look: no stamp, no rings, no lettering round the edge. Each direction comes in two variants: <b>a</b> ink only, <b>b</b> with one vermilion detail. Pick two for the phone, or note what's close.</p>
+
+  <div class="took">
+    <div><b>A letter that's also an idea</b>Tangent's σ is a circle with a tangent. Here, a letter or line that is also something you hang.</div>
+    <div><b>Made by hand</b>A slightly rough inked edge and a little grain, so it reads as a made thing, not a flat vector.</div>
+    <div><b>Paper and ink</b>One ink on the Sage wall; inverts cleanly for dark mode and the themed icon.</div>
+  </div>
+
+  <h2>At a glance</h2>
+  <p class="note">96dp, squircle mask</p>
+  <div class="glance" id="glance"></div>
+
+  <h2>Each direction</h2>
+  <p class="note">Masks at 72dp (dashed: the 66dp safe zone) · themed (Android 13+) · 24dp · launcher and share row at 48dp · splash light and dark</p>
+  <div id="dirs"></div>
+</div>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <!-- A soft warp roughens edges; fine grain knocks out a few voids, like ink that didn't quite take. -->
+    <filter id="ink" x="-8%" y="-8%" width="116%" height="116%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="2" seed="11" result="warp"/>
+      <feDisplacementMap in="SourceGraphic" in2="warp" scale="7" xChannelSelector="R" yChannelSelector="G" result="rough"/>
+      <feTurbulence type="fractalNoise" baseFrequency="0.5" numOctaves="2" seed="4" result="grain"/>
+      <feColorMatrix in="grain" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  -10 0 0 0 7.6" result="voids"/>
+      <feComposite in="rough" in2="voids" operator="in"/>
+    </filter>
+  </defs>
+</svg>
+
+<script>
+const LIGHT = { ink: '#151D18', paper: '#EDF0EA', accent: '#C23B20' };
+const DARK = { ink: '#E6ECE6', paper: '#161C18', accent: '#F0714F' };
+const THEMED = { ink: '#2F3B33', paper: '#DCE8DD', accent: '#2F3B33' };
+const SERIF = "Newsreader, Georgia, serif";
+
+const detail = (c, accentOn) => (accentOn ? c.accent : c.ink);
+
+/* Marks draw on a 1024 canvas = the 108dp adaptive layer (1dp ≈ 9.5). Safe zone: centre 512, r 313. */
+const DIRECTIONS = [
+  {
+    key: 'hook-h', name: 'Hook h',
+    what: 'A lowercase h in one ink line: its stem hangs from a nail, its leg curls up into a picture hook.',
+    draw: (c, a) => `<g transform="translate(-26 0)">
+      <path d="M430 345 V705" stroke="${c.ink}" stroke-width="50" stroke-linecap="round" fill="none"/>
+      <path d="M430 548 C430 440 602 430 602 545 V650 C602 712 652 724 690 690" stroke="${c.ink}" stroke-width="50" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <circle cx="430" cy="282" r="32" fill="${detail(c, a)}"/></g>`,
+  },
+  {
+    key: 'one-line', name: 'One-line picture',
+    what: 'Nail, wire and a small landscape drawn as a pen sketch. The content is the colour; the frame is just a line.',
+    draw: (c, a) => `
+      <path d="M446 452 L512 362 L578 452" stroke="${c.ink}" stroke-width="20" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <rect x="372" y="452" width="280" height="226" rx="6" stroke="${c.ink}" stroke-width="34" fill="none"/>
+      <path d="M392 630 C440 590 478 590 520 616 S598 600 632 586" stroke="${c.ink}" stroke-width="22" stroke-linecap="round" fill="none"/>
+      <circle cx="586" cy="522" r="26" fill="${detail(c, a)}"/>
+      <circle cx="512" cy="356" r="22" fill="${c.ink}"/>`,
+  },
+  {
+    key: 'hung-h', name: 'Hung H',
+    what: 'Hang\'s own serif capital, printed like a letterpress block and hung slightly crooked from a nail.',
+    draw: (c, a) => `
+      <g transform="rotate(-5 512 330)">
+        <path d="M418 418 L512 330 L606 418" stroke="${c.ink}" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        <text x="512" y="700" text-anchor="middle" font-family="${SERIF}" font-weight="500" font-size="400" fill="${c.ink}">H</text>
+      </g>
+      <circle cx="512" cy="326" r="24" fill="${detail(c, a)}"/>`,
+  },
+  {
+    key: 'corners', name: 'Photo corners',
+    what: 'Two album corners holding nothing yet. "Hang is the frame": whatever you share fills the middle.',
+    draw: (c, a) => `
+      <rect x="352" y="352" width="320" height="320" stroke="${c.ink}" stroke-width="6" stroke-dasharray="14 16" fill="none" opacity=".55"/>
+      <path d="M322 322 H520 L322 520 Z M362 362 V425 L425 362 Z" fill="${c.ink}" fill-rule="evenodd"/>
+      <path d="M702 702 H504 L702 504 Z M662 662 V599 L599 662 Z" fill="${detail(c, a)}" fill-rule="evenodd"/>`,
+  },
+  {
+    key: 'italic-h', name: 'Underlined h',
+    what: 'An italic h, the voice of Hang\'s catalogue notes, with the brush underline you see on entering a room.',
+    draw: (c, a) => `
+      <text x="500" y="636" text-anchor="middle" font-family="${SERIF}" font-style="italic" font-weight="400" font-size="500" fill="${c.ink}">h</text>
+      <path d="M352 712 C440 694 560 690 676 704" stroke="${detail(c, a)}" stroke-width="30" stroke-linecap="round" fill="none"/>`,
+  },
+];
+
+const VISIBLE = '170.5 170.5 683 683';
+const MASKS = {
+  circle: '<circle cx="512" cy="512" r="341.5"/>',
+  squircle: '<rect x="170.5" y="170.5" width="683" height="683" rx="228"/>',
+  teardrop: '<path d="M512 170.5 H683 A170.5 170.5 0 0 1 853.5 341 V512 A341.5 341.5 0 0 1 512 853.5 A341.5 341.5 0 0 1 170.5 512 A341.5 341.5 0 0 1 512 170.5 Z"/>',
+};
+
+let uid = 0;
+const mark = (dir, colors, accentOn) => `<g filter="url(#ink)">${dir.draw(colors, accentOn)}</g>`;
+
+function icon({ dir, accentOn, colors = LIGHT, mask = 'squircle', size = 72, safeZone = false }) {
+  const id = `m${uid++}`;
+  const ring = safeZone ? `<circle cx="512" cy="512" r="313" fill="none" stroke="${colors.accent}" stroke-width="5" stroke-dasharray="18 18" opacity=".7"/>` : '';
+  return `<svg width="${size}" height="${size}" viewBox="${VISIBLE}" role="img" aria-label="${dir.name}">
+    <defs><clipPath id="${id}">${MASKS[mask]}</clipPath></defs>
+    <g clip-path="url(#${id})"><rect width="1024" height="1024" fill="${colors.paper}"/>${mark(dir, colors, accentOn)}${ring}</g>
+  </svg>`;
+}
+
+const splash = ({ dir, accentOn, colors }) => `<div class="phone" style="background:${colors.paper}">
+  <svg width="64" height="64" viewBox="${VISIBLE}" aria-hidden="true">${mark(dir, colors, accentOn)}</svg></div>`;
+
+const tile = (color) => `<svg width="48" height="48" viewBox="0 0 48 48" aria-hidden="true"><rect width="48" height="48" rx="16" fill="${color}"/><circle cx="24" cy="24" r="8" fill="#fff" opacity=".55"/></svg>`;
+const app = (glyph, label) => `<div class="app">${glyph}<span>${label}</span></div>`;
+
+function variant(dir, n, accentOn) {
+  const id = `${n}${accentOn ? 'b' : 'a'}`;
+  const hang = icon({ dir, accentOn, size: 48 });
+  return `<div class="v" data-variant="${id}">
+    <div class="vid">${id} <span>· ${accentOn ? 'one vermilion detail' : 'ink only'}</span></div>
+    <div class="row">
+      ${['circle', 'squircle', 'teardrop'].map((mask, i) => `<figure>${icon({ dir, accentOn, mask, safeZone: i === 0 })}<figcaption>${mask}</figcaption></figure>`).join('')}
+      <figure>${icon({ dir, accentOn, colors: THEMED, mask: 'circle' })}<figcaption>themed</figcaption></figure>
+      <figure>${icon({ dir, accentOn, size: 24 })}<figcaption>24dp</figcaption></figure>
+    </div>
+    <div class="ctx">
+      <div class="launcher">${app(tile('#4E7FC4'), 'Photos')}${app(hang, 'Hang')}${app(tile('#3A9A6B'), 'Maps')}${app(tile('#C9803A'), 'Notes')}</div>
+      <div class="share"><div class="h">Share</div><div class="tiles">${app(tile('#5A6ACF'), 'Messages')}${app(tile('#D25F6B'), 'Mail')}${app(hang, 'Hang')}${app(tile('#8A8F98'), 'More')}</div></div>
+      <figure class="row" style="margin:0;gap:8px">${splash({ dir, accentOn, colors: LIGHT })}${splash({ dir, accentOn, colors: DARK })}</figure>
+    </div>
+  </div>`;
+}
+
+function render() {
+  document.getElementById('glance').innerHTML = DIRECTIONS.map((dir, i) => `
+    <div class="g" data-direction="${i + 1}">
+      <div class="pair">
+        <figure>${icon({ dir, accentOn: false, size: 96 })}<figcaption>${i + 1}a</figcaption></figure>
+        <figure>${icon({ dir, accentOn: true, size: 96 })}<figcaption>${i + 1}b</figcaption></figure>
+      </div>
+      <div class="name">${i + 1} · ${dir.name}</div>
+    </div>`).join('');
+  document.getElementById('dirs').innerHTML = DIRECTIONS.map((dir, i) => `
+    <section class="dir" data-direction="${i + 1}">
+      <header><span class="name">${i + 1} · ${dir.name}</span><span class="note">${dir.what}</span></header>
+      <div class="variants">${variant(dir, i + 1, false)}${variant(dir, i + 1, true)}</div>
+    </section>`).join('');
+}
+
+// The serif marks are SVG text, so draw once the web fonts are in.
+document.fonts.ready.then(render);
+render();
+</script>
+</body>
+</html>

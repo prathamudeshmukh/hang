@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="lavish-design" content="off">
+<title>App Icon Directions</title>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300..700;1,6..72,300..700&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--wall:#F7F5F0;--ink:#1B1A17;--ink-2:#55514A;--ink-3:#736E66;--rule:#E4E0D7;--accent:#D2462A;
+  --serif:'Newsreader',Georgia,serif;--sans:'Hanken Grotesk',system-ui,sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#ECEAE4;color:var(--ink);font-family:var(--sans);line-height:1.5;padding:48px 16px 96px}
+.wrap{max-width:1240px;margin:0 auto}
+h1{font-family:var(--serif);font-weight:400;font-size:clamp(32px,4.5vw,50px);letter-spacing:-.025em;line-height:1}
+h2{font-family:var(--serif);font-weight:400;font-size:28px;letter-spacing:-.02em;margin:48px 0 4px}
+.lede{color:var(--ink-2);max-width:760px;margin-top:10px}
+.note{color:var(--ink-3);font-family:var(--serif);font-style:italic;font-size:15px}
+.glance{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:18px;margin-top:20px}
+@media (max-width:820px){.glance{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.g{background:var(--wall);border:1px solid var(--rule);border-radius:14px;padding:14px;text-align:center;min-width:0}
+.g .pair{display:flex;justify-content:center;gap:12px}
+.g .pair figure{display:flex;flex-direction:column;align-items:center;gap:4px}
+.g figcaption{font-size:12px;color:var(--ink-3)}
+.g .name{font-family:var(--serif);font-size:19px;line-height:1.1;margin-top:10px}
+.dir{background:var(--wall);border:1px solid var(--rule);border-radius:16px;padding:20px;margin-top:22px}
+.dir header{display:flex;flex-wrap:wrap;gap:4px 14px;align-items:baseline}
+.dir header .name{font-family:var(--serif);font-size:26px;line-height:1.1}
+.variants{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin-top:14px}
+@media (max-width:900px){.variants{grid-template-columns:1fr}}
+.v{border-top:1px solid var(--rule);padding-top:12px;min-width:0}
+.v .vid{font-weight:600;font-size:13px}
+.v .vid span{color:var(--ink-3);font-weight:400}
+.row{display:flex;flex-wrap:wrap;gap:14px;align-items:flex-end;margin-top:10px}
+.row figure{display:flex;flex-direction:column;align-items:center;gap:4px}
+.row figcaption{font-size:11px;color:var(--ink-3)}
+.ctx{display:flex;flex-wrap:wrap;gap:14px;margin-top:14px}
+.launcher{background:linear-gradient(160deg,#6E7B74,#3F4A52);border-radius:14px;padding:14px 12px 10px;display:flex;gap:14px}
+.app{display:flex;flex-direction:column;align-items:center;gap:4px;width:56px}
+.app span{font-size:11px;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.4)}
+.share{background:#FBFBFD;border:1px solid #DDDDE3;border-radius:18px 18px 0 0;padding:10px 12px 12px;min-width:0}
+.share .h{font-size:12px;color:#444;margin-bottom:8px}
+.share .tiles{display:flex;gap:12px}
+.share .app span{color:#222;text-shadow:none}
+.g svg,.row figure svg{filter:drop-shadow(0 1px 2px rgba(27,26,23,.22)) drop-shadow(0 0 0.5px rgba(27,26,23,.3))}
+.phone{width:84px;height:168px;border-radius:14px;border:3px solid #2A2A2A;display:flex;align-items:center;justify-content:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>App icon: five directions</h1>
+  <p class="lede">#74. Each direction in two variants: <b>a</b> pure ink, <b>b</b> ink with one vermilion accent. Wall background, no gradients, no text but the H. Pick two for the phone; note anything per icon.</p>
+  <p class="note">Masks crop the 108dp adaptive canvas to its visible 72dp; the dashed ring in the first mask is the 66dp safe zone.</p>
+
+  <h2>At a glance</h2>
+  <p class="note">96dp, squircle mask</p>
+  <div class="glance" id="glance"></div>
+
+  <h2>Each direction</h2>
+  <p class="note">Masks at 72dp · themed (Android 13+) · launcher and share row at 48dp · splash light and dark</p>
+  <div id="dirs"></div>
+</div>
+
+<script>
+const LIGHT = { ink: '#1B1A17', paper: '#F7F5F0', accent: '#D2462A' };
+const DARK = { ink: '#EDEAE3', paper: '#161514', accent: '#E25A3E' };
+const THEMED = { ink: '#2F3B33', paper: '#DCE8DD', accent: '#2F3B33' };
+
+const pick = (c, accentOn) => (accentOn ? c.accent : c.ink);
+
+/* Each mark draws on the 108×108 adaptive canvas, inside the 66dp safe zone (centre 54, r 33). */
+const DIRECTIONS = [
+  {
+    key: 'nail', name: 'Nail + print', what: 'A print hanging off a nail by a string. Literal hang.',
+    draw: (c, a) => `
+      <path d="M54 32 L41 49 M54 32 L67 49" stroke="${c.ink}" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <rect x="37" y="48" width="34" height="27" rx="1.5" fill="${c.paper}" stroke="${c.ink}" stroke-width="3.5"/>
+      <rect x="43" y="54" width="22" height="15" fill="${c.ink}"/>
+      <circle cx="54" cy="31" r="3" fill="${pick(c, a)}"/>`,
+  },
+  {
+    key: 'h', name: 'H as hanger', what: 'An H whose crossbar is a picture rail, a small print hanging from it.',
+    draw: (c, a) => `
+      <rect x="35" y="31" width="7" height="46" fill="${c.ink}"/>
+      <rect x="66" y="31" width="7" height="46" fill="${c.ink}"/>
+      <rect x="31" y="30" width="15" height="2.6" fill="${c.ink}"/><rect x="62" y="30" width="15" height="2.6" fill="${c.ink}"/>
+      <rect x="31" y="75.4" width="15" height="2.6" fill="${c.ink}"/><rect x="62" y="75.4" width="15" height="2.6" fill="${c.ink}"/>
+      <rect x="42" y="44" width="24" height="3" fill="${c.ink}"/>
+      <path d="M54 47 L48 55 M54 47 L60 55" stroke="${c.ink}" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+      <rect x="46" y="54.5" width="16" height="13" fill="${pick(c, a)}"/>`,
+  },
+  {
+    key: 'salon', name: 'Salon wall', what: 'Four offset prints: a tiny masonry wall, the gallery itself.',
+    draw: (c, a) => `
+      <rect x="32" y="33" width="20" height="27" rx="1.2" fill="${c.ink}"/>
+      <rect x="32" y="64" width="20" height="13" rx="1.2" fill="${c.ink}"/>
+      <rect x="56" y="31" width="20" height="14" rx="1.2" fill="${pick(c, a)}"/>
+      <rect x="56" y="49" width="20" height="26" rx="1.2" fill="${c.ink}"/>`,
+  },
+  {
+    key: 'underline', name: 'Ink underline', what: 'The room-entry reward as a mark: one stroke under a print.',
+    draw: (c, a) => `
+      <rect x="35" y="32" width="38" height="32" rx="1.5" fill="${c.ink}"/>
+      <path d="M35 74 L73 74" stroke="${pick(c, a)}" stroke-width="4" stroke-linecap="round"/>`,
+  },
+  {
+    key: 'tilted', name: 'Tilted print', what: 'One print hung slightly crooked, held by a pin.',
+    draw: (c, a) => `
+      <g transform="rotate(-7 54 56)">
+        <rect x="37" y="36" width="34" height="40" rx="1.5" fill="${c.paper}" stroke="${c.ink}" stroke-width="3.5"/>
+        <rect x="43" y="42" width="22" height="28" fill="${c.ink}"/>
+        <circle cx="54" cy="36" r="3.6" fill="${pick(c, a)}" stroke="${c.paper}" stroke-width="1.5"/>
+      </g>`,
+  },
+];
+
+const MASKS = {
+  circle: '<circle cx="54" cy="54" r="36"/>',
+  squircle: '<rect x="18" y="18" width="72" height="72" rx="24"/>',
+  teardrop: '<path d="M54 18 H72 A18 18 0 0 1 90 36 V54 A36 36 0 0 1 54 90 A36 36 0 0 1 18 54 A36 36 0 0 1 54 18 Z"/>',
+};
+
+let uid = 0;
+function icon({ dir, accentOn, colors = LIGHT, mask = 'squircle', size = 72, safeZone = false }) {
+  const id = `m${uid++}`;
+  const ring = safeZone ? `<circle cx="54" cy="54" r="33" fill="none" stroke="${colors.accent}" stroke-width=".6" stroke-dasharray="2 2" opacity=".7"/>` : '';
+  return `<svg width="${size}" height="${size}" viewBox="18 18 72 72" role="img" aria-label="${dir.name}">
+    <defs><clipPath id="${id}">${MASKS[mask]}</clipPath></defs>
+    <g clip-path="url(#${id})"><rect x="0" y="0" width="108" height="108" fill="${colors.paper}"/>${dir.draw(colors, accentOn)}${ring}</g>
+  </svg>`;
+}
+
+function splash({ dir, accentOn, colors }) {
+  return `<div class="phone" style="background:${colors.paper}">
+    <svg width="64" height="64" viewBox="18 18 72 72" aria-hidden="true">${dir.draw(colors, accentOn)}</svg></div>`;
+}
+
+const tile = (color) => `<svg width="48" height="48" viewBox="0 0 48 48" aria-hidden="true"><rect width="48" height="48" rx="16" fill="${color}"/><circle cx="24" cy="24" r="8" fill="#fff" opacity=".55"/></svg>`;
+const app = (glyph, label) => `<div class="app">${glyph}<span>${label}</span></div>`;
+
+function variant(dir, n, accentOn) {
+  const id = `${n}${accentOn ? 'b' : 'a'}`;
+  const hang = icon({ dir, accentOn, size: 48, mask: 'squircle' });
+  return `<div class="v" data-variant="${id}">
+    <div class="vid">${id} <span>· ${accentOn ? 'ink + vermilion' : 'pure ink'}</span></div>
+    <div class="row">
+      ${['circle', 'squircle', 'teardrop'].map((mask, i) => `<figure>${icon({ dir, accentOn, mask, safeZone: i === 0 })}<figcaption>${mask}</figcaption></figure>`).join('')}
+      <figure>${icon({ dir, accentOn, colors: THEMED, mask: 'circle' })}<figcaption>themed</figcaption></figure>
+    </div>
+    <div class="ctx">
+      <div class="launcher">${app(tile('#4E7FC4'), 'Photos')}${app(hang, 'Hang')}${app(tile('#3A9A6B'), 'Maps')}${app(tile('#C9803A'), 'Notes')}</div>
+      <div class="share"><div class="h">Share</div><div class="tiles">${app(tile('#5A6ACF'), 'Messages')}${app(tile('#D25F6B'), 'Mail')}${app(hang, 'Hang')}${app(tile('#8A8F98'), 'More')}</div></div>
+      <figure class="row" style="margin:0;gap:8px">${splash({ dir, accentOn, colors: LIGHT })}${splash({ dir, accentOn, colors: DARK })}</figure>
+    </div>
+  </div>`;
+}
+
+document.getElementById('glance').innerHTML = DIRECTIONS.map((dir, i) => `
+  <div class="g" data-direction="${i + 1}">
+    <div class="pair">
+      <figure>${icon({ dir, accentOn: false, size: 96 })}<figcaption>${i + 1}a</figcaption></figure>
+      <figure>${icon({ dir, accentOn: true, size: 96 })}<figcaption>${i + 1}b</figcaption></figure>
+    </div>
+    <div class="name">${i + 1} · ${dir.name}</div>
+  </div>`).join('');
+
+document.getElementById('dirs').innerHTML = DIRECTIONS.map((dir, i) => `
+  <section class="dir" data-direction="${i + 1}">
+    <header><span class="name">${i + 1} · ${dir.name}</span><span class="note">${dir.what}</span></header>
+    <div class="variants">${variant(dir, i + 1, false)}${variant(dir, i + 1, true)}</div>
+  </section>`).join('');
+</script>
+</body>
+</html>

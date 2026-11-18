@@ -193,6 +193,10 @@ Post cards are drawn with **top and bottom rules**, not boxes.
 - Icons appear only for **back, search, more (⋯), play**. The set is **Phosphor Light**, 1.25px
   stroke, 22dp, colored `ink`.
 - Never an icon and label together for the same action.
+- **App icon:** the mosaic (#74, chosen on the phone 2026-11-18): a masonry of colour tiles on wall-coloured
+  gutters. What you keep supplies the colour, as in the app. Themed icons and the splash show the same masonry as
+  four tiles inside the 66dp safe zone. Rejected: nail, frame, wire and letter marks; inked texture; a clothes peg.
+  Explorations: `design/explorations/06`–`09`.
 
 ---
 

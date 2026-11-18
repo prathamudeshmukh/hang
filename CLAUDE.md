@@ -97,7 +97,13 @@ npm run test:coverage  # 80% threshold
 npm run test:integration  # src/**/*.integration.ts against the local stack (`npx supabase start` first)
 npm run typecheck
 npm run db:generate    # after changing src/db/schema.ts: new SQLite migration in src/db/migrations
+npm run icon           # after changing scripts/icon/iconArt.ts: re-renders the icon and splash PNGs
 ```
+
+App icon (#74): the mosaic. Its tiles live in `src/theme/hangMark.ts`, shared by `<HangMark size>` (the four-tile
+mark, for use inside the app) and `scripts/icon/iconArt.ts`, which is rendered with `@resvg/resvg-js` into
+`assets/images` (icon, adaptive foreground over the wall colour, monochrome for themed icons, splash). The PNGs are
+committed; prebuild copies them into `android/`, so re-render, prebuild and rebuild to see a change on the phone.
 
 Design foundations (`src/theme/`, #28): tokens for light and dark (`tokens.ts`), the type scale (`typeScale.ts`), `useTheme()` and
 `makeStyles()` (`theme.ts`), the three voices (`NameText`, `NoteText`, `ActionText`) and `Pill`. Nothing outside `src/theme`
