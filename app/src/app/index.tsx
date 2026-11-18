@@ -20,7 +20,7 @@ import { SPACE } from '@/theme/tokens';
 /** Offsets only matter when a flight comes back, so a few reports a frame is plenty. */
 const SCROLL_THROTTLE_MS = 32;
 
-/** Home (SPEC #16, DESIGN.md sheet): greeting → Recently saved (holds the Inbox) → Rediscover → collections. */
+/** Home (SPEC #16, DESIGN.md sheet): Today on the feature wall (greeting → Recently saved, holding the Inbox → Rediscover), then collections. */
 export default function Home() {
   const insets = useSafeAreaInsets();
   const styles = useHomeStyles();
@@ -39,16 +39,18 @@ export default function Home() {
       onScroll={onPageScroll}
       scrollEventThrottle={SCROLL_THROTTLE_MS}
       style={styles.wall}
-      contentContainerStyle={[styles.content, { paddingTop: insets.top + SPACE.screenTop, paddingBottom: insets.bottom + SPACE.screenBottom }]}
+      contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + SPACE.screenBottom }]}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[color.ink]} progressBackgroundColor={color.raised} />}
     >
-      <View testID="home-greeting" accessible accessibilityRole="header">
-        <NoteText>{dayLine(today)}</NoteText>
-        <NameText token="display" style={styles.greeting}>{greetingFor(today)}</NameText>
+      <View style={[styles.featureWall, { paddingTop: insets.top + SPACE.screenTop }]}>
+        <View testID="home-greeting" accessible accessibilityRole="header">
+          <NoteText>{dayLine(today)}</NoteText>
+          <NameText token="display" style={styles.greeting}>{greetingFor(today)}</NameText>
+        </View>
+        <SyncProblem />
+        <RecentStrip recent={home.recent} inboxCount={home.inboxCount} />
+        {home.rediscover ? <RediscoverSection key={`${home.rediscover.card.id}:${day}`} pick={home.rediscover} day={day} /> : null}
       </View>
-      <SyncProblem />
-      <RecentStrip recent={home.recent} inboxCount={home.inboxCount} />
-      {home.rediscover ? <RediscoverSection key={`${home.rediscover.card.id}:${day}`} pick={home.rediscover} day={day} /> : null}
       <CollectionList collections={home.collections} />
       <AccountLine />
     </ScrollView>

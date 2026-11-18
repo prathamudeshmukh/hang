@@ -32,7 +32,7 @@ export function Pill({ label, kind = 'outline', size = 'm', disabled, accessibil
   const { color } = useTheme();
   const { height, paddingX, token } = SIZES[size];
   const slop = (SPACE.touch - height) / 2;
-  const labelColor = { filled: color.wall, outline: color.ink, accent: color.screenInk }[kind];
+  const labelColor = { filled: color.wall, outline: color.ink, accent: color.onAccent }[kind];
   return (
     <Pressable
       accessibilityRole="button"

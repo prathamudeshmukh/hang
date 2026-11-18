@@ -8,6 +8,8 @@ import { textStyle, tokensOf, TYPE_SCALE } from './typeScale.ts';
 const SCHEMES: readonly Scheme[] = ['light', 'dark'];
 const AA_BODY = 4.5;
 const AA_LARGE = 3;
+/** The dark wall and the screen must differ enough that entering the feed reads as a change of room. */
+const ROOM_STEP = 1.12;
 
 describe('palette (DESIGN.md §10)', () => {
   it('keeps every ink at AA body contrast on the wall and on raised surfaces, in both themes', () => {
@@ -33,6 +35,27 @@ describe('palette (DESIGN.md §10)', () => {
 
   it('builds the screening room from the screen colors, so the feed is always dark', () => {
     assert.deepEqual([SCREENING_ROOM.wall, SCREENING_ROOM.ink], [PALETTES.light.screen, PALETTES.light.screenInk]);
+  });
+
+  it('keeps the label on an accent pill at AA body contrast, in both themes (Save, Take down)', () => {
+    const failures = SCHEMES.filter((scheme) => contrastRatio(PALETTES[scheme].onAccent, PALETTES[scheme].accent) < AA_BODY);
+    assert.deepEqual(failures, []);
+  });
+
+  it('keeps every ink at AA body contrast on the feature wall, in both themes', () => {
+    const failures = SCHEMES.flatMap((scheme) => {
+      const p = PALETTES[scheme];
+      return (['ink', 'ink2', 'ink3'] as const).filter((ink) => contrastRatio(p[ink], p.wallDeep) < AA_BODY).map((ink) => `${scheme} ${ink}`);
+    });
+    assert.deepEqual(failures, []);
+  });
+
+  it('makes the screening room a different room from the dark wall', () => {
+    assert.equal(contrastRatio(PALETTES.dark.wall, PALETTES.dark.screen) >= ROOM_STEP, true);
+  });
+
+  it('outlines the screening room in its own rule', () => {
+    assert.equal(SCREENING_ROOM.rule, PALETTES.dark.screenRule);
   });
 
   it('never uses pure black for the dark wall', () => {

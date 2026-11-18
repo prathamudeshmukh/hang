@@ -1,5 +1,5 @@
 import { memo } from 'react';
-import { View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { Pill } from '@/theme/Pill';
 import { NameText, NoteText } from '@/theme/Text';
@@ -10,6 +10,7 @@ import { useFeedStyles } from './feedStyles';
 import { PAGE_ACTIONS, stepOf, type PageStep } from './pageA11y';
 import { ImagePageView } from './image/ImagePageView';
 import { PostPageView } from './post/PostPageView';
+import { ProjectorSpill } from './ProjectorSpill';
 import { OpeningText } from './text/OpeningText';
 import { TextPageView } from './text/TextPageView';
 import { useFeedTextFade } from './useFeedHero';
@@ -32,8 +33,15 @@ export interface FeedPageViewProps {
 function MediaPageView({ page, height, bottomInset, onOpen, onMove, onStep, onMediaDrawn }: FeedPageViewProps) {
   const styles = useFeedStyles();
   const textFade = useFeedTextFade();
+  const media = mediaHeight(height);
+  const spillUri = page.media.kind === 'picture' ? page.media.media.uri : null;
   return (
     <View style={[styles.page, { height }]}>
+      {spillUri ? (
+        <Animated.View pointerEvents="none" style={[StyleSheet.absoluteFill, textFade]}>
+          <ProjectorSpill uri={spillUri} pageHeight={height} mediaHeight={media} />
+        </Animated.View>
+      ) : null}
       <View
         accessible
         accessibilityLabel={page.accessibilityLabel}
@@ -43,7 +51,7 @@ function MediaPageView({ page, height, bottomInset, onOpen, onMove, onStep, onMe
           if (step) onStep(step);
         }}
       >
-        <FeedMediaView page={page} height={mediaHeight(height)} onDrawn={onMediaDrawn} />
+        <FeedMediaView page={page} height={media} onDrawn={onMediaDrawn} />
       </View>
       <Animated.View style={[styles.text, { paddingBottom: bottomInset }, textFade]}>
         <View style={[styles.words, page.opening && styles.wordsFilling]}>

@@ -3,7 +3,10 @@
 export type Scheme = 'light' | 'dark';
 
 export interface Palette {
+  /** Sage room (#79): the pale grey-green of a print room; green-black ink. */
   readonly wall: string;
+  /** The feature wall: a shade deeper, behind Home's Today (Recently saved, Rediscover). A tone, never an accent. */
+  readonly wallDeep: string;
   readonly raised: string;
   readonly rule: string;
   readonly ink: string;
@@ -11,9 +14,13 @@ export interface Palette {
   readonly ink3: string;
   /** Vermilion: only the five uses DESIGN.md §3 lists. */
   readonly accent: string;
+  /** The label on an accent pill (Save, Take down), at AA on `accent`. */
+  readonly onAccent: string;
   /** Screening room: always dark (feed, video). */
   readonly screen: string;
   readonly screenInk: string;
+  /** Outlines in the screening room (Later, Move): screen ink at 30%. */
+  readonly screenRule: string;
   /** Behind the share sheet. */
   readonly scrim: string;
   /** Disc behind the play icon on a video card, so it reads over any thumbnail. */
@@ -22,35 +29,45 @@ export interface Palette {
   readonly ripple: string;
 }
 
-const SCREEN = { screen: '#0B0B0A', screenInk: '#F2EFE8', scrim: 'rgba(0,0,0,0.4)', veil: 'rgba(11,11,10,0.45)' } as const;
+const SCREEN = {
+  screen: '#080A09',
+  screenInk: '#EEF2EC',
+  screenRule: 'rgba(238,242,236,0.3)',
+  scrim: 'rgba(8,10,9,0.4)',
+  veil: 'rgba(8,10,9,0.45)',
+} as const;
 
 export const PALETTES: Readonly<Record<Scheme, Palette>> = {
   light: {
-    wall: '#F7F5F0',
-    raised: '#FFFFFF',
-    rule: '#E4E0D7',
-    ink: '#1B1A17',
-    ink2: '#55514A',
-    ink3: '#736E66',
-    accent: '#D2462A',
-    ripple: 'rgba(27,26,23,0.08)',
+    wall: '#EDF0EA',
+    wallDeep: '#E2E7DE',
+    raised: '#F9FAF6',
+    rule: '#D6DCD2',
+    ink: '#151D18',
+    ink2: '#46524A',
+    ink3: '#5A665E',
+    accent: '#C23B20',
+    onAccent: '#FFFFFF',
+    ripple: 'rgba(21,29,24,0.08)',
     ...SCREEN,
   },
   dark: {
-    wall: '#161514',
-    raised: '#1F1E1C',
-    rule: '#2C2A27',
-    ink: '#EDEAE3',
-    ink2: '#B4AEA3',
-    ink3: '#9A958B',
-    accent: '#E25A3E',
-    ripple: 'rgba(237,234,227,0.08)',
+    wall: '#161C18',
+    wallDeep: '#111612',
+    raised: '#202823',
+    rule: '#323C35',
+    ink: '#E6ECE6',
+    ink2: '#AAB6AD',
+    ink3: '#8F9C92',
+    accent: '#F0714F',
+    onAccent: '#111613',
+    ripple: 'rgba(230,236,230,0.08)',
     ...SCREEN,
   },
 };
 
-/** The feed and its sheets (DESIGN.md §3 "always dark"): the dark theme on the screen colors. */
-export const SCREENING_ROOM: Palette = { ...PALETTES.dark, wall: SCREEN.screen, ink: SCREEN.screenInk };
+/** The feed and its sheets (DESIGN.md §3 "always dark"): the dark theme on the screen colors, outlined in screen rule. */
+export const SCREENING_ROOM: Palette = { ...PALETTES.dark, wall: SCREEN.screen, ink: SCREEN.screenInk, rule: SCREEN.screenRule };
 
 export const RADIUS = { print: 2, sheet: 24, pill: 999 } as const;
 
