@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>App Icon Round Three</title>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300..700;1,6..72,300..700&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--wall:#EDF0EA;--deep:#E2E7DE;--raised:#F9FAF6;--ink:#151D18;--ink-2:#46524A;--ink-3:#5A665E;--rule:#D6DCD2;
+  --serif:'Newsreader',Georgia,serif;--sans:'Hanken Grotesk',system-ui,sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--deep);color:var(--ink);font-family:var(--sans);line-height:1.5;padding:48px 16px 96px}
+.wrap{max-width:1240px;margin:0 auto}
+h1{font-family:var(--serif);font-weight:400;font-size:clamp(32px,4.5vw,50px);letter-spacing:-.025em;line-height:1}
+h2{font-family:var(--serif);font-weight:400;font-size:28px;letter-spacing:-.02em;margin:48px 0 4px}
+.lede{color:var(--ink-2);max-width:780px;margin-top:10px}
+.note{color:var(--ink-3);font-family:var(--serif);font-style:italic;font-size:15px}
+.glance{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px;margin-top:20px}
+@media (max-width:860px){.glance{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.g{background:var(--wall);border:1px solid var(--rule);border-radius:14px;padding:14px;text-align:center;min-width:0}
+.g .pair{display:flex;justify-content:center;gap:12px;flex-wrap:wrap}
+.g figure,.row figure{display:flex;flex-direction:column;align-items:center;gap:4px}
+.g figcaption,.row figcaption{font-size:12px;color:var(--ink-3)}
+.g .name{font-family:var(--serif);font-size:19px;line-height:1.1;margin-top:10px}
+.dir{background:var(--wall);border:1px solid var(--rule);border-radius:16px;padding:20px;margin-top:22px}
+.dir header{display:flex;flex-wrap:wrap;gap:4px 14px;align-items:baseline}
+.dir header .name{font-family:var(--serif);font-size:26px;line-height:1.1}
+.variants{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin-top:14px}
+@media (max-width:900px){.variants{grid-template-columns:1fr}}
+.v{border-top:1px solid var(--rule);padding-top:12px;min-width:0}
+.v .vid{font-weight:600;font-size:13px}
+.v .vid span{color:var(--ink-3);font-weight:400}
+.row{display:flex;flex-wrap:wrap;gap:14px;align-items:flex-end;margin-top:10px}
+.ctx{display:flex;flex-wrap:wrap;gap:14px;margin-top:14px}
+.launcher{background:linear-gradient(160deg,#6E7B74,#3F4A52);border-radius:14px;padding:14px 12px 10px;display:flex;gap:14px;flex-wrap:wrap}
+.app{display:flex;flex-direction:column;align-items:center;gap:4px;width:56px}
+.app span{font-size:11px;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.4)}
+.share{background:#FBFBFD;border:1px solid #DDDDE3;border-radius:18px 18px 0 0;padding:10px 12px 12px;min-width:0}
+.share .h{font-size:12px;color:#444;margin-bottom:8px}
+.share .tiles{display:flex;gap:12px;flex-wrap:wrap}
+.share .app span{color:#222;text-shadow:none}
+.g svg,.row figure svg{filter:drop-shadow(0 1px 2px rgba(21,29,24,.22))}
+.phone{width:84px;height:168px;border-radius:14px;border:3px solid #2A2A2A;display:flex;align-items:center;justify-content:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>App icon, round three</h1>
+  <p class="lede">#74. Louder, not literal, no letters, clean edges. Four new directions, two variants each. Pick two for the phone, or say which is closest.</p>
+
+  <h2>At a glance</h2>
+  <p class="note">96dp, squircle mask</p>
+  <div class="glance" id="glance"></div>
+
+  <h2>Each direction</h2>
+  <p class="note">Masks at 72dp (dashed: the 66dp safe zone) · themed (Android 13+) · 24dp · launcher and share row at 48dp · splash light and dark</p>
+  <div id="dirs"></div>
+</div>
+
+<script>
+const C = {
+  wall: '#EDF0EA', raised: '#F9FAF6', ink: '#151D18', green: '#1E3327', sage: '#9FB3A3',
+  vermilion: '#C23B20', vermilionLight: '#F0714F', ochre: '#D9A441', teal: '#2F7F7A',
+  rose: '#D98B8B', blue: '#2E4A7D', wood: '#D9A86C', woodDark: '#A9773F', steel: '#9AA5A0',
+};
+const THEMED = { fg: '#2F3B33', bg: '#DCE8DD' };
+const DARK_SPLASH = '#161C18';
+
+/* 1024 canvas = the 108dp adaptive layer. Safe zone: centre 512, r 313. `mono` is the themed-icon silhouette. */
+const DIRECTIONS = [
+  {
+    key: 'arch', name: 'Doorway',
+    what: 'A colour field with one cut-out: an arch, the way into the next room. No frame, no nail.',
+    variants: [
+      { label: 'vermilion field', bg: C.vermilion,
+        draw: () => `<path d="M372 712 V500 A140 140 0 0 1 652 500 V712 Z" fill="${C.wall}"/>` },
+      { label: 'green field, light inside', bg: C.green,
+        draw: () => `<path d="M372 712 V500 A140 140 0 0 1 652 500 V712 Z" fill="${C.wall}"/><circle cx="512" cy="520" r="54" fill="${C.vermilion}"/>` },
+    ],
+    mono: (f) => `<path d="M372 712 V500 A140 140 0 0 1 652 500 V712 Z" fill="${f}"/>`,
+  },
+  {
+    key: 'bars', name: 'Hanging line',
+    what: 'Three shapes of different heights sharing one top edge: a wall of prints, reduced to rhythm.',
+    variants: [
+      { label: 'on ink', bg: C.ink,
+        draw: () => `<rect x="342" y="352" width="92" height="320" rx="8" fill="${C.wall}"/>
+          <rect x="462" y="352" width="100" height="200" rx="8" fill="${C.vermilion}"/>
+          <rect x="590" y="352" width="92" height="260" rx="8" fill="${C.sage}"/>` },
+      { label: 'on wall', bg: C.wall,
+        draw: () => `<rect x="342" y="352" width="92" height="320" rx="8" fill="${C.ink}"/>
+          <rect x="462" y="352" width="100" height="200" rx="8" fill="${C.vermilion}"/>
+          <rect x="590" y="352" width="92" height="260" rx="8" fill="${C.sage}"/>` },
+    ],
+    mono: (f) => `<rect x="342" y="352" width="92" height="320" rx="8" fill="${f}"/><rect x="462" y="352" width="100" height="200" rx="8" fill="${f}"/><rect x="590" y="352" width="92" height="260" rx="8" fill="${f}"/>`,
+  },
+  {
+    key: 'mosaic', name: 'Mosaic',
+    what: 'The icon shows what you keep: a masonry of colour. Like the app, the content supplies the colour.',
+    variants: [
+      { label: 'full bleed', bg: C.wall,
+        draw: () => `<rect x="0" y="0" width="502" height="430" fill="${C.ochre}"/>
+          <rect x="0" y="450" width="502" height="250" fill="${C.teal}"/>
+          <rect x="0" y="720" width="502" height="304" fill="${C.rose}"/>
+          <rect x="522" y="0" width="502" height="300" fill="${C.blue}"/>
+          <rect x="522" y="320" width="502" height="320" fill="${C.vermilion}"/>
+          <rect x="522" y="660" width="502" height="364" fill="${C.sage}"/>` },
+      { label: 'one picked out', bg: C.wall,
+        draw: () => `<rect x="342" y="342" width="150" height="190" rx="6" fill="${C.ochre}"/>
+          <rect x="512" y="342" width="170" height="130" rx="6" fill="${C.blue}"/>
+          <rect x="342" y="552" width="150" height="130" rx="6" fill="${C.teal}"/>
+          <g transform="rotate(7 597 587)"><rect x="512" y="492" width="170" height="190" rx="6" fill="${C.vermilion}"/></g>` },
+    ],
+    mono: (f) => `<rect x="342" y="342" width="150" height="190" rx="6" fill="${f}"/><rect x="512" y="342" width="170" height="130" rx="6" fill="${f}"/><rect x="342" y="552" width="150" height="130" rx="6" fill="${f}"/><g transform="rotate(7 597 587)"><rect x="512" y="492" width="170" height="190" rx="6" fill="${f}"/></g>`,
+  },
+  {
+    key: 'object', name: 'Object with character',
+    what: 'A small, friendly made thing holding a card: something you keep, not a diagram of hanging.',
+    variants: [
+      { label: 'clothes peg', bg: C.green,
+        draw: () => `<path d="M0 300 Q512 330 1024 300" stroke="${C.wall}" stroke-width="8" fill="none" opacity=".7"/>
+          <g transform="rotate(-6 512 470)">
+            <rect x="388" y="452" width="248" height="300" rx="8" fill="${C.raised}"/>
+            <rect x="420" y="560" width="184" height="150" rx="4" fill="${C.vermilion}"/>
+          </g>
+          <rect x="468" y="262" width="88" height="270" rx="22" fill="${C.wood}"/>
+          <path d="M512 270 V524" stroke="${C.woodDark}" stroke-width="8"/>
+          <circle cx="512" cy="390" r="30" fill="none" stroke="${C.steel}" stroke-width="14"/>` },
+      { label: 'pushpin', bg: C.wall,
+        draw: () => `<g transform="rotate(8 512 560)">
+            <rect x="372" y="402" width="280" height="320" rx="8" fill="${C.green}"/>
+            <rect x="404" y="520" width="216" height="168" rx="4" fill="${C.sage}"/>
+          </g>
+          <ellipse cx="530" cy="452" rx="58" ry="18" fill="${C.ink}" opacity=".25"/>
+          <circle cx="512" cy="410" r="64" fill="${C.vermilion}"/>
+          <circle cx="490" cy="386" r="20" fill="${C.vermilionLight}"/>` },
+    ],
+    mono: (f) => `<g transform="rotate(-6 512 470)"><rect x="388" y="452" width="248" height="300" rx="8" fill="${f}"/></g><rect x="468" y="262" width="88" height="270" rx="22" fill="${f}" stroke="${THEMED.bg}" stroke-width="14"/>`,
+  },
+];
+
+const VISIBLE = '170.5 170.5 683 683';
+const MASKS = {
+  circle: '<circle cx="512" cy="512" r="341.5"/>',
+  squircle: '<rect x="170.5" y="170.5" width="683" height="683" rx="228"/>',
+  teardrop: '<path d="M512 170.5 H683 A170.5 170.5 0 0 1 853.5 341 V512 A341.5 341.5 0 0 1 512 853.5 A341.5 341.5 0 0 1 170.5 512 A341.5 341.5 0 0 1 512 170.5 Z"/>',
+};
+
+let uid = 0;
+function svgIcon({ bg, body, mask, size, safeZone }) {
+  const id = `m${uid++}`;
+  const ring = safeZone ? '<circle cx="512" cy="512" r="313" fill="none" stroke="#fff" stroke-width="5" stroke-dasharray="18 18" opacity=".8" style="mix-blend-mode:difference"/>' : '';
+  return `<svg width="${size}" height="${size}" viewBox="${VISIBLE}" role="img">
+    <defs><clipPath id="${id}">${MASKS[mask]}</clipPath></defs>
+    <g clip-path="url(#${id})"><rect width="1024" height="1024" fill="${bg}"/>${body}${ring}</g></svg>`;
+}
+
+const icon = (v, { mask = 'squircle', size = 72, safeZone = false } = {}) => svgIcon({ bg: v.bg, body: v.draw(), mask, size, safeZone });
+const themed = (dir) => svgIcon({ bg: THEMED.bg, body: dir.mono(THEMED.fg), mask: 'circle', size: 72 });
+const splash = (dir, back, fill) => `<div class="phone" style="background:${back}">
+  <svg width="64" height="64" viewBox="${VISIBLE}" aria-hidden="true">${dir.mono(fill)}</svg></div>`;
+const splashColour = (v) => `<div class="phone" style="background:${C.wall}">${icon(v, { mask: 'circle', size: 64 })}</div>`;
+
+const tile = (color) => `<svg width="48" height="48" viewBox="0 0 48 48" aria-hidden="true"><rect width="48" height="48" rx="16" fill="${color}"/><circle cx="24" cy="24" r="8" fill="#fff" opacity=".55"/></svg>`;
+const app = (glyph, label) => `<div class="app">${glyph}<span>${label}</span></div>`;
+
+function variant(dir, n, i) {
+  const v = dir.variants[i];
+  const id = `${n}${'ab'[i]}`;
+  const hang = icon(v, { size: 48 });
+  return `<div class="v" data-variant="${id}">
+    <div class="vid">${id} <span>· ${v.label}</span></div>
+    <div class="row">
+      ${['circle', 'squircle', 'teardrop'].map((mask, k) => `<figure>${icon(v, { mask, safeZone: k === 0 })}<figcaption>${mask}</figcaption></figure>`).join('')}
+      <figure>${themed(dir)}<figcaption>themed</figcaption></figure>
+      <figure>${icon(v, { size: 24 })}<figcaption>24dp</figcaption></figure>
+    </div>
+    <div class="ctx">
+      <div class="launcher">${app(tile('#4E7FC4'), 'Photos')}${app(hang, 'Hang')}${app(tile('#3A9A6B'), 'Maps')}${app(tile('#C9803A'), 'Notes')}</div>
+      <div class="share"><div class="h">Share</div><div class="tiles">${app(tile('#5A6ACF'), 'Messages')}${app(tile('#D25F6B'), 'Mail')}${app(hang, 'Hang')}${app(tile('#8A8F98'), 'More')}</div></div>
+      <figure class="row" style="margin:0;gap:8px">${splashColour(v)}${splash(dir, DARK_SPLASH, C.wall)}</figure>
+    </div>
+  </div>`;
+}
+
+document.getElementById('glance').innerHTML = DIRECTIONS.map((dir, n) => `
+  <div class="g" data-direction="${n + 1}">
+    <div class="pair">${dir.variants.map((v, i) => `<figure>${icon(v, { size: 96 })}<figcaption>${n + 1}${'ab'[i]}</figcaption></figure>`).join('')}</div>
+    <div class="name">${n + 1} · ${dir.name}</div>
+  </div>`).join('');
+
+document.getElementById('dirs').innerHTML = DIRECTIONS.map((dir, n) => `
+  <section class="dir" data-direction="${n + 1}">
+    <header><span class="name">${n + 1} · ${dir.name}</span><span class="note">${dir.what}</span></header>
+    <div class="variants">${variant(dir, n + 1, 0)}${variant(dir, n + 1, 1)}</div>
+  </section>`).join('');
+</script>
+</body>
+</html>
