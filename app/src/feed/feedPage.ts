@@ -3,14 +3,22 @@ import { postWords, sameCard, type CardMedia, type CardModel } from '../grid/car
 import { actionFor, movedNote, type FeedAction } from './feedCopy.ts';
 
 export type FeedMedia =
-  /** Images fit whole; everything else crops to fill (#31). */
-  | { readonly kind: 'picture'; readonly media: CardMedia; readonly fit: 'contain' | 'cover'; readonly playable: boolean }
+  /** Thumbnails crop to fill the top of the page (#31). */
+  | { readonly kind: 'picture'; readonly media: CardMedia; readonly playable: boolean }
+  /** An image fills the page, whole, and zooms into its original (#60). */
+  | ImageMedia
   /** No thumbnail: the title set large. */
   | { readonly kind: 'title' }
   | PostMedia
   | { readonly kind: 'pending' }
   /** An imageless article with reader text: no media box, the page is its words (#61). */
   | { readonly kind: 'none' };
+
+export interface ImageMedia {
+  readonly kind: 'image';
+  readonly media: CardMedia;
+  readonly original: string | null;
+}
 
 /** Who signs a post page's words (#59): the author's name and `@handle`, either of which may be missing. */
 export interface Imprint {
@@ -85,7 +93,8 @@ export function feedMediaOf(card: CardModel): FeedMedia {
   if (card.variant === 'pending') return { kind: 'pending' };
   if (card.variant === 'post') return postMediaOf(card);
   if (!card.media) return { kind: 'title' };
-  return { kind: 'picture', media: card.media, fit: card.variant === 'image' ? 'contain' : 'cover', playable: card.variant === 'video' };
+  if (card.variant === 'image') return { kind: 'image', media: card.media, original: card.original };
+  return { kind: 'picture', media: card.media, playable: card.variant === 'video' };
 }
 
 /** Only an article opens on its first lines; other kinds keep their summary (DESIGN.md §8). */
@@ -101,8 +110,11 @@ export function pageMediaOf(card: CardModel, hasOpening: boolean): FeedMedia {
   return hasOpening && card.variant === 'article' && media.kind === 'title' ? { kind: 'none' } : media;
 }
 
+/** Kinds whose media isn't already the title (the large title, a post's words). */
+const SHOWS_TITLE_BELOW: ReadonlySet<FeedMedia['kind']> = new Set(['picture', 'image', 'pending', 'none']);
+
 function titleShownBelow(media: FeedMedia, card: CardModel): boolean {
-  return card.title !== null && (media.kind === 'picture' || media.kind === 'pending' || media.kind === 'none');
+  return card.title !== null && SHOWS_TITLE_BELOW.has(media.kind);
 }
 
 function noteOf(card: CardModel, { movedTo, saved }: FeedPageExtras): string {

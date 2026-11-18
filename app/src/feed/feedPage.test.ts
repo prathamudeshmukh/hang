@@ -11,14 +11,24 @@ const UNMOVED: FeedPageExtras = { summary: null, placeId: null };
 const pageOf = (overrides: Partial<Item>, extras = UNMOVED) => toFeedPage(toCardModel(anItem(overrides), 'file:///thumb.jpg', CARD_NOW), extras);
 
 describe('toFeedPage media', () => {
-  it('fits an image whole, never cropped', () => {
-    const { media } = pageOf({ status: 'ready', kind: 'image', ...WITH_THUMB });
-    assert.deepEqual([media.kind, media.kind === 'picture' && media.fit], ['picture', 'contain']);
+  it('gives an image the whole page, with its original for zooming (#60)', () => {
+    const { media } = pageOf({ status: 'ready', kind: 'image', imageUrl: 'https://example.com/full.png', ...WITH_THUMB });
+    assert.deepEqual([media.kind, media.kind === 'image' && media.original], ['image', 'https://example.com/full.png']);
+  });
+
+  it('sets an image’s title on its shade, under the note', () => {
+    const page = pageOf({ status: 'ready', kind: 'image', title: 'Map of Lisbon', ...WITH_THUMB });
+    assert.equal(page.showTitle, true);
+  });
+
+  it('sets an image with no thumbnail as its title, like any imageless page', () => {
+    const page = pageOf({ status: 'ready', kind: 'image', imageUrl: null });
+    assert.equal(page.media.kind, 'title');
   });
 
   it('crops a video thumbnail to fill and marks it playable', () => {
     const { media } = pageOf({ status: 'ready', kind: 'video', ...WITH_THUMB });
-    assert.deepEqual(media.kind === 'picture' && [media.fit, media.playable], ['cover', true]);
+    assert.deepEqual([media.kind, media.kind === 'picture' && media.playable], ['picture', true]);
   });
 
   it('sets the title large in the media area when there is no thumbnail, and not again below', () => {

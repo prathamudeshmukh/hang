@@ -17,7 +17,7 @@ export function lookOf(card: CardModel, hasOpening = false): Look {
   const media = pageMediaOf(card, hasOpening);
   if (media.kind === 'post') return POST_FRAME;
   if (media.kind === 'none') return TEXT_FRAME;
-  if (media.kind !== 'picture' || !media.media.uri) return FRAME;
-  const landing: Landing = media.fit === 'contain' ? { fit: 'contain', ratio: media.media.naturalRatio } : MEDIA_BOX;
+  if ((media.kind !== 'picture' && media.kind !== 'image') || !media.media.uri) return FRAME;
+  const landing: Landing = media.kind === 'image' ? { fit: 'contain', ratio: media.media.naturalRatio } : MEDIA_BOX;
   return { kind: 'picture', uri: media.media.uri, landing };
 }

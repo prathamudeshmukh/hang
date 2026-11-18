@@ -19,7 +19,7 @@ export interface Size {
 export type FeedFrame = PostFrame & TextFrame;
 
 /**
- * Where a feed page draws its media: whole images fit inside the box, everything else fills it (#31);
+ * Where a feed page draws its media: an image fits whole on the page (#60), everything else fills the box (#31);
  * a post lands on its words' place instead (#59), an imageless article on its text block (#61).
  */
 export type Landing =
@@ -29,6 +29,11 @@ export type Landing =
   | { readonly fit: 'text' };
 
 export type Axis = 'x' | 'y';
+
+/** The whole page: an image page draws its image fitted to it (#60). */
+export function feedPageRect(feed: Size): Rect {
+  return { x: 0, y: 0, width: feed.width, height: feed.height };
+}
 
 /** The feed fills the window edge to edge, so its media box starts at the window's top-left. */
 export function feedMediaRect(feed: Size): Rect {
@@ -47,8 +52,7 @@ export function fittedRect(box: Rect, ratio: number): Rect {
 export function landingRect(feed: FeedFrame, landing: Landing, print: Rect): Rect {
   if (landing.fit === 'words') return wordsPlace(feed, print.height / print.width);
   if (landing.fit === 'text') return textPlace(feed);
-  const box = feedMediaRect(feed);
-  return landing.fit === 'contain' ? fittedRect(box, landing.ratio) : box;
+  return landing.fit === 'contain' ? fittedRect(feedPageRect(feed), landing.ratio) : feedMediaRect(feed);
 }
 
 const SIZE_OF: Readonly<Record<Axis, 'width' | 'height'>> = { x: 'width', y: 'height' };
