@@ -338,6 +338,10 @@ Short, warm and literal. Gallery language used lightly: *hang*, *wall*, *room*, 
 | Dismiss hint | Swipe down to leave it in Inbox |
 | Greeting | Good morning / Good afternoon / Good evening |
 | Empty collection | An empty wall. Share anything from another app to hang it here. |
+| Empty Home (how-to, #75) | Things get here from other apps. · open anything · tap Share · pick Hang · it may be under More |
+| First pull on a new device | Bringing your wall over… |
+| Sign-in, shares waiting | 1 link waiting to hang. Sign in to keep it. / 3 links waiting to hang. Sign in to keep them. |
+| New collection (sheet, Move) | **+ New** chip · placeholder: Name the room |
 | Empty search | Nothing hangs under that name yet. |
 | Fetch failed | couldn't read this · retry |
 | Offline share | fetching… |
