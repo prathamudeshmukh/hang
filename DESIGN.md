@@ -59,24 +59,38 @@ reachable within two levels.
 
 ## 3. Color
 
-### Surfaces
+### Surfaces: the Sage room
+
+The pale grey-green that print rooms paint their walls, with green-black ink. Green sits opposite vermilion, so the
+accent carries further at the same small size. Chosen 2026-11-18 (#79) from four mocked directions
+(`.lavish/color-directions.html`): *Tuned* (today's warm paper with the failures fixed), *Limewash* (chalky, warmer)
+and *Ultramarine* (cool white, blue accent, dropping vermilion) were turned down.
 
 | Token | Light | Dark | Use |
 |---|---|---|---|
-| `wall` | `#F7F5F0` | `#161514` | Default background: Home, collections, search, sheets |
-| `raised` | `#FFFFFF` | `#1F1E1C` | Chips, inputs, the share sheet's selected state |
-| `rule` | `#E4E0D7` | `#2C2A27` | Hairlines, dividers, unselected chip borders |
-| `ink` | `#1B1A17` | `#EDEAE3` | Primary text, primary buttons |
-| `ink-2` | `#55514A` | `#B4AEA3` | Secondary text |
-| `ink-3` | `#736E66` | `#9A958B` | Catalogue notes, placeholders (≥ 4.5:1 on wall) |
-| `screen` | `#0B0B0A` | `#0B0B0A` | Screening room: swipe feed and video, **always dark** |
-| `screen-ink` | `#F2EFE8` | `#F2EFE8` | Text in the screening room |
+| `wall` | `#EDF0EA` | `#161C18` | Default background: Home, collections, search, sheets |
+| `wallDeep` | `#E2E7DE` | `#111612` | The feature wall: Today on Home (greeting, Recently saved, Rediscover) |
+| `raised` | `#F9FAF6` | `#202823` | Chips, inputs, the share sheet's selected state |
+| `rule` | `#D6DCD2` | `#323C35` | Hairlines, dividers, unselected chip borders |
+| `ink` | `#151D18` | `#E6ECE6` | Primary text, primary buttons |
+| `ink-2` | `#46524A` | `#AAB6AD` | Secondary text |
+| `ink-3` | `#5A665E` | `#8F9C92` | Catalogue notes, placeholders (≥ 4.5:1 on wall, raised and wallDeep) |
+| `screen` | `#080A09` | `#080A09` | Screening room: swipe feed and video, **always dark** |
+| `screen-ink` | `#EEF2EC` | `#EEF2EC` | Text in the screening room |
+| `screen-rule` | screen-ink at 30% | same | Outlined pills and hairlines in the screening room |
 
-Light or dark follows the system setting. Never pure black on the wall.
+Light or dark follows the system setting. Never pure black on the wall. The dark wall stays a clear step above
+`screen` (≥ 1.12:1), so going into the feed still reads as entering another room in dark mode.
+
+### The feature wall
+
+Galleries paint the wall behind the main piece a shade deeper. On Home, Today (greeting, Recently saved,
+Rediscover) sits on `wallDeep`, bleeding to the screen edges and up behind the status bar; the collections hang on
+the plain wall below. It is a tone, never an accent, and appears nowhere else.
 
 ### Accent: vermilion
 
-`accent = #D2462A` (dark mode: `#E25A3E`). It's Hang's signature and is used only for:
+`accent = #C23B20` (dark mode: `#F0714F`). It's Hang's signature and is used only for:
 - Save button in the share sheet
 - Unsorted-Inbox dot on "Recently saved"
 - Search caret and match underline
@@ -84,6 +98,9 @@ Light or dark follows the system setting. Never pure black on the wall.
 - Destructive confirmation (delete)
 
 Nothing else. If something new "needs" an accent, use `ink` instead.
+
+Text on the accent (the Save and Take down labels) is `onAccent`: white in light mode, the dark wall's green-black
+in dark mode, ≥ 4.5:1 in both. (The old screen-ink label measured 3.9:1 and 3.2:1.)
 
 ### Collections stay ink
 
@@ -98,6 +115,14 @@ room numbers. A colour you choose stays a deferred idea (SPEC §3).
 
 | Theme | Background | Text |
 |---|---|---|
+| Light | `#EDF0EA` | `#151D18` |
+| Sepia | `#EEE7D4` | `#33291C` |
+| Dark | `#161C18` | `#E6ECE6` |
+
+Light and dark are the Sage room's wall and ink; sepia is tuned to sit beside them. Defaults to the system mode;
+your choice is remembered.
+
+---|---|---|
 | Light | `#F7F5F0` | `#1B1A17` |
 | Sepia | `#F1E7D3` | `#3A2E1F` |
 | Dark | `#161514` | `#E4DFD5` |
@@ -259,7 +284,11 @@ Media fills the top ~56%; below it are the note, title (`title-l`) and a one-to-
 **Link pages** (#54): a link has nothing behind *Open* but the site, so its page says more: the description runs to five
 lines, and the note adds how long it has hung (*aeon.co · saved 3 days ago*: today, yesterday, 2–6 days ago, last
 week, 2–4 weeks ago, then *in March*, or *in March 2025* from another year). Other kinds keep their note and two lines.
-Actions are pills: **Read/Watch** (filled `screen-ink`), **Later**, **Move**. Swipe up
+Actions are pills: **Read/Watch** (filled `screen-ink`), **Later**, **Move**.
+**Projector spill** (#79): under a page with a picture, the picture itself, mirrored, blurred (radius 40) and at
+32%, glows down the top 70% of the room below the media box and fades into `screen`, as if the screen were lit by
+what's on it. The colour only ever comes from that page's picture; it leaves with the text on the way back. Not on
+post, image or text pages. Swipe up
 for the next item. The counter appears as a note in the top-right: *4 of 12*.
 
 **By kind, once opened** (chosen 2026-11-16, `.lavish/print-opened.html`). The main pill keeps one plain word:

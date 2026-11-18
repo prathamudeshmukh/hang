@@ -22,6 +22,8 @@ const print = { borderRadius: RADIUS.print, overflow: 'hidden' } as const;
 export const useHomeStyles = makeStyles(({ color }) => ({
   wall: { flex: 1, backgroundColor: color.wall },
   content: { paddingHorizontal: SPACE.margin },
+  /** Today on a shade deeper wall (#79), bleeding to the screen edges and up behind the status bar. */
+  featureWall: { backgroundColor: color.wallDeep, marginHorizontal: -SPACE.margin, paddingHorizontal: SPACE.margin, paddingBottom: SECTION_GAP },
   greeting: { marginTop: SPACE.caption },
   /** One style object: expo-router's `Link asChild` rejects style arrays. */
   sectionLabel: {
