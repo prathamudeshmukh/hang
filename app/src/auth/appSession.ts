@@ -82,6 +82,9 @@ function wipeAccount(): void {
   settleThumbs(thumbs.reconcile());
 }
 
+/** Links shared before any sign-in, which signing in would keep (#77); none once the device has an owner. */
+export const unclaimedCount = (): number => deviceOwner.unclaimedCount();
+
 // At launch, finish any cleanup a killed app left behind.
 settleThumbs(thumbs.reconcile());
 

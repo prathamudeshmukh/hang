@@ -168,6 +168,10 @@ Rediscover's develop. No collection tint (DESIGN.md §3). Dev tools (`src/dev/`)
 `EXPO_PUBLIC_HANG_DEV_TOOLS=1` (`e2e/run.sh` sets it): `hang://dev/rediscover` backdates the newest ready item on the
 device so Rediscover has a pick.
 
+Sign-in (#77): the tagline is `signInTagline(unclaimedCount())` (`src/signIn/`), the count only on a device nobody
+owns. The route is mounted under the splash while the session restores and the database may still be migrating,
+so `sign-in.tsx` draws only the wall until `status` leaves `restoring`.
+
 Duplicate shares (#19): `supabase/functions/_shared/links/linkKey.ts` says when two links are the same thing; the app
 imports it by relative path (Metro watches only that folder), so keep it dependency-free. `src/share/sameLink.ts`
 finds the live item a share already is, and the capture opens on it (`kind: 'existing'`) instead of saving. The one-off

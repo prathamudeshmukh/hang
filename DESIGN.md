@@ -283,6 +283,19 @@ dashed strip-size frames, where a returning user's prints are about to land.
 Chosen from four rounds of sheets (`design/explorations/10`–`13`); turned down: line drawings, numbered wall text,
 strip-size prints in a row (too small, too busy), masonry, one large share sheet, a sideways strip.
 
+### Sign-in (#77)
+
+Hang's four-tile mark at 56dp, then *Hang* (`display`) and the tagline (`prompt`), the Google pill (filled) at the foot.
+On a device nobody owns with links already shared, the tagline becomes the count: *3 links waiting to hang. Sign in to
+keep them.* A session that ended on its own keeps its owner, so it shows the pitch.
+
+The splash fades out over the screen with the mark already in place; nothing travels. A settle from the splash's
+mark was built and dropped (2026-11-19): expo-splash-screen holds back the app's first frame until the splash is
+released, so on the S23 the hand-over showed a blank frame or the mark already moving.
+
+Chosen from `design/explorations/14-sign-in.html` (direction A, without its motion); turned down: the full mosaic
+as the one piece on the wall, a dashed frame per waiting link, the waiting links as wall labels.
+
 ### Share sheet
 
 Appears translucent over the source app, with a 40% black scrim.

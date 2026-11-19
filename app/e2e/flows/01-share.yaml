@@ -1,10 +1,9 @@
-# Fresh install: sign in, share URL from Chrome, then wait until the server has it.
+# Fresh install: share URL from Chrome before signing in, see sign-in count it (#77), sign in (which claims it),
+# then wait until the server has it.
 # Env (from run.sh): URL, URL_PATTERN, ACCOUNT, DEVICE.
 appId: com.prathamesh.hang
-name: Share from Chrome, then synced
+name: Share before sign-in, then claimed and synced
 ---
-- launchApp
-- runFlow: sign-in.google.yaml
 - runFlow:
     when:
       true: ${DEVICE == 'emulator'}
@@ -14,4 +13,10 @@ name: Share from Chrome, then synced
       true: ${DEVICE == 'phone'}
     file: share-from-chrome.phone.yaml
 - runFlow: leave-in-inbox.yaml
+- extendedWaitUntil:
+    visible:
+      id: sign-in-tagline
+      text: 1 link waiting to hang\. Sign in to keep it\.
+    timeout: 20000
+- runFlow: sign-in.google.yaml
 - runFlow: wait-until-synced.yaml
