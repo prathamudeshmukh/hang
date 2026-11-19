@@ -43,12 +43,25 @@ export const MARK_TILES: readonly Tile[] = [
   { x: 518, y: 478, width: 154, height: 194, fill: vermilion },
 ];
 
-/** The SVG viewBox that fits the tiles exactly. */
-export function markViewBox(tiles: readonly Tile[]): string {
+export interface MarkBounds {
+  readonly left: number;
+  readonly top: number;
+  readonly width: number;
+  readonly height: number;
+}
+
+/** The box that fits the tiles exactly. */
+export function markBounds(tiles: readonly Tile[]): MarkBounds {
   if (tiles.length === 0) throw new Error('A mark with no tiles has no bounds');
   const left = Math.min(...tiles.map((tile) => tile.x));
   const top = Math.min(...tiles.map((tile) => tile.y));
   const right = Math.max(...tiles.map((tile) => tile.x + tile.width));
   const bottom = Math.max(...tiles.map((tile) => tile.y + tile.height));
-  return `${left} ${top} ${right - left} ${bottom - top}`;
+  return { left, top, width: right - left, height: bottom - top };
+}
+
+/** The SVG viewBox that fits the tiles exactly. */
+export function markViewBox(tiles: readonly Tile[]): string {
+  const { left, top, width, height } = markBounds(tiles);
+  return `${left} ${top} ${width} ${height}`;
 }

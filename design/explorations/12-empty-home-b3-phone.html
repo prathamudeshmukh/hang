@@ -1,0 +1,115 @@
+<title>Empty Home on a Phone</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="lavish-design" content="off">
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300..700;1,6..72,300..700&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* One Home screen at 1 css px = 1 dp. Fills a phone; framed at 412×915 (Pixel 7) on a desk. Sage room tokens (#79). */
+:root{--bench:#C9D1C5;--wall:#EDF0EA;--deep:#E2E7DE;--raised:#F9FAF6;--ink:#151D18;--ink-2:#46524A;--ink-3:#5A665E;--rule:#D6DCD2;
+  --blk:rgba(21,29,24,.11);--blk2:rgba(21,29,24,.24);--sheet:#FFFFFF;--tap:rgba(21,29,24,.10);--wash:#B9CFC9;--wash2:#8FB0A8;
+  --serif:'Newsreader',Georgia,'Times New Roman',serif;--sans:'Hanken Grotesk',system-ui,-apple-system,sans-serif}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bench:#0A0D0B;--wall:#161C18;--deep:#111612;--raised:#202823;--ink:#E6ECE6;--ink-2:#AAB6AD;--ink-3:#8F9C92;--rule:#323C35;
+  --blk:rgba(230,236,230,.12);--blk2:rgba(230,236,230,.26);--sheet:#2B342E;--tap:rgba(230,236,230,.14);--wash:#2E4A45;--wash2:#3F6A62;color-scheme:dark}}
+:root[data-theme="dark"]{--bench:#0A0D0B;--wall:#161C18;--deep:#111612;--raised:#202823;--ink:#E6ECE6;--ink-2:#AAB6AD;--ink-3:#8F9C92;--rule:#323C35;
+  --blk:rgba(230,236,230,.12);--blk2:rgba(230,236,230,.26);--sheet:#2B342E;--tap:rgba(230,236,230,.14);--wash:#2E4A45;--wash2:#3F6A62;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--wall);color:var(--ink);font-family:var(--sans)}
+.bench{display:flex;flex-direction:column;align-items:center}
+.screen{width:100%;min-height:100vh;background:var(--wall);display:flex;flex-direction:column}
+@media (min-width:520px){
+  body{background:var(--bench)}
+  .bench{padding:32px 16px 48px;gap:16px}
+  .screen{width:412px;min-height:0;height:915px;border-radius:36px;border:10px solid #1B201D;overflow-y:auto;scrollbar-width:none}
+  .statusbar{display:flex}
+}
+.statusbar{display:none;justify-content:space-between;padding:10px 24px 0;font-size:13px;font-weight:600;background:var(--deep);color:var(--ink)}
+.fw{background:var(--deep);padding:24px max(16px,env(safe-area-inset-right,0px)) 18px max(16px,env(safe-area-inset-left,0px))}
+.date{font-family:var(--serif);font-style:italic;font-size:13px;line-height:1.35;color:var(--ink-2)}
+.greet{font-family:var(--serif);font-size:40px;line-height:1;letter-spacing:-1.2px;margin-top:6px;font-weight:400}
+.label{font-family:var(--serif);font-size:18px;line-height:1.15;margin:18px 0 10px}
+.prompt{font-family:var(--serif);font-style:italic;font-size:15px;line-height:1.3;color:var(--ink-2);margin:18px 0 10px}
+.strip{display:flex;gap:10px}
+.print{flex:1 1 0;min-width:0}
+.frame{width:100%;height:auto;aspect-ratio:4/5;border-radius:2px;background:var(--raised);display:block;overflow:hidden}
+.dash{width:100%;aspect-ratio:4/5;border-radius:2px;border:1px dashed var(--ink-3)}
+.strip > .dash{flex:1 1 0;min-width:0}
+.cap{font-family:var(--serif);font-style:italic;font-size:13px;line-height:1.35;color:var(--ink-2);margin-top:6px}
+.cap .sub{color:var(--ink-3)}
+.lower{padding:0 max(16px,env(safe-area-inset-right,0px)) 40px max(16px,env(safe-area-inset-left,0px))}
+.section{font-family:var(--serif);font-size:18px;margin-top:18px}
+.row{display:flex;align-items:center;gap:12px;margin-top:12px;min-height:48px}
+.cover{width:40px;height:40px;border-radius:2px;border:1px dashed var(--ink-3);flex:none}
+.action{font-size:15px;font-weight:500;color:var(--ink-3)}
+.acct{font-family:var(--serif);font-style:italic;font-size:13px;color:var(--ink-2);margin-top:28px}
+.acct span{font-family:var(--sans);font-style:normal;font-size:13px;font-weight:500}
+.controls{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;padding:16px max(16px,env(safe-area-inset-left,0px));font-size:13px}
+.controls button{font:inherit;font-weight:600;border:1px solid var(--ink-3);background:transparent;color:var(--ink);border-radius:999px;padding:6px 14px;min-height:36px;cursor:pointer}
+.controls button[aria-pressed="true"]{background:var(--ink);color:var(--wall);border-color:var(--ink)}
+.controls button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.hint{font-size:12px;color:var(--ink-3);text-align:center;max-width:412px;padding:0 16px 24px;line-height:1.5}
+</style>
+
+<div class="bench">
+  <div class="screen" id="screen">
+    <div class="statusbar"><span>19:42</span><span>● ▲ ▮</span></div>
+    <div class="fw">
+      <div class="date">Wednesday, 18 November</div>
+      <h1 class="greet">Good evening</h1>
+      <div id="wall"></div>
+    </div>
+    <div class="lower">
+      <div class="section">Collections</div>
+      <div class="row"><div class="cover"></div><div class="action">New collection</div></div>
+      <div class="acct">signed in as you@example.com  ·  <span>sign out</span></div>
+    </div>
+  </div>
+  <div class="controls" role="group" aria-label="Preview">
+    <button type="button" id="state-empty" aria-pressed="true">Empty</button>
+    <button type="button" id="state-waiting" aria-pressed="false">Waiting</button>
+    <button type="button" id="theme-light" aria-pressed="false">Light</button>
+    <button type="button" id="theme-dark" aria-pressed="false">Dark</button>
+  </div>
+  <p class="hint">B3 · The picture travels, at real size: panels share the wall's width (about 110 dp each on this screen), captions 13 sp. Follows your system theme until you pick one.</p>
+</div>
+
+<script>
+const MARK = '<rect x="0" y="0" width="150" height="170" rx="10" fill="#D9A441"/><rect x="0" y="186" width="150" height="134" rx="10" fill="#2F7F7A"/><rect x="166" y="0" width="154" height="110" rx="10" fill="#2E4A7D"/><rect x="166" y="126" width="154" height="194" rx="10" fill="#C23B20"/>';
+const mark = (cx, cy, size) => `<g transform="translate(${cx - size / 2} ${cy - size / 2}) scale(${size / 320})">${MARK}</g>`;
+function shareGlyph(cx, cy, r, color, w) {
+  const a = [cx + r * .55, cy - r * .7], b = [cx - r * .65, cy], c = [cx + r * .55, cy + r * .7], d = r * .28;
+  return `<g stroke="${color}" fill="${color}" stroke-width="${w}"><line x1="${a[0]}" y1="${a[1]}" x2="${b[0]}" y2="${b[1]}"/><line x1="${b[0]}" y1="${b[1]}" x2="${c[0]}" y2="${c[1]}"/><circle cx="${a[0]}" cy="${a[1]}" r="${d}"/><circle cx="${b[0]}" cy="${b[1]}" r="${d}"/><circle cx="${c[0]}" cy="${c[1]}" r="${d}"/></g>`;
+}
+const svg = (body, label) => `<svg class="frame" viewBox="0 0 120 150" role="img" aria-label="${label}">${body}</svg>`;
+const halo = (cx, cy, r) => `<circle cx="${cx}" cy="${cy}" r="${r + 7}" fill="var(--tap)"/>`;
+const shareBtn = (cx, cy, r) => halo(cx, cy, r) + `<circle cx="${cx}" cy="${cy}" r="${r}" fill="var(--ink)"/>` + shareGlyph(cx, cy, r * .52, 'var(--raised)', r * .12);
+const picture = (x, y, w, h) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="2" fill="var(--wash)"/><path d="M${x} ${y + h} L${x + w * .3} ${y + h * .45} L${x + w * .47} ${y + h * .7} L${x + w * .64} ${y + h * .38} L${x + w} ${y + h} Z" fill="var(--wash2)"/><circle cx="${x + w * .8}" cy="${y + h * .22}" r="${h * .1}" fill="var(--wash2)"/>`;
+
+/** The page in another app: a back button, a picture, a headline and one line. */
+function page({ o = 1, share = false } = {}) {
+  return `<g opacity="${o}"><rect x="12" y="12" width="10" height="10" rx="2" fill="var(--blk2)"/>${share ? '' : '<circle cx="103" cy="17" r="5" fill="var(--blk2)"/>'}${picture(12, 34, 96, 62)}<rect x="12" y="108" width="78" height="8" rx="2" fill="var(--blk2)"/><rect x="12" y="124" width="60" height="5" rx="2.5" fill="var(--blk)"/></g>`;
+}
+function sheet() {
+  const xs = [21, 47, 73, 99];
+  const disc = (x, i) => i === 1
+    ? halo(x, 120, 11) + `<circle cx="${x}" cy="120" r="11" fill="var(--wall)" stroke="var(--blk2)" stroke-width=".8"/>` + mark(x, 120, 12)
+    : i === 3 ? `<circle cx="${x}" cy="120" r="11" fill="var(--blk)"/><g fill="var(--ink-2)">${[-4, 0, 4].map((d) => `<circle cx="${x + d}" cy="120" r="1.4"/>`).join('')}</g>`
+    : `<circle cx="${x}" cy="120" r="11" fill="var(--blk2)"/>`;
+  return `<path d="M0 150 V78 Q0 68 10 68 H110 Q120 68 120 78 V150" fill="var(--sheet)"/><rect x="50" y="74" width="20" height="3" rx="1.5" fill="var(--blk2)"/>${picture(12, 84, 20, 16)}<rect x="38" y="87" width="52" height="5" rx="2.5" fill="var(--ink-3)"/><rect x="38" y="95" width="34" height="4" rx="2" fill="var(--blk2)"/>${xs.map(disc).join('')}`;
+}
+const PRINTS = [
+  { art: svg(page(), 'Step 1 of 3, open anything'), cap: 'open anything' },
+  { art: svg(page({ o: .45, share: true }) + shareBtn(100, 20, 11), 'Step 2 of 3, tap Share'), cap: 'tap Share' },
+  { art: svg('<rect width="120" height="150" fill="var(--blk)"/>' + page({ o: .3 }) + sheet(), 'Step 3 of 3, pick Hang. It may be under More'), cap: 'pick Hang', sub: 'it may be under More' },
+];
+const EMPTY = `<h2 class="label" style="font-weight:400">Things get here from other apps.</h2><div class="strip">${PRINTS.map((p) => `<div class="print">${p.art}<div class="cap" aria-hidden="true">${p.cap}${p.sub ? `<br><span class="sub">${p.sub}</span>` : ''}</div></div>`).join('')}</div>`;
+const WAITING = '<div class="prompt">Bringing your wall over…</div><div class="strip"><div class="dash"></div><div class="dash"></div><div class="dash"></div></div>';
+
+const wall = document.getElementById('wall');
+const press = (ids, on) => ids.forEach((id) => document.getElementById(id).setAttribute('aria-pressed', String(id === on)));
+function showState(state) { wall.innerHTML = state === 'empty' ? EMPTY : WAITING; press(['state-empty', 'state-waiting'], `state-${state}`); }
+function showTheme(theme) { document.documentElement.setAttribute('data-theme', theme); press(['theme-light', 'theme-dark'], `theme-${theme}`); }
+document.getElementById('state-empty').addEventListener('click', () => showState('empty'));
+document.getElementById('state-waiting').addEventListener('click', () => showState('waiting'));
+document.getElementById('theme-light').addEventListener('click', () => showTheme('light'));
+document.getElementById('theme-dark').addEventListener('click', () => showTheme('dark'));
+showState('empty');
+</script>

@@ -124,7 +124,13 @@ records them and is wiped with the account. Each thumbnail is fetched once and n
 
 Home (`src/home/`, #30): `readHome(sources, now)` builds the strip prints, the Inbox count, today's Rediscover
 pick (`rediscover.ts`, pure) and the collection rows with their covers; `homeCopy.ts` holds the greeting, date and
-count words. Item taps open the swipe feed (below). E2E waits on `testID="home-greeting"` (not `home`: Maestro also matches `android:id/home`); `inbox`
+count words. Item taps open the swipe feed (below). `readHome(sources, { now, syncFailed })` also gives the feature
+wall's state (#75, pure `homeWall.ts`): `hanging` with any live item; else `waiting` (*Bringing your wall over…*,
+dashed frames) until the local `first_pull` row exists, which the sync engine writes after every error-free pull,
+even an empty one (a `sync_state` cursor only appears when rows arrive); a failed sync shows `empty` instead.
+`empty` is the how-to (`src/home/howto/`): geometry as plain shapes in `howtoShapes.ts`, drawn by `HowToArt` in the
+`SKETCH` tokens, copy in `howtoCopy.ts`. Hang's mark is drawn there as its tiles (`markBounds`): `react-native-svg` ignores `x`/`y` on a
+nested `<Svg>` and stops drawing after it. E2E waits on `testID="home-greeting"` (not `home`: Maestro also matches `android:id/home`); `inbox`
 is the "Recently saved" label, present only while something is unsorted.
 
 Feed (`src/feed/`, #31): grid cards, strip prints and Rediscover call `openFeed(ids, start)` (`appFeed.ts`); the ids go
@@ -177,6 +183,7 @@ uses expo-sqlite. Both are synchronous Drizzle drivers, typed as `HangDb`.
 cd app
 HANG_E2E_ACCOUNT=<test account email> e2e/run.sh emulator        # builds the release APK, runs both flows
 HANG_E2E_ACCOUNT=<test account email> e2e/run.sh phone --i-know  # uninstalls your install; sign back in after
+# HANG_E2E_EMPTY_ACCOUNT=<second account, never saves anything> adds 00-empty-home.yaml (the how-to, #75)
 # --skip-build reuses android/app/build/outputs/apk/release/app-release.apk
 ```
 

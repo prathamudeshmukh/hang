@@ -1,0 +1,14 @@
+# Fresh install, signed in as an account that never saves anything: Home teaches sharing (#75).
+# The first pull finds nothing, so the wall goes from "Bringing your wall over…" to the how-to.
+# Env (from run.sh): ACCOUNT is HANG_E2E_EMPTY_ACCOUNT here.
+appId: com.prathamesh.hang
+name: Empty Home shows the how-to
+---
+- launchApp
+- runFlow: sign-in.google.yaml
+- extendedWaitUntil:
+    visible:
+      id: home-howto
+    timeout: 30000
+- assertVisible: Things get here from other apps.
+- assertVisible: Pick Hang

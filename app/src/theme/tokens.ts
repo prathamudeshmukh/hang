@@ -69,6 +69,42 @@ export const PALETTES: Readonly<Record<Scheme, Palette>> = {
 /** The feed and its sheets (DESIGN.md §3 "always dark"): the dark theme on the screen colors, outlined in screen rule. */
 export const SCREENING_ROOM: Palette = { ...PALETTES.dark, wall: SCREEN.screen, ink: SCREEN.screenInk, rule: SCREEN.screenRule };
 
+/**
+ * The empty Home's how-to drawings (#75): another app's page in flat blocks of ink, on a print's `raised` paper.
+ * The sample picture is a washed teal from the mark; with the mark itself, the only colour on the wall.
+ */
+export interface SketchPalette {
+  /** Faint blocks: body text, the room around a share sheet. */
+  readonly faint: string;
+  /** Firm blocks: buttons, headlines, the other apps in the share row. */
+  readonly firm: string;
+  /** The share sheet rising over the page. */
+  readonly sheet: string;
+  /** The halo round what to tap. */
+  readonly halo: string;
+  readonly picture: string;
+  readonly pictureShade: string;
+}
+
+export const SKETCH: Readonly<Record<Scheme, SketchPalette>> = {
+  light: {
+    faint: 'rgba(21,29,24,0.11)',
+    firm: 'rgba(21,29,24,0.24)',
+    sheet: '#FFFFFF',
+    halo: 'rgba(21,29,24,0.10)',
+    picture: '#B9CFC9',
+    pictureShade: '#8FB0A8',
+  },
+  dark: {
+    faint: 'rgba(230,236,230,0.12)',
+    firm: 'rgba(230,236,230,0.26)',
+    sheet: '#2B342E',
+    halo: 'rgba(230,236,230,0.14)',
+    picture: '#2E4A45',
+    pictureShade: '#3F6A62',
+  },
+};
+
 export const RADIUS = { print: 2, sheet: 24, pill: 999 } as const;
 
 /** Grid and screen rhythm (DESIGN.md §8). */

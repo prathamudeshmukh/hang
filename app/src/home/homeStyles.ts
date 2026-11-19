@@ -2,8 +2,9 @@ import { makeStyles } from '@/theme/theme';
 import { RADIUS, SPACE } from '@/theme/tokens';
 import { textStyle } from '@/theme/typeScale';
 
-/** DESIGN.md Home sheet: a 76×98 strip print, a 62dp Rediscover print, 40dp collection covers. */
+/** DESIGN.md Home sheet: a 76×98 strip print, a 62dp Rediscover print, 40dp collection covers, 88dp how-to prints (#75). */
 export const HOME_SIZE = {
+  howto: 88,
   stripWidth: 76,
   stripHeight: 98,
   rediscover: 62,
@@ -14,6 +15,8 @@ export const HOME_SIZE = {
 const SECTION_GAP = 18;
 const STRIP_GAP = 8;
 const ROW_GAP = 10;
+const HOWTO_STEP_GAP = 12;
+const HOWTO_TEXT_GAP = 14;
 const ROW_PADDING = 9;
 const FADED = 0.5;
 
@@ -52,6 +55,12 @@ export const useHomeStyles = makeStyles(({ color }) => ({
     justifyContent: 'center',
   },
   stripCaption: { marginTop: SPACE.caption },
+  /** While the first pull runs: the strip's three places, dashed (#75). */
+  waitingStrip: { flexDirection: 'row', gap: STRIP_GAP },
+  /** The empty wall's how-to: a column of prints, each labelled beside it like a wall label (#75). */
+  howto: { gap: HOWTO_STEP_GAP },
+  howtoStep: { flexDirection: 'row', alignItems: 'center', gap: HOWTO_TEXT_GAP },
+  howtoPrint: { ...print, width: HOME_SIZE.howto, height: HOME_SIZE.howto },
   printDot: { position: 'absolute', top: SPACE.tight, right: SPACE.tight },
   faded: { opacity: FADED },
   rediscover: { flexDirection: 'row', alignItems: 'center', gap: ROW_GAP },

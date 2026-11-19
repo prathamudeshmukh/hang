@@ -267,6 +267,22 @@ Mocked and turned down: serif titles and a "first page" for articles; a film-bla
 the play disc on videos; a hanging quote mark for posts (breaks the ruled post); a bare print or source-only note for
 images; the host as a nameplate for links (every link from one site still looks the same).
 
+### Empty Home: the how-to (#75)
+
+While no live item is on the device, the feature wall teaches the one thing nobody can discover: things get in by
+sharing from another app. Under the heading *Things get here from other apps.* hang three 88dp square prints in a
+column, each with its step beside it like a wall label (the name in `title-s`, a note in `note`, `ink-2`). The
+drawings are flat blocks of ink at low alpha (`SKETCH` in `tokens.ts`): another app's page, the same page with its
+Share button in solid ink under a tap halo, then a share sheet whose row holds Hang's mark in full colour. A washed-teal
+picture travels from the page to the sheet's preview; it and the mark are the only colour. Nothing is tappable.
+It returns whenever the wall empties.
+
+While the first pull is still bringing an account's wall onto a new device: *Bringing your wall over…* over three
+dashed strip-size frames, where a returning user's prints are about to land.
+
+Chosen from four rounds of sheets (`design/explorations/10`–`13`); turned down: line drawings, numbered wall text,
+strip-size prints in a row (too small, too busy), masonry, one large share sheet, a sideways strip.
+
 ### Share sheet
 
 Appears translucent over the source app, with a 40% black scrim.
@@ -371,7 +387,7 @@ Short, warm and literal. Gallery language used lightly: *hang*, *wall*, *room*, 
 | Dismiss hint | Swipe down to leave it in Inbox |
 | Greeting | Good morning / Good afternoon / Good evening |
 | Empty collection | An empty wall. Share anything from another app to hang it here. |
-| Empty Home (how-to, #75) | Things get here from other apps. · open anything · tap Share · pick Hang · it may be under More |
+| Empty Home (how-to, #75) | Things get here from other apps. · **Open anything**: A page, a video, a post: whatever you’re looking at. · **Tap Share**: Usually in the top bar, or under ⋮. · **Pick Hang**: It may be under More. |
 | First pull on a new device | Bringing your wall over… |
 | Sign-in, shares waiting | 1 link waiting to hang. Sign in to keep it. / 3 links waiting to hang. Sign in to keep them. |
 | New collection (sheet, Move) | **+ New** chip · placeholder: Name the room |

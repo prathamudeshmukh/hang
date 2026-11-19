@@ -44,6 +44,8 @@ export class RemoteError extends Error {
 /** The local side of sync; implemented over SQLite by `createSqliteSyncStore`. */
 export interface SyncStore {
   readCursor(tableName: SyncTableName): Cursor | null;
+  /** Records that a whole pull finished, even one that found nothing (#75). */
+  markPulled(): void;
   /** Applies a page of pulled rows and moves the cursor, atomically. */
   applyPulled(tableName: SyncTableName, page: PulledPage): void;
   nextPending(): OutboxEntry | undefined;

@@ -6,6 +6,8 @@ import { appListSources } from '@/home/appListSources';
 import { CollectionList } from '@/home/CollectionList';
 import { dayKey, dayLine, greetingFor } from '@/home/homeCopy';
 import { readHome } from '@/home/homeLists';
+import { HowToWall } from '@/home/howto/HowToWall';
+import { WaitingWall } from '@/home/howto/WaitingWall';
 import { useHomeStyles } from '@/home/homeStyles';
 import { RecentStrip } from '@/home/RecentStrip';
 import { RediscoverSection } from '@/home/RediscoverSection';
@@ -14,21 +16,23 @@ import { useLiveQuery } from '@/home/useLiveQuery';
 import { useRefresh } from '@/home/useRefresh';
 import { useToday } from '@/home/useToday';
 import { NameText, NoteText } from '@/theme/Text';
+import { useAuth } from '@/auth/useAuth';
 import { useTheme } from '@/theme/theme';
 import { SPACE } from '@/theme/tokens';
 
 /** Offsets only matter when a flight comes back, so a few reports a frame is plenty. */
 const SCROLL_THROTTLE_MS = 32;
 
-/** Home (SPEC #16, DESIGN.md sheet): Today on the feature wall (greeting → Recently saved, holding the Inbox → Rediscover), then collections. */
+/** Home (SPEC #16, DESIGN.md sheet): Today on the feature wall (greeting → Recently saved, holding the Inbox → Rediscover; the how-to while it is empty, #75), then collections. */
 export default function Home() {
   const insets = useSafeAreaInsets();
   const styles = useHomeStyles();
   const { color } = useTheme();
   const today = useToday();
   const day = dayKey(today);
+  const syncFailed = useAuth().lastSync.kind === 'error';
   // A fresh `now` on every read: cards waiting for an image stop after 2 minutes (#34); the day still follows `today`.
-  const home = useLiveQuery(() => readHome(appListSources, new Date()), `home:${day}`);
+  const home = useLiveQuery(() => readHome(appListSources, { now: new Date(), syncFailed }), `home:${day}:${syncFailed}`);
   const { refreshing, onRefresh } = useRefresh();
   const { attach: attachPage, onScroll: onPageScroll, step: pageStep } = useScroller('y');
 
@@ -48,7 +52,12 @@ export default function Home() {
           <NameText token="display" style={styles.greeting}>{greetingFor(today)}</NameText>
         </View>
         <SyncProblem />
-        <RecentStrip recent={home.recent} inboxCount={home.inboxCount} />
+        {home.wall === 'hanging' ? <RecentStrip recent={home.recent} inboxCount={home.inboxCount} /> : null}
+        {/* Polite: a screen reader hears the wall change from waiting to the how-to (#75). */}
+        <View accessibilityLiveRegion="polite">
+          {home.wall === 'empty' ? <HowToWall /> : null}
+          {home.wall === 'waiting' ? <WaitingWall /> : null}
+        </View>
         {home.rediscover ? <RediscoverSection key={`${home.rediscover.card.id}:${day}`} pick={home.rediscover} day={day} /> : null}
       </View>
       <CollectionList collections={home.collections} />

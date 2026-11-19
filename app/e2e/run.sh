@@ -1,11 +1,13 @@
 #!/usr/bin/env bash
 # Slice 9 E2E: share from Chrome → synced → uninstall → reinstall → sign in → still there → opens in the feed
-# → Rediscover has a pick once an item is backdated.
+# → Rediscover has a pick once an item is backdated. First, if HANG_E2E_EMPTY_ACCOUNT is set: a fresh install
+# signed in as an account that stays empty shows the how-to (#75).
 #
 #   e2e/run.sh emulator [--skip-build]
 #   e2e/run.sh phone --i-know [--skip-build]
 #
 # Needs HANG_E2E_ACCOUNT (the test Google account's email, already added to the device).
+# HANG_E2E_EMPTY_ACCOUNT (optional): a second test account, also on the device, that never saves anything.
 # HANG_E2E_SERIAL overrides the adb serial picked for the device.
 set -euo pipefail
 
@@ -58,10 +60,21 @@ reinstall() {
   adb -s "$SERIAL" install "$APK" >/dev/null
 }
 
+# run_flow <flow> [account]: the account defaults to HANG_E2E_ACCOUNT.
 run_flow() {
   echo "e2e: $1"
   maestro --device "$SERIAL" test "$FLOWS/$1" \
-    -e URL="$URL" -e URL_PATTERN="$URL_PATTERN" -e ACCOUNT="$HANG_E2E_ACCOUNT" -e DEVICE="$DEVICE"
+    -e URL="$URL" -e URL_PATTERN="$URL_PATTERN" -e ACCOUNT="${2:-$HANG_E2E_ACCOUNT}" -e DEVICE="$DEVICE"
+}
+
+# Its account must stay empty: nothing in this run saves as it.
+run_empty_home() {
+  if [[ -z "${HANG_E2E_EMPTY_ACCOUNT:-}" ]]; then
+    echo "e2e: skipping 00-empty-home.yaml (set HANG_E2E_EMPTY_ACCOUNT to run it)"
+    return
+  fi
+  reinstall
+  run_flow 00-empty-home.yaml "$HANG_E2E_EMPTY_ACCOUNT"
 }
 
 DEVICE="${1:-}"
@@ -97,6 +110,7 @@ echo "e2e: $DEVICE ($SERIAL), $URL"
 
 require_unlocked
 keep_awake
+run_empty_home
 reinstall
 run_flow 01-share.yaml
 reinstall

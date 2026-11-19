@@ -91,6 +91,7 @@ export function createSyncEngine({ store, remote, clock, options }: SyncEngineDe
     for (const tableName of SYNC_TABLE_ORDER) {
       pulled[tableName] = await pullTable(tableName);
     }
+    store.markPulled();
     return pulled as SyncReport['pulled'];
   }
 

@@ -120,6 +120,16 @@ export const syncState = sqliteTable('sync_state', {
 });
 
 /**
+ * Local only: at most one row, written when a pull first finishes without an error, even one that found
+ * nothing (#75). `sync_state` can't say this: a cursor is written only when rows arrive, so a new, empty
+ * account would never get one. Home waits for this row before it says the wall is empty.
+ */
+export const firstPull = sqliteTable('first_pull', {
+  id: integer('id').primaryKey(),
+  pulledAt: text('pulled_at').notNull(),
+});
+
+/**
  * Whose data is on the device: at most one row. No row means nobody has signed in yet, and whatever
  * was shared meanwhile is unclaimed; the first sign-in claims it.
  */

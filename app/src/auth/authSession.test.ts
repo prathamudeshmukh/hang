@@ -88,6 +88,19 @@ describe('auth session: sign in', () => {
     assert.deepEqual(t.session.getSnapshot().lastSync, { kind: 'error', message: 'offline' });
   });
 
+  it('forgets the last session\'s failed sync while the next sign-in\'s first sync runs (#75)', async () => {
+    t.world.holdNextSync(Promise.reject(new Error('offline')));
+    await t.session.signIn();
+    t.world.endSessionRemotely();
+    const first = deferred<SyncReport>();
+    t.world.holdNextSync(first.promise);
+    const signingIn = t.session.signIn();
+    await new Promise((resolve) => setImmediate(resolve));
+    assert.deepEqual(t.session.getSnapshot().lastSync, { kind: 'never' });
+    first.resolve(EMPTY_REPORT);
+    await signingIn;
+  });
+
   it('lets a sync still running for the previous user finish before the device changes hands', async () => {
     const running = deferred<SyncReport>();
     t.world.holdNextSync(running.promise);
