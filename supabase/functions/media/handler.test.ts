@@ -57,7 +57,7 @@ describe('media handler', () => {
       thumb_path: `user-1/thumbs/${ITEM_ID}.webp`,
       thumb_w: 1080,
       thumb_h: 540,
-      palette: { dominant: expect.stringMatching(HEX), muted: expect.stringMatching(HEX), onDominant: '#F7F5F0' },
+      palette: { dominant: expect.stringMatching(HEX), muted: expect.stringMatching(HEX), onDominant: '#F7F5F0', vibrant: expect.stringMatching(HEX) },
     });
   });
 

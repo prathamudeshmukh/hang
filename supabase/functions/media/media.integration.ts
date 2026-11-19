@@ -27,7 +27,7 @@ interface MediaRow {
   readonly thumb_path: string | null;
   readonly thumb_w: number | null;
   readonly thumb_h: number | null;
-  readonly palette: { dominant: string; muted: string; onDominant: string } | null;
+  readonly palette: { dominant: string; muted: string; onDominant: string; vibrant: string | null } | null;
 }
 
 async function waitForThumb(id: string): Promise<MediaRow> {

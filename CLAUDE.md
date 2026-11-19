@@ -181,6 +181,10 @@ Reader text (#61): `extract` writes `item_content` for articles (`text` = the `<
 without the title or byline; `_shared/extraction/paragraphs.ts`) before the item turns ready. Articles saved before
 that get theirs from `supabase/functions/scripts/backfill-content/run.ts` (dry run unless `--apply`; service-role key).
 
+Room colour input (#85): `media`'s palette has `vibrant` (most saturated colour covering ≥ 3%, or null), since
+`dominant` is often the background. Palettes made before it get it from `supabase/functions/scripts/backfill-palette/run.ts`
+(reads stored thumbnails, never the source; dry run unless `--apply`; service-role key).
+
 Local store tests use better-sqlite3 with the real migrations (`src/db/testing/testDb.ts`); the device
 uses expo-sqlite. Both are synchronous Drizzle drivers, typed as `HangDb`.
 

@@ -162,7 +162,8 @@ back to a generic link card (Open Graph image, title, site), never to a broken s
    image_url` trigger posts the item id to `media`, which fetches it through the SSRF guard (5 MB, 10 s),
    checks the type and size from the file header (JPEG, PNG, WebP, first GIF frame; no SVG; ≤ 6 MP), stores a
    1080px-wide lossy WebP (never enlarged) at `media/{user_id}/thumbs/{item_id}.webp`, and writes `thumb_*`
-   and the **palette** (dominant and muted colors). It runs after `status = ready`, so cards appear first;
+   and the **palette** (dominant and muted colors, and `vibrant`: the most saturated colour covering ≥ 3%, which a
+   collection's colour is made from, #85). It runs after `status = ready`, so cards appear first;
    an unusable image is dropped (`image_url` cleared) and leaves a text card. Client writes to `image_url` never
    trigger a fetch. The app mirrors `image_url` to hold a dashed box for the coming image, for at most 2 minutes
    after the item's last server change (#34).
@@ -254,7 +255,7 @@ items (
   image_url       text,              -- lead image for `media`; server-written, cleared when unusable (#34)
   thumb_path      text,              -- Storage
   thumb_w, thumb_h int,              -- masonry aspect ratio
-  palette         jsonb,             -- { dominant, muted, onDominant }
+  palette         jsonb,             -- { dominant, muted, onDominant, vibrant }
   post            jsonb,             -- post snapshot: author, handle, avatar, text, media[], posted_at
   embed           jsonb,             -- { provider, video_id, playable_inline }
 
