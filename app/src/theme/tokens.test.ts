@@ -2,7 +2,7 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 import { contrastRatio } from './contrast.ts';
-import { PALETTES, SCREENING_ROOM, type Scheme } from './tokens.ts';
+import { PALETTES, SCREENING_ROOM, SKETCH, type Scheme } from './tokens.ts';
 import { textStyle, tokensOf, TYPE_SCALE } from './typeScale.ts';
 
 const SCHEMES: readonly Scheme[] = ['light', 'dark'];
@@ -10,6 +10,9 @@ const AA_BODY = 4.5;
 const AA_LARGE = 3;
 /** The dark wall and the screen must differ enough that entering the feed reads as a change of room. */
 const ROOM_STEP = 1.12;
+/** The how-to's sample picture must read as a picture on the print's paper, not as a smudge (#75). */
+const PICTURE_STEP = 1.3;
+const HILLS_STEP = 1.2;
 
 describe('palette (DESIGN.md §10)', () => {
   it('keeps every ink at AA body contrast on the wall and on raised surfaces, in both themes', () => {
@@ -75,5 +78,17 @@ describe('type scale (DESIGN.md §4)', () => {
 
   it('groups tokens by voice', () => {
     assert.deepEqual([tokensOf('note'), tokensOf('action')], [['note', 'prompt', 'label'], ['action', 'actionS', 'card']]);
+  });
+
+  it('sets the how-to picture apart from the print paper, and its hills from the picture, in both themes', () => {
+    const failures = SCHEMES.flatMap((scheme) => {
+      const { picture, pictureShade } = SKETCH[scheme];
+      const checks = [
+        { name: 'picture on paper', ratio: contrastRatio(picture, PALETTES[scheme].raised), least: PICTURE_STEP },
+        { name: 'hills on picture', ratio: contrastRatio(pictureShade, picture), least: HILLS_STEP },
+      ];
+      return checks.filter(({ ratio, least }) => ratio < least).map(({ name }) => `${scheme} ${name}`);
+    });
+    assert.deepEqual(failures, []);
   });
 });

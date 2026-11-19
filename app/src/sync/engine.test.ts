@@ -2,6 +2,7 @@
 import assert from 'node:assert/strict';
 import { beforeEach, describe, it } from 'node:test';
 import { createCollectionsRepository } from '../db/collectionsRepository.ts';
+import { createFirstPullRepository } from '../db/firstPullRepository.ts';
 import { createItemsRepository } from '../db/itemsRepository.ts';
 import { createOutboxRepository } from '../db/outboxRepository.ts';
 import { createSqliteSyncStore } from '../db/sqliteSyncStore.ts';
@@ -26,6 +27,7 @@ function setup(options = {}) {
     collections: createCollectionsRepository(deps),
     items: createItemsRepository(deps),
     outbox: createOutboxRepository(deps),
+    firstPulls: createFirstPullRepository(deps),
     engine: createSyncEngine({ store, remote, clock: deps.clock, options }),
   };
 }
@@ -169,6 +171,17 @@ describe('sync engine: pull', () => {
     await t.engine.sync();
     assert.equal(t.items.getById('i1'), undefined);
     assert.equal(t.db.select().from(itemContent).all().length, 0);
+  });
+
+  it('marks the first pull finished even when the server has nothing yet (#75)', async () => {
+    await t.engine.sync();
+    assert.equal(t.firstPulls.hasPulled(), true);
+  });
+
+  it('does not mark the first pull finished when the pull fails', async () => {
+    t.remote.seed('items', { id: 'i1', source_url: URL, updated_at: null });
+    await assert.rejects(t.engine.sync());
+    assert.equal(t.firstPulls.hasPulled(), false);
   });
 
   it('rejects a malformed page and leaves the cursor where it was', async () => {

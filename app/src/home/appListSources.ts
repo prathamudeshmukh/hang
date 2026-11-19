@@ -1,5 +1,6 @@
 import { db } from '@/db/client';
 import { createCollectionsRepository } from '@/db/collectionsRepository';
+import { createFirstPullRepository } from '@/db/firstPullRepository';
 import { createItemsRepository } from '@/db/itemsRepository';
 import { systemClock } from '@/db/types';
 import { createThumbStore } from '@/thumbs/thumbStore';
@@ -14,4 +15,5 @@ export const appListSources: ListSources = {
   items: createItemsRepository(repositoryDeps),
   collections: appCollections,
   thumbs: createThumbStore(db),
+  firstPulls: createFirstPullRepository(repositoryDeps),
 };

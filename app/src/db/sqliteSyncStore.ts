@@ -3,6 +3,7 @@ import type { SQLiteColumn, SQLiteTable } from 'drizzle-orm/sqlite-core';
 import { mergePulledRow } from '../sync/merge.ts';
 import type { Cursor } from '../sync/cursor.ts';
 import type { PulledPage, SyncStore } from '../sync/types.ts';
+import { createFirstPullRepository } from './firstPullRepository.ts';
 import { createOutboxRepository, type OutboxRepository } from './outboxRepository.ts';
 import { fromServerRow, primaryKeyColumn, toLocalFields, type ServerRow } from './rowShape.ts';
 import { itemContent, SYNC_TABLES, syncState, type SyncTableName } from './schema.ts';
@@ -68,6 +69,8 @@ export function createSqliteSyncStore(deps: RepositoryDeps): SyncStore {
         writeCursor(tx, tableName, page.cursor);
       });
     },
+
+    markPulled: createFirstPullRepository(deps).markPulled,
 
     nextPending: outboxRepository.nextPending,
     complete: outboxRepository.complete,

@@ -62,11 +62,13 @@ export function createAuthSession({ backend, google, account, syncer, wait }: Au
   /**
    * A sync still running for the previous user (after a session ended on its own) could otherwise
    * land its rows after the wipe and hand them to the next user. Requests time out, so this wait ends.
+   * A failure from before (a session that ended on its own, a restore that failed) isn't this session's: Home
+   * would take it for a failed first pull and skip "Bringing your wall over…" (#75).
    */
   async function becomeSignedIn(user: AuthUser): Promise<void> {
     await inFlight;
     account.bindTo(user.id);
-    setStatus({ kind: 'signedIn', user });
+    publish({ status: { kind: 'signedIn', user }, lastSync: NEVER_SYNCED });
     await sync();
   }
 

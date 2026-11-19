@@ -12,7 +12,6 @@ import { useHomeStyles } from './homeStyles';
 import { StripPrint } from './StripPrint';
 
 const SCROLL_THROTTLE_MS = 32;
-const EMPTY_HOME = 'Share anything from another app to hang it here.';
 
 function Label() {
   return <NameText token="titleS">Recently saved</NameText>;
@@ -42,13 +41,6 @@ export function RecentStrip({ recent, inboxCount }: { readonly recent: readonly 
   const openFeed = useFeedOpener(ids, HOME_SCOPE.strip);
   const { attach: attachStrip, onScroll: onStripScroll, step: stripStep } = useScroller('x');
   useScrollersOrigin(HOME_SCOPE.strip, ids, stripStep);
-  if (recent.length === 0) {
-    return (
-      <View style={styles.sectionLabel}>
-        <NoteText token="prompt">{EMPTY_HOME}</NoteText>
-      </View>
-    );
-  }
   return (
     <>
       {inboxCount > 0 ? (

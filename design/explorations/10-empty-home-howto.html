@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="lavish-design" content="off">
+<title>Empty Home How-to</title>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300..700;1,6..72,300..700&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--wall:#EDF0EA;--deep:#E2E7DE;--raised:#F9FAF6;--ink:#151D18;--ink-2:#46524A;--ink-3:#5A665E;--rule:#D6DCD2;--accent:#C23B20;
+  --serif:'Newsreader',Georgia,serif;--sans:'Hanken Grotesk',system-ui,sans-serif}
+.dark{--wall:#161C18;--deep:#111612;--raised:#202823;--rule:#323C35;--ink:#E6ECE6;--ink-2:#AAB6AD;--ink-3:#8F9C92;--accent:#F0714F}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#DDE3D9;color:#151D18;font-family:var(--sans);line-height:1.5;padding:48px 16px 96px}
+.wrap{max-width:1240px;margin:0 auto}
+h1{font-family:var(--serif);font-weight:400;font-size:clamp(32px,4.5vw,50px);letter-spacing:-.025em;line-height:1}
+h2{font-family:var(--serif);font-weight:400;font-size:28px;letter-spacing:-.02em;line-height:1.1}
+.lede{color:#46524A;max-width:780px;margin-top:10px}
+.dir{background:#EDF0EA;border:1px solid #D6DCD2;border-radius:16px;padding:20px;margin-top:28px}
+.dir header{display:flex;flex-wrap:wrap;gap:4px 14px;align-items:baseline}
+.dir .tag{font-weight:600;font-size:13px;color:#C23B20}
+.dir p{color:#46524A;max-width:760px;margin-top:6px;font-size:15px}
+.dir ul{color:#46524A;font-size:14px;margin:8px 0 0 18px;max-width:760px}
+.phones{display:flex;flex-wrap:wrap;gap:20px;margin-top:18px}
+/* A phone at 1dp = 1px */
+.phone{width:360px;max-width:100%;border-radius:28px;overflow:hidden;border:8px solid #1d221f;background:var(--wall);color:var(--ink);flex:none}
+.phone .fw{background:var(--deep);padding:52px 16px 24px}
+.date{font-family:var(--serif);font-style:italic;font-size:13px;color:var(--ink-2)}
+.greet{font-family:var(--serif);font-size:40px;line-height:1;letter-spacing:-1.2px;margin-top:2px}
+.label{font-family:var(--serif);font-size:18px;margin:22px 0 10px}
+.prompt{font-family:var(--serif);font-style:italic;font-size:15px;color:var(--ink-2);margin:22px 0 10px}
+.strip{display:flex;gap:10px}
+.print{width:76px}
+.frame{width:76px;height:98px;border-radius:2px;background:var(--raised);box-shadow:0 1px 0 var(--rule);display:block;overflow:hidden}
+.dash{width:76px;height:98px;border-radius:2px;border:1px dashed var(--ink-3)}
+.cap{font-family:var(--serif);font-style:italic;font-size:13px;line-height:1.3;color:var(--ink-2);margin-top:6px}
+.cap .sub{color:var(--ink-3)}
+.lower{padding:24px 16px 28px}
+.lower .row{display:flex;align-items:center;gap:12px;margin-top:12px}
+.lower .cover{width:40px;height:40px;border-radius:2px;border:1px dashed var(--ink-3)}
+.lower .rowname{font-family:var(--serif);font-size:16px;color:var(--ink-2)}
+.acct{font-family:var(--serif);font-style:italic;font-size:13px;color:var(--ink-3);margin-top:28px}
+.plabel{font-size:12px;color:#5A665E;margin-top:6px;text-align:center}
+.reco{display:inline-block;background:#151D18;color:#F9FAF6;font-size:11px;font-weight:600;border-radius:99px;padding:2px 9px;letter-spacing:.02em}
+.qs{background:#F9FAF6;border:1px solid #D6DCD2;border-radius:16px;padding:20px;margin-top:28px}
+.qs ol{margin:8px 0 0 20px;color:#46524A}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Empty Home: the how-to</h1>
+  <p class="lede">#75. Three ways to draw the three panels that hang where the strip goes when the wall is empty, and the <em>waiting</em> state (dashed frames, decided). Each is shown on the real Home at 1&nbsp;dp = 1&nbsp;px, light and dark. Prints are 76×98, the strip print size; captions are notes.</p>
+
+  <section class="dir">
+    <header><h2>A · Line</h2><span class="tag">recommended</span></header>
+    <p>Ink line drawings on the print's paper, like a curator's sketch pinned up. Pages are outlines; the share glyph is circled; the share row is outlined discs, and Hang's mark is the only colour on the wall.</p>
+    <ul><li>Quietest; reads as part of a gallery, not a tutorial.</li><li>Thin lines at 76 dp: needs a 1.25 dp stroke minimum to survive dark mode.</li></ul>
+    <div class="phones" data-dir="line"></div>
+  </section>
+
+  <section class="dir">
+    <header><h2>B · Blocks</h2></header>
+    <p>Filled shapes in rule grey, no outlines: the page is a stack of blocks, the share button a solid ink disc, the share row grey discs. Hang's mark again carries the only colour, so it pops harder than in A.</p>
+    <ul><li>Bolder and more legible at strip size, especially in dark.</li><li>Closer to the icon's masonry language; risks looking like skeleton loading.</li></ul>
+    <div class="phones" data-dir="blocks"></div>
+  </section>
+
+  <section class="dir">
+    <header><h2>C · Wall text</h2></header>
+    <p>No pictures: each print is a museum label with a large serif numeral and the step set inside it. Only print 3 has a picture, the mark. Captions under the prints go away; <em>it may be under More</em> sits under print 3.</p>
+    <ul><li>Most on-voice with the typography; simplest to build and scale with font size.</li><li>Teaches less: nothing shows what the Share button or the share sheet look like.</li></ul>
+    <div class="phones" data-dir="words"></div>
+  </section>
+
+  <section class="dir">
+    <header><h2>Waiting</h2><span class="tag">decided in grilling</span></header>
+    <p>First pull still running: <em>Bringing your wall over…</em> in the label slot, three dashed frames holding the strip's place, so nothing jumps when prints or the how-to arrive. Same for every direction.</p>
+    <div class="phones" data-dir="waiting"></div>
+  </section>
+
+  <section class="qs">
+    <h2>To pick</h2>
+    <ol><li>A, B or C (or a mix: e.g. B's filled share disc inside A).</li><li>Hang's mark in panel 3: in colour (as drawn) or in ink like the other discs, with a ring?</li></ol>
+  </section>
+</div>
+
+<script>
+const MARK = `<g><rect x="0" y="0" width="150" height="170" rx="6" fill="#D9A441"/><rect x="0" y="186" width="150" height="134" rx="6" fill="#2F7F7A"/><rect x="166" y="0" width="154" height="110" rx="6" fill="#2E4A7D"/><rect x="166" y="126" width="154" height="194" rx="6" fill="#C23B20"/></g>`;
+function mark(cx, cy, size){const s=size/320;return `<g transform="translate(${cx-size/2} ${cy-size/2}) scale(${s})">${MARK}</g>`;}
+function shareGlyph(cx, cy, r, color, w){
+  const a=[cx+r*0.6,cy-r*0.7], b=[cx-r*0.7,cy], c=[cx+r*0.6,cy+r*0.7], d=r*0.28;
+  return `<g stroke="${color}" fill="${color}" stroke-width="${w}"><line x1="${a[0]}" y1="${a[1]}" x2="${b[0]}" y2="${b[1]}"/><line x1="${b[0]}" y1="${b[1]}" x2="${c[0]}" y2="${c[1]}"/><circle cx="${a[0]}" cy="${a[1]}" r="${d}"/><circle cx="${b[0]}" cy="${b[1]}" r="${d}"/><circle cx="${c[0]}" cy="${c[1]}" r="${d}"/></g>`;
+}
+const svg = (body) => `<svg class="frame" viewBox="0 0 76 98" role="img">${body}</svg>`;
+const DISC_X = [12, 25, 38, 51, 64];
+
+const LINE = {
+  page(o){return `<g fill="none" stroke="var(--ink)" stroke-width="1.25" stroke-linecap="round" opacity="${o}"><line x1="8" y1="11" x2="40" y2="11"/><rect x="8" y="18" width="60" height="30" rx="1"/><line x1="8" y1="56" x2="68" y2="56"/><line x1="8" y1="62" x2="62" y2="62"/><line x1="8" y1="68" x2="46" y2="68"/></g>`;},
+  p1(){return svg(this.page(1));},
+  p2(){return svg(this.page(.35)+shareGlyph(62,11,5,'var(--ink)',1.1)+`<circle cx="61.5" cy="11" r="8.5" fill="none" stroke="var(--ink)" stroke-width="1.5"/>`);},
+  p3(){
+    const discs = DISC_X.map((x,i)=> i===1 ? `<circle cx="${x}" cy="74" r="6" fill="var(--raised)"/>${mark(x,74,8)}<circle cx="${x}" cy="74" r="7.5" fill="none" stroke="var(--ink)" stroke-width="1.5"/>`
+      : i===4 ? `<circle cx="${x}" cy="74" r="6" fill="none" stroke="var(--ink-3)" stroke-width="1"/><g fill="var(--ink-3)"><circle cx="${x-2.5}" cy="74" r=".8"/><circle cx="${x}" cy="74" r=".8"/><circle cx="${x+2.5}" cy="74" r=".8"/></g>`
+      : `<circle cx="${x}" cy="74" r="6" fill="none" stroke="var(--ink-3)" stroke-width="1"/>`).join('');
+    return svg(this.page(.2)+`<path d="M2 98 V52 Q2 46 8 46 H68 Q74 46 74 52 V98" fill="var(--raised)" stroke="var(--ink)" stroke-width="1.25"/><line x1="32" y1="51" x2="44" y2="51" stroke="var(--ink-3)" stroke-width="1.5" stroke-linecap="round"/><line x1="8" y1="60" x2="30" y2="60" stroke="var(--ink)" stroke-width="1.25" stroke-linecap="round"/>`+discs);
+  },
+};
+const BLOCKS = {
+  page(o){return `<g fill="var(--rule)" opacity="${o}"><rect x="8" y="8" width="32" height="5" rx="2.5"/><rect x="8" y="18" width="60" height="30" rx="1"/><rect x="8" y="54" width="60" height="4" rx="2"/><rect x="8" y="61" width="54" height="4" rx="2"/><rect x="8" y="68" width="38" height="4" rx="2"/></g>`;},
+  p1(){return svg(this.page(1));},
+  p2(){return svg(this.page(.45)+`<circle cx="61" cy="11" r="8" fill="var(--ink)"/>`+shareGlyph(61,11,4.2,'var(--raised)',1));},
+  p3(){
+    const discs = DISC_X.map((x,i)=> i===1 ? `<circle cx="${x}" cy="74" r="7" fill="var(--wall)"/>${mark(x,74,9)}`
+      : i===4 ? `<circle cx="${x}" cy="74" r="6" fill="var(--rule)"/><g fill="var(--ink-2)"><circle cx="${x-2.5}" cy="74" r=".9"/><circle cx="${x}" cy="74" r=".9"/><circle cx="${x+2.5}" cy="74" r=".9"/></g>`
+      : `<circle cx="${x}" cy="74" r="6" fill="var(--rule)"/>`).join('');
+    return svg(this.page(.25)+`<path d="M0 98 V52 Q0 44 8 44 H68 Q76 44 76 52 V98" fill="var(--wall)"/><rect x="32" y="49" width="12" height="2.5" rx="1.25" fill="var(--rule)"/><rect x="8" y="57" width="24" height="4" rx="2" fill="var(--ink-3)"/>`+discs);
+  },
+};
+const WORDS = {
+  card(n, word){return svg(`<text x="8" y="34" font-family="Newsreader, Georgia, serif" font-size="34" fill="var(--ink)" letter-spacing="-1">${n}</text><text x="8" y="80" font-family="Newsreader, Georgia, serif" font-size="12.5" fill="var(--ink)">${word[0]}</text><text x="8" y="92" font-family="Newsreader, Georgia, serif" font-size="12.5" fill="var(--ink)">${word[1]}</text>`);},
+  p1(){return this.card(1,['Open','anything']);},
+  p2(){return svg(`<text x="8" y="34" font-family="Newsreader, Georgia, serif" font-size="34" fill="var(--ink)" letter-spacing="-1">2</text><text x="8" y="80" font-family="Newsreader, Georgia, serif" font-size="12.5" fill="var(--ink)">Tap</text><text x="8" y="92" font-family="Newsreader, Georgia, serif" font-size="12.5" fill="var(--ink)">Share</text>`+shareGlyph(56,86,5,'var(--ink)',1.1));},
+  p3(){return svg(`<text x="8" y="34" font-family="Newsreader, Georgia, serif" font-size="34" fill="var(--ink)" letter-spacing="-1">3</text><text x="8" y="80" font-family="Newsreader, Georgia, serif" font-size="12.5" fill="var(--ink)">Pick</text><text x="8" y="92" font-family="Newsreader, Georgia, serif" font-size="12.5" fill="var(--ink)">Hang</text>`+mark(57,86,13));},
+};
+
+const CAPS = [['open anything'],['tap Share'],['pick Hang','it may be under More']];
+function howto(d, withCaps){
+  const prints = [d.p1(), d.p2(), d.p3()].map((art,i)=>{
+    const cap = withCaps ? `<div class="cap">${CAPS[i][0]}${CAPS[i][1]?`<br><span class="sub">${CAPS[i][1]}</span>`:''}</div>`
+      : (i===2 ? `<div class="cap"><span class="sub">it may be under More</span></div>` : '');
+    return `<div class="print">${art}${cap}</div>`;
+  }).join('');
+  return `<div class="label">Things get here from other apps.</div><div class="strip">${prints}</div>`;
+}
+const waiting = () => `<div class="prompt">Bringing your wall over…</div><div class="strip"><div class="dash"></div><div class="dash"></div><div class="dash"></div></div>`;
+function phone(scheme, wall){
+  return `<div><div class="phone ${scheme}"><div class="fw"><div class="date">Wednesday 18 November</div><div class="greet">Good evening</div>${wall}</div>
+    <div class="lower"><div style="font-family:var(--serif);font-size:18px">Collections</div><div class="row"><div class="cover"></div><div class="rowname">+ New collection</div></div><div class="acct">Signed in as you · Sign out</div></div></div>
+    <div class="plabel">${scheme}</div></div>`;
+}
+const DIRS = { line:[LINE,true], blocks:[BLOCKS,true], words:[WORDS,false] };
+document.querySelectorAll('.phones').forEach((el)=>{
+  const key = el.dataset.dir;
+  const wall = key==='waiting' ? waiting() : howto(DIRS[key][0], DIRS[key][1]);
+  el.innerHTML = phone('light', wall) + phone('dark', wall);
+});
+</script>
+</body>
+</html>

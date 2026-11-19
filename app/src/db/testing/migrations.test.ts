@@ -5,7 +5,7 @@ import { sql } from 'drizzle-orm';
 import { createTestDb } from './testDb.ts';
 
 describe('local migrations', () => {
-  it('create the three mirrored tables plus outbox, sync_state, device_owner and thumb_files', () => {
+  it('create the three mirrored tables plus outbox, sync_state, first_pull, device_owner and thumb_files', () => {
     const db = createTestDb();
     const rows = db.all<{ name: string }>(
       sql`select name from sqlite_master where type = 'table' order by name`,
@@ -13,7 +13,7 @@ describe('local migrations', () => {
     const appTables = rows.map((row) => row.name).filter((name) => !name.startsWith('__') && !name.startsWith('sqlite_'));
     assert.deepEqual(
       appTables,
-      ['collections', 'device_owner', 'item_content', 'items', 'outbox', 'sync_state', 'thumb_files'],
+      ['collections', 'device_owner', 'first_pull', 'item_content', 'items', 'outbox', 'sync_state', 'thumb_files'],
     );
   });
 });

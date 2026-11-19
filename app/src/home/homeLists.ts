@@ -1,9 +1,11 @@
 import type { CollectionsRepository } from '../db/collectionsRepository.ts';
+import type { FirstPullRepository } from '../db/firstPullRepository.ts';
 import type { ItemsRepository } from '../db/itemsRepository.ts';
 import type { Item } from '../db/schema.ts';
 import type { ThumbStore } from '../thumbs/thumbStore.ts';
 import { toCardModel, type CardModel } from '../grid/cardModel.ts';
 import { dayKey, savedMonthNote } from './homeCopy.ts';
+import { wallState, type WallState } from './homeWall.ts';
 import { pickRediscover, rediscoverWindow } from './rediscover.ts';
 
 /** SPEC §5 "Recently saved": the latest 12 items by created_at. */
@@ -30,8 +32,9 @@ export interface CollectionRow {
   readonly coverUri: string | null;
 }
 
-/** Home's shape (SPEC #16): Recently saved (holding the Inbox), one Rediscover pick, collections. */
+/** Home's shape (SPEC #16): the feature wall's state, Recently saved (holding the Inbox), one Rediscover pick, collections. */
 export interface HomeLists {
+  readonly wall: WallState;
   readonly recent: readonly RecentPrint[];
   readonly inboxCount: number;
   readonly rediscover: RediscoverPick | null;
@@ -49,6 +52,13 @@ export interface ListSources {
   readonly items: Pick<ItemsRepository, 'listRecent' | 'listInbox' | 'listInCollection' | 'listRediscoverCandidates' | 'getById' | 'countByCollection'>;
   readonly collections: Pick<CollectionsRepository, 'list'>;
   readonly thumbs: Pick<ThumbStore, 'fileUris' | 'coversByCollection'>;
+  readonly firstPulls: Pick<FirstPullRepository, 'hasPulled'>;
+}
+
+/** When Home is read, and whether this session's last sync failed (it lives in memory, not the database). */
+export interface HomeMoment {
+  readonly now: Date;
+  readonly syncFailed: boolean;
 }
 
 function readRediscover(sources: ListSources, now: Date, thumbs: ReadonlyMap<string, string>): RediscoverPick | null {
@@ -67,12 +77,14 @@ function readCollections(sources: ListSources, counts: ReadonlyMap<string | null
   return sources.collections.list().map(({ id, name }) => ({ id, name, count: counts.get(id) ?? 0, coverUri: covers.get(id) ?? null }));
 }
 
-export function readHome(sources: ListSources, now: Date): HomeLists {
+export function readHome(sources: ListSources, { now, syncFailed }: HomeMoment): HomeLists {
   const counts = sources.items.countByCollection();
   const thumbs = sources.thumbs.fileUris();
   const toPrint = (item: Item): RecentPrint => ({ card: toCardModel(item, thumbs.get(item.id) ?? null, now), inInbox: item.collectionId === null });
+  const recent = sources.items.listRecent(RECENT_LIMIT).map(toPrint);
   return {
-    recent: sources.items.listRecent(RECENT_LIMIT).map(toPrint),
+    wall: wallState({ hasItems: recent.length > 0, hasPulled: sources.firstPulls.hasPulled(), syncFailed }),
+    recent,
     inboxCount: counts.get(null) ?? 0,
     rediscover: readRediscover(sources, now, thumbs),
     collections: readCollections(sources, counts),
