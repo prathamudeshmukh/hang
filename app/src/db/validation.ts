@@ -4,10 +4,15 @@ export const SOURCE_URL_MAX = 4096;
 export const SHARED_TITLE_MAX = 1000;
 const HTTP_URL = /^https?:\/\//i;
 
+/** A name the user can fix: its message is written to be shown. */
+export class CollectionNameError extends Error {
+  override readonly name = 'CollectionNameError';
+}
+
 export function validCollectionName(name: string): string {
   const trimmed = name.trim();
   if (trimmed.length === 0 || trimmed.length > COLLECTION_NAME_MAX) {
-    throw new Error(`Collection name must be 1–${COLLECTION_NAME_MAX} characters`);
+    throw new CollectionNameError(`Collection name must be 1–${COLLECTION_NAME_MAX} characters`);
   }
   return trimmed;
 }

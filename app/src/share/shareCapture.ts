@@ -2,12 +2,10 @@ import type { CollectionsRepository } from '../db/collectionsRepository.ts';
 import type { ItemsRepository } from '../db/itemsRepository.ts';
 import type { ThumbStore } from '../thumbs/thumbStore.ts';
 import type { ParsedShare } from './parseShare.ts';
+import { type CollectionChoice, type CreateOutcome, tryCreateCollection } from '../collections/createCollection.ts';
 import { findSameLink } from './sameLink.ts';
 
-export interface CollectionChoice {
-  readonly id: string;
-  readonly name: string;
-}
+export type { CollectionChoice } from '../collections/createCollection.ts';
 
 /** The item a re-shared link already is (#19): what the sheet says about it. */
 export interface ExistingItem {
@@ -43,7 +41,7 @@ export interface ShareCaptureDeps {
   /** Resolves once the local database is migrated; a share can be the first thing the process ever runs. */
   readonly ready: () => Promise<void>;
   readonly items: Pick<ItemsRepository, 'save' | 'file' | 'listLinks' | 'getById'>;
-  readonly collections: Pick<CollectionsRepository, 'list'>;
+  readonly collections: Pick<CollectionsRepository, 'list' | 'create'>;
   readonly thumbs: Pick<ThumbStore, 'fileUris'>;
   readonly newId: () => string;
   /** Sends the outbox if signed in. Whatever it can't send stays queued for the next sync. */
@@ -110,6 +108,11 @@ export function createShareCapture({ ready, items, collections, newId, thumbs, p
         ? saveLink(share.url, share.sharedTitle)
         : Promise.resolve({ kind: 'notSaved', reason: share.kind === 'image' ? 'image' : 'unsupported' });
       return opening;
+    },
+
+    /** + New (#76): a local insert + outbox, so the sheet stays instant; `close()` pushes it with the share. */
+    createCollection(name: string): CreateOutcome {
+      return tryCreateCollection({ collections, warn: logger.warn }, { id: newId(), name });
     },
 
     /** The item is already safe in the Inbox, so a failure here only leaves it unfiled. */

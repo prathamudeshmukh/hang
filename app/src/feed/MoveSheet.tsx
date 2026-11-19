@@ -1,8 +1,11 @@
 import { useMemo } from 'react';
 import { Modal, Pressable, StyleSheet, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { createAppCollection } from '@/collections/appCreateCollection';
 import { CollectionChips } from '@/collections/CollectionChips';
+import type { CreateOutcome } from '@/collections/createCollection';
+import { useSheetLift } from '@/collections/useSheetLift';
 import { appCollections } from '@/home/appListSources';
+import { syncTriggers } from '@/sync/syncWiring';
 import { ScreeningRoom } from '@/theme/ScreeningRoom';
 import { makeStyles } from '@/theme/theme';
 import { RADIUS, SPACE } from '@/theme/tokens';
@@ -28,14 +31,24 @@ interface MoveSheetProps {
 
 function Sheet({ page, onChoose, onClose }: MoveSheetProps & { readonly page: FeedPage }) {
   const styles = useStyles();
-  const insets = useSafeAreaInsets();
   const choices = useMemo(() => moveChoices(appCollections.list()), []);
+  const lift = useSheetLift(SHEET_PADDING_BOTTOM);
+
+  /** Every Move chip commits on tap, so a new one does too: create, move into it, close (#76). */
+  const createAndMove = (name: string): CreateOutcome => {
+    const outcome = createAppCollection(name);
+    if (outcome.kind === 'created') {
+      onChoose(page, outcome.choice.id);
+      void syncTriggers.syncNow();
+    }
+    return outcome;
+  };
   return (
     <View style={StyleSheet.absoluteFill}>
       <Pressable style={[StyleSheet.absoluteFill, styles.scrim]} onPress={onClose} accessibilityLabel="Keep it here" />
-      <View testID="move-sheet" style={[styles.sheet, { paddingBottom: insets.bottom + SHEET_PADDING_BOTTOM }]}>
+      <View testID="move-sheet" style={[styles.sheet, lift]}>
         <View style={styles.handle} />
-        <CollectionChips choices={choices} selected={page.placeId} onSelect={(id) => onChoose(page, id)} />
+        <CollectionChips choices={choices} selected={page.placeId} onSelect={(id) => onChoose(page, id)} onCreate={createAndMove} />
       </View>
     </View>
   );

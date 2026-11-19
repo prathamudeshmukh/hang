@@ -1,5 +1,5 @@
 # From the Inbox (after wait-until-synced): the card opens the swipe feed at that item (#31).
-# Env (from run.sh): URL_PATTERN.
+# Env (from run.sh): URL_PATTERN. A link page's note ends in when it was saved (#54).
 appId: com.prathamesh.hang
 ---
 - tapOn:
@@ -10,7 +10,7 @@ appId: com.prathamesh.hang
     timeout: 5000
 - assertVisible:
     id: feed-note
-    text: (\d+ min · )?example\.com
+    text: (\d+ min · )?example\.com( · saved .+)?
 # The test account's Inbox holds every past run's item, so there is usually a next one; one item hides the counter.
 - runFlow:
     when:
@@ -34,7 +34,7 @@ appId: com.prathamesh.hang
     id: move-sheet
 - assertVisible:
     id: feed-note
-    text: (\d+ min · )?example\.com
+    text: (\d+ min · )?example\.com( · saved .+)?
 - back
 - extendedWaitUntil:
     visible:

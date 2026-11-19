@@ -1,4 +1,4 @@
-# Galaxy S23 Ultra (One UI): Chrome's ⋮ menu → Share → Samsung's share sheet → Hang.
+# Galaxy S23 Ultra (One UI): Chrome's ⋮ menu → Share → Samsung's share sheet → Hang. The caller decides what the sheet does next.
 # Unfinished (#23): Hang is in the sheet's More → Apps grid, which this doesn't reach yet.
 appId: com.android.chrome
 ---
@@ -37,4 +37,3 @@ appId: com.android.chrome
           direction: DOWN
           timeout: 15000
 - tapOn: Hang
-- runFlow: leave-in-inbox.yaml

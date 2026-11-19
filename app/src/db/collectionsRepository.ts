@@ -3,7 +3,7 @@ import { enqueue } from './outboxRepository.ts';
 import { toServerShape } from './rowShape.ts';
 import { collections, type Collection } from './schema.ts';
 import type { HangDb, RepositoryDeps } from './types.ts';
-import { validCollectionName } from './validation.ts';
+import { CollectionNameError, validCollectionName } from './validation.ts';
 
 export interface NewCollection {
   readonly id: string;
@@ -21,7 +21,7 @@ function assertNameIsFree(tx: HangDb, name: string): void {
   const wanted = comparable(name);
   const taken = tx.select({ name: collections.name }).from(collections).where(liveCollections).all()
     .find((existing) => comparable(existing.name) === wanted);
-  if (taken) throw new Error(`You already have “${taken.name}”`);
+  if (taken) throw new CollectionNameError(`You already have “${taken.name}”`);
 }
 
 export function createCollectionsRepository({ db, clock }: RepositoryDeps) {

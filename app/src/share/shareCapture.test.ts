@@ -251,3 +251,34 @@ describe('share capture: a link Hang already has (#19)', () => {
     assert.equal(opening.kind, 'saved');
   });
 });
+
+describe('share capture: + New in the sheet (#76)', () => {
+  let s: ReturnType<typeof setup>;
+  beforeEach(() => {
+    s = setup();
+  });
+
+  it('creates the collection and queues it before the item is filed into it', async () => {
+    await s.capture.open(LINK);
+    const outcome = s.capture.createCollection('Reading');
+    assert.ok(outcome.kind === 'created');
+    s.capture.file('id-1', outcome.choice.id);
+    assert.deepEqual(s.outbox.list().map((entry) => [entry.tableName, entry.op]), [
+      ['items', 'upsert'], ['collections', 'upsert'], ['items', 'patch'],
+    ]);
+  });
+
+  it('refuses a name the device already has, creating nothing', async () => {
+    s.collections.create({ id: 'c1', name: 'Reading' });
+    const outcome = s.capture.createCollection('READING');
+    assert.deepEqual(outcome, { kind: 'invalid', message: 'You already have “Reading”' });
+    assert.equal(s.collections.list().length, 1);
+  });
+
+  it('keeps the new collection queued when the share is left in the Inbox', async () => {
+    await s.capture.open(LINK);
+    s.capture.createCollection('Reading');
+    await s.capture.close();
+    assert.deepEqual(s.outbox.list().map((entry) => [entry.tableName, entry.op]), [['items', 'upsert'], ['collections', 'upsert']]);
+  });
+});
