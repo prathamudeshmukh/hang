@@ -142,7 +142,10 @@ note adds `savedNote` (*saved 3 days ago*, #54). Read/Watch/Open goes through
 sets the words at all six `post-fit` steps unseen, pure `fitStep` picks the largest that fits the room `postLayout`
 works out, and the hero flies the print to `wordsPlace` (the feed reports `wordsTop` with its size). Everything inside `ScreeningRoom`
 (`src/theme/ScreeningRoom.tsx`) draws with the always-dark `SCREENING_ROOM` palette. `CollectionChips`
-(`src/collections/`) is shared by the share sheet and Move. E2E waits on `testID="feed"`, `feed-counter`, `feed-move`.
+(`src/collections/`) is shared by the share sheet and Move, and ends in **+ New** (#76): the chip turns into a
+name field (pure rules in `newCollectionDraft.ts`; a draft with text survives a blur). Enter calls `onCreate`: the
+sheet selects the new collection (Save still files; a refused name shows in the footer hint), Move moves into it and
+closes. Edge-to-edge means `adjustResize` doesn't lift the sheets: `useSheetLift` does. E2E waits on `testID="feed"`, `feed-counter`, `feed-move`.
 
 Hero (`src/hero/`, #32): every way into the feed goes through `hero.open({ ids, card, scope })` (`appHero.ts`), and the
 feed's `usePreventRemove` sends every way out through `hero.back`. `hero.ts` runs the trip (`trip.ts` reducer:
@@ -184,6 +187,7 @@ cd app
 HANG_E2E_ACCOUNT=<test account email> e2e/run.sh emulator        # builds the release APK, runs both flows
 HANG_E2E_ACCOUNT=<test account email> e2e/run.sh phone --i-know  # uninstalls your install; sign back in after
 # HANG_E2E_EMPTY_ACCOUNT=<second account, never saves anything> adds 00-empty-home.yaml (the how-to, #75)
+# 02 ends by re-sharing into a new collection, `E2E <run id>` (#76): one is left on the test account per run
 # --skip-build reuses android/app/build/outputs/apk/release/app-release.apk
 ```
 

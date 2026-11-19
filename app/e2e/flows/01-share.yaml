@@ -13,4 +13,5 @@ name: Share from Chrome, then synced
     when:
       true: ${DEVICE == 'phone'}
     file: share-from-chrome.phone.yaml
+- runFlow: leave-in-inbox.yaml
 - runFlow: wait-until-synced.yaml

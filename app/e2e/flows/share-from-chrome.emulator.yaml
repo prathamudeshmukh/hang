@@ -1,4 +1,4 @@
-# Stock Android 11 emulator: Chrome's ⋮ menu → Share… → the system share sheet → Hang.
+# Stock Android 11 emulator: Chrome's ⋮ menu → Share… → the system share sheet → Hang. The caller decides what the sheet does next.
 appId: com.android.chrome
 ---
 - openLink:
@@ -13,4 +13,3 @@ appId: com.android.chrome
     visible: Hang
     timeout: 10000
 - tapOn: Hang
-- runFlow: leave-in-inbox.yaml

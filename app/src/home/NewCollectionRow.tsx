@@ -1,9 +1,8 @@
 import { useState } from 'react';
 import { Pressable, TextInput, View } from 'react-native';
+import { createAppCollection } from '@/collections/appCreateCollection';
 import { COLLECTION_NAME_MAX } from '@/db/validation';
-import { newId } from '@/db/deviceIds';
 import { syncTriggers } from '@/sync/syncWiring';
-import { appCollections } from './appListSources';
 import { ActionText, NoteText } from '@/theme/Text';
 import { useTheme } from '@/theme/theme';
 import { useHomeStyles } from './homeStyles';
@@ -20,13 +19,10 @@ export function NewCollectionRow() {
 
   function create(name: string) {
     if (name.trim().length === 0) return setDraft(IDLE);
-    try {
-      appCollections.create({ id: newId(), name });
-      setDraft(IDLE);
-      void syncTriggers.syncNow();
-    } catch (error) {
-      setDraft({ kind: 'editing', error: error instanceof Error ? error.message : String(error) });
-    }
+    const outcome = createAppCollection(name);
+    if (outcome.kind === 'invalid') return setDraft({ kind: 'editing', error: outcome.message });
+    setDraft(IDLE);
+    void syncTriggers.syncNow();
   }
 
   if (draft.kind === 'idle') {

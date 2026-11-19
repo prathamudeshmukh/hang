@@ -1,0 +1,40 @@
+# #76: the share sheet's + New. Re-shares the run's link (in the Inbox, so Save is the move), names a new
+# collection, Enter selects it, Save files; then Home has the room and the item hangs in it.
+# From Home, signed in, with the run's item synced. Env (from run.sh): URL, URL_PATTERN, DEVICE, ROOM.
+appId: com.prathamesh.hang
+---
+- runFlow:
+    when:
+      true: ${DEVICE == 'emulator'}
+    file: share-from-chrome.emulator.yaml
+- runFlow:
+    when:
+      true: ${DEVICE == 'phone'}
+    file: share-from-chrome.phone.yaml
+- extendedWaitUntil:
+    visible: Where does it hang\?
+    timeout: 10000
+- tapOn:
+    id: new-chip
+- inputText: ${ROOM}
+- pressKey: Enter
+- assertVisible:
+    id: chip:${ROOM}
+    selected: true
+- assertNotVisible:
+    id: new-chip-name
+- tapOn: Save
+- launchApp:
+    stopApp: false
+- extendedWaitUntil:
+    visible:
+      id: home-greeting
+    timeout: 10000
+- scrollUntilVisible:
+    element: ${ROOM}
+    direction: DOWN
+- tapOn: ${ROOM}
+- extendedWaitUntil:
+    visible:
+      id: ${URL_PATTERN}
+    timeout: 5000

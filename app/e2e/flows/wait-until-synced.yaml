@@ -1,6 +1,7 @@
 # Opens Inbox and waits until the shared card's note is just its host: that means status `ready`,
 # set only by the server's extract, so the item made the round trip (pending cards say "fetching…").
-# An article read of the page would add its minutes, hence the optional `N min · `.
+# An article read of the page would add its minutes, hence the optional `N min · `. Descendants, not child:
+# an imageless link is a wall label (#58), which puts the note one level down.
 appId: com.prathamesh.hang
 ---
 # Home's "Recently saved" label opens the Inbox; it's there once the share has left an item unsorted.
@@ -15,8 +16,8 @@ appId: com.prathamesh.hang
     while:
       notVisible:
         id: ${URL_PATTERN}
-        containsChild:
-          text: (\d+ min · )?example\.com
+        containsDescendants:
+          - text: (\d+ min · )?example\.com
     commands:
       - swipe:
           direction: DOWN
@@ -24,5 +25,5 @@ appId: com.prathamesh.hang
           timeout: 5000
 - assertVisible:
     id: ${URL_PATTERN}
-    containsChild:
-      text: (\d+ min · )?example\.com
+    containsDescendants:
+      - text: (\d+ min · )?example\.com

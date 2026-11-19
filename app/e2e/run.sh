@@ -64,7 +64,7 @@ reinstall() {
 run_flow() {
   echo "e2e: $1"
   maestro --device "$SERIAL" test "$FLOWS/$1" \
-    -e URL="$URL" -e URL_PATTERN="$URL_PATTERN" -e ACCOUNT="${2:-$HANG_E2E_ACCOUNT}" -e DEVICE="$DEVICE"
+    -e URL="$URL" -e URL_PATTERN="$URL_PATTERN" -e ACCOUNT="${2:-$HANG_E2E_ACCOUNT}" -e DEVICE="$DEVICE" -e ROOM="$ROOM"
 }
 
 # Its account must stay empty: nothing in this run saves as it.
@@ -103,6 +103,8 @@ SERIAL="${HANG_E2E_SERIAL:-$(pick_serial "$DEVICE")}"
 RUN_ID="$(date +%s)"
 URL="https://example.com/?e2e=$RUN_ID"
 URL_PATTERN="item:https://example\\.com/\\?e2e=$RUN_ID"
+# + New makes a collection per run (#76); names must be unique, so leftovers pile up on the test account.
+ROOM="E2E $RUN_ID"
 echo "e2e: $DEVICE ($SERIAL), $URL"
 
 [[ "$SKIP_BUILD" == true ]] || build_apk
