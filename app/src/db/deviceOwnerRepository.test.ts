@@ -81,3 +81,30 @@ describe('device owner: wipe', () => {
     assert.equal(setup().owner.current(), null);
   });
 });
+
+describe('device owner: links waiting to be claimed (#77)', () => {
+  let t: ReturnType<typeof setup>;
+  beforeEach(() => {
+    t = setup();
+  });
+
+  it('counts live items, filed or not, on a device nobody owns', () => {
+    t.collections.create({ id: 'c1', name: 'Reading' });
+    t.items.save({ id: 'i1', sourceUrl: URL, collectionId: 'c1' });
+    t.items.save({ id: 'i2', sourceUrl: `${URL}?2` });
+    assert.equal(t.owner.unclaimedCount(), 2);
+  });
+
+  it('leaves out items taken down', () => {
+    t.items.save({ id: 'i1', sourceUrl: URL });
+    t.items.save({ id: 'i2', sourceUrl: `${URL}?2` });
+    t.items.remove('i2');
+    assert.equal(t.owner.unclaimedCount(), 1);
+  });
+
+  it('counts nothing once someone owns the device (a session that ended on its own keeps its rows)', () => {
+    t.owner.bindTo(ALICE);
+    t.items.save({ id: 'i1', sourceUrl: URL });
+    assert.equal(t.owner.unclaimedCount(), 0);
+  });
+});

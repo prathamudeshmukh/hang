@@ -1,0 +1,139 @@
+<title>Sign-in Directions</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="lavish-design" content="off">
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300..700;1,6..72,300..700&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* #77: three sign-in directions × 0 / 1 / 3 links waiting. Real-size phones (1 css px = 1 dp), Sage room tokens. */
+:root{--bench:#D3DACF;--wall:#EDF0EA;--deep:#E2E7DE;--raised:#F9FAF6;--ink:#151D18;--ink-2:#46524A;--ink-3:#5A665E;--rule:#D6DCD2;
+  --serif:'Newsreader',Georgia,'Times New Roman',serif;--sans:'Hanken Grotesk',system-ui,-apple-system,sans-serif;--calm:cubic-bezier(.2,.7,.1,1)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bench:#0A0D0B;--wall:#161C18;--deep:#111612;--raised:#202823;--ink:#E6ECE6;--ink-2:#AAB6AD;--ink-3:#8F9C92;--rule:#323C35;color-scheme:dark}}
+:root[data-theme="dark"]{--bench:#0A0D0B;--wall:#161C18;--deep:#111612;--raised:#202823;--ink:#E6ECE6;--ink-2:#AAB6AD;--ink-3:#8F9C92;--rule:#323C35;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bench);color:var(--ink);font-family:var(--sans);padding-block:28px 64px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.top{max-width:1320px;margin:0 auto}
+h1{font-family:var(--serif);font-weight:400;font-size:clamp(30px,4vw,44px);letter-spacing:-.02em;line-height:1.05;margin:0;text-wrap:balance}
+.lede{color:var(--ink-2);max-width:760px;margin:8px 0 0;line-height:1.5;font-size:15px}
+.controls{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.controls button,.replay{font:inherit;font-size:13px;font-weight:600;border:1px solid var(--ink-3);background:transparent;color:var(--ink);border-radius:999px;padding:6px 14px;min-height:36px;cursor:pointer}
+.controls button[aria-pressed="true"]{background:var(--ink);color:var(--wall);border-color:var(--ink)}
+button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.dir{max-width:1320px;margin:40px auto 0}
+.dir > header{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.dir h2{font-family:var(--serif);font-weight:400;font-size:30px;margin:0;line-height:1.1}
+.dir .tag{font-size:12px;font-weight:700;color:#C23B20;letter-spacing:.02em}
+.dir > p{margin:6px 0 0;color:var(--ink-2);font-size:14px;line-height:1.5;max-width:760px}
+.row{display:flex;flex-wrap:wrap;gap:24px;margin-top:16px}
+.mock{width:412px;max-width:100%;display:flex;flex-direction:column;gap:8px}
+.mock .cap{font-size:13px;font-weight:600;color:var(--ink-2)}
+.screen{position:relative;height:860px;border-radius:30px;border:8px solid #1B201D;overflow:hidden;background:var(--wall);display:flex;flex-direction:column}
+.status{height:32px;flex:none}
+.nav{height:24px;flex:none}
+.body{flex:1;display:flex;flex-direction:column;padding:0 24px 40px;min-height:0}
+.name{font-family:var(--serif);font-weight:350;font-size:40px;line-height:1;letter-spacing:-1.2px;margin:0}
+.tagline{font-family:var(--serif);font-style:italic;font-size:15px;line-height:1.3;color:var(--ink);margin:6px 0 0;max-width:300px;text-wrap:pretty}
+.spacer{flex:1}
+.pill{display:flex;align-items:center;justify-content:center;height:48px;border-radius:999px;background:var(--ink);color:var(--wall);font-weight:600;font-size:15px}
+.mark{display:block;flex:none}
+/* A */
+.a .mark{width:56px;height:56px;margin-top:64px;margin-bottom:22px}
+/* B */
+.b .piece{margin:44px auto 0;width:236px;aspect-ratio:1;border-radius:2px;overflow:hidden;flex:none}
+.b .piece svg{display:block;width:100%;height:100%}
+.b .label{margin-top:36px}
+/* C */
+.frames{display:flex;gap:10px;align-items:flex-end;margin-top:auto;margin-bottom:28px}
+.frame{width:96px;height:120px;border:1.5px dashed var(--ink-3);border-radius:2px;opacity:.9}
+.frame:nth-child(2){height:96px}
+.frame:nth-child(3){height:132px}
+.frames + .spacer{display:none}
+/* the old screen, for reference */
+.old .name{margin-top:96px}
+@media (prefers-reduced-motion: reduce){.replay{display:none}}
+</style>
+
+<div class="top">
+  <h1>Sign-in: three directions</h1>
+  <p class="lede">For #77. Each direction shows the screen with no links waiting, one, and three. The tagline becomes the count only on a device nobody owns. Real-size phones (412 dp wide). <b>Replay</b> runs the splash handing over to the screen: the mark leaves the centre, where the splash drew it at about 90 dp, and settles into place over 600 ms on the calm curve, with the words fading up 60 ms behind.</p>
+  <div class="controls" role="group" aria-label="Theme">
+    <button type="button" data-theme-set="light" aria-pressed="false">Light</button>
+    <button type="button" data-theme-set="dark" aria-pressed="false">Dark</button>
+  </div>
+</div>
+<div id="dirs"></div>
+
+<script>
+const MARK = '<rect x="0" y="0" width="150" height="170" rx="10" fill="#D9A441"/><rect x="0" y="186" width="150" height="134" rx="10" fill="#2F7F7A"/><rect x="166" y="0" width="154" height="110" rx="10" fill="#2E4A7D"/><rect x="166" y="126" width="154" height="194" rx="10" fill="#C23B20"/>';
+const markSvg = () => `<svg class="mark" viewBox="0 0 320 320" aria-hidden="true">${MARK}</svg>`;
+
+const MOSAIC = [
+  [0, 0, 502, 430, '#D9A441'], [0, 450, 502, 250, '#2F7F7A'], [0, 720, 502, 304, '#D98B8B'],
+  [522, 0, 502, 300, '#2E4A7D'], [522, 320, 502, 320, '#C23B20'], [522, 660, 502, 364, '#9FB3A3'],
+];
+const mosaicSvg = () => `<svg viewBox="0 0 1024 1024" aria-hidden="true"><rect width="1024" height="1024" fill="var(--wall)"/>${
+  MOSAIC.map(([x, y, w, h, f]) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="6" fill="${f}"/>`).join('')}</svg>`;
+
+const PITCH = 'Your links, hung on one wall.';
+const tagline = (n) => n === 0 ? PITCH
+  : n === 1 ? '1 link waiting to hang. Sign in to keep it.'
+  : `${n} links waiting to hang. Sign in to keep them.`;
+const words = (n) => `<p class="name">Hang</p><p class="tagline">${tagline(n)}</p>`;
+const frames = (n) => n === 0 ? '' : `<div class="frames" aria-hidden="true">${'<div class="frame"></div>'.repeat(Math.min(n, 3))}</div>`;
+const pill = '<div class="pill">Continue with Google</div>';
+
+const DIRECTIONS = [
+  { id: 'old', name: 'Today', tag: 'for reference', replay: false,
+    note: 'What ships now: the name high on the wall, the pitch, and the Google pill at the foot. The splash’s mark vanishes when this appears.',
+    body: (n) => `${words(n)}<div class="spacer"></div>${pill}` },
+  { id: 'a', name: 'A · The splash settles', tag: '', replay: true,
+    note: 'The splash’s four-tile mark doesn’t disappear: it rises and shrinks to 56 dp above the name, so launching reads as one move. Otherwise as quiet as today.',
+    body: (n) => `${markSvg()}${words(n)}<div class="spacer"></div>${pill}` },
+  { id: 'b', name: 'B · The mosaic as the piece', tag: '', replay: false,
+    note: 'The full six-tile mosaic (the app icon’s art) hangs as the one work on the wall, a 236 dp print with square corners; the name sits under it like its label. Bolder, and the colour comes from the mark’s stand-ins, not from what you saved.',
+    body: (n) => `<div class="piece">${mosaicSvg()}</div><div class="label">${words(n)}</div><div class="spacer"></div>${pill}` },
+  { id: 'a c', name: 'A + C · Frames waiting', tag: 'recommended', replay: true,
+    note: 'A, plus one dashed frame per waiting link (at most three) just above the pill: the same dashed frames as “Bringing your wall over…”, meaning not hung yet. With nothing waiting it is plain A. Signing in claims them; Home then fills them in as they’re fetched.',
+    body: (n) => `${markSvg()}${words(n)}${frames(n)}<div class="spacer"></div>${pill}` },
+];
+
+function mock(dir, n) {
+  const label = n === 0 ? 'Nothing waiting' : n === 1 ? '1 link waiting' : '3 links waiting';
+  return `<div class="mock"><div class="cap">${label}</div>
+    <div class="screen ${dir.id}"><div class="status"></div><div class="body">${dir.body(n)}</div><div class="nav"></div></div></div>`;
+}
+
+document.getElementById('dirs').innerHTML = DIRECTIONS.map((dir) => `
+  <section class="dir" data-dir="${dir.id}">
+    <header><h2>${dir.name}</h2>${dir.tag ? `<span class="tag">${dir.tag}</span>` : ''}
+      ${dir.replay ? '<button type="button" class="replay">Replay</button>' : ''}</header>
+    <p>${dir.note}</p>
+    <div class="row">${[0, 1, 3].map((n) => mock(dir, n)).join('')}</div>
+  </section>`).join('');
+
+const SPLASH_MARK = 90;
+const CALM = 'cubic-bezier(.2,.7,.1,1)';
+
+function settle(screen) {
+  const mark = screen.querySelector('.mark');
+  if (!mark) return;
+  const s = screen.getBoundingClientRect(), m = mark.getBoundingClientRect();
+  const dx = s.left + s.width / 2 - (m.left + m.width / 2);
+  const dy = s.top + s.height / 2 - (m.top + m.height / 2);
+  const scale = SPLASH_MARK / m.width;
+  mark.animate([{ transform: `translate(${dx}px, ${dy}px) scale(${scale})` }, { transform: 'none' }],
+    { duration: 600, easing: CALM, fill: 'backwards', delay: 250 });
+  [...screen.querySelectorAll('.name, .tagline, .frames, .pill')].forEach((el) =>
+    el.animate([{ opacity: 0, transform: 'translateY(8px)' }, { opacity: 1, transform: 'none' }],
+      { duration: 340, easing: CALM, fill: 'backwards', delay: 250 + 600 - 340 + 60 }));
+}
+
+document.querySelectorAll('.replay').forEach((button) => button.addEventListener('click', () => {
+  button.closest('.dir').querySelectorAll('.screen').forEach(settle);
+}));
+
+document.querySelectorAll('[data-theme-set]').forEach((button) => button.addEventListener('click', () => {
+  const theme = button.dataset.themeSet;
+  const on = document.documentElement.dataset.theme === theme;
+  if (on) delete document.documentElement.dataset.theme; else document.documentElement.dataset.theme = theme;
+  document.querySelectorAll('[data-theme-set]').forEach((b) => b.setAttribute('aria-pressed', String(!on && b === button)));
+}));
+</script>

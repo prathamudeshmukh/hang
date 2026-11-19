@@ -1,3 +1,4 @@
+import { count, isNull } from 'drizzle-orm';
 import { collections, deviceOwner, firstPull, itemContent, items, outbox, syncState, thumbFiles } from './schema.ts';
 import type { HangDb, RepositoryDeps } from './types.ts';
 
@@ -21,6 +22,12 @@ function readOwner(db: HangDb): string | null {
 export function createDeviceOwnerRepository({ db }: Pick<RepositoryDeps, 'db'>) {
   return {
     current: (): string | null => readOwner(db),
+
+    /** Live items a first sign-in would claim (#77); none once the device has an owner. */
+    unclaimedCount(): number {
+      if (readOwner(db) !== null) return 0;
+      return db.select({ total: count() }).from(items).where(isNull(items.deletedAt)).get()?.total ?? 0;
+    },
 
     /** Atomic: the data and its owner always change together. */
     bindTo(userId: string): BindOutcome {

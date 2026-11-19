@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Slice 9 E2E: share from Chrome → synced → uninstall → reinstall → sign in → still there → opens in the feed
+# Slice 9 E2E: share from Chrome while signed out → sign-in counts it → signed in, claimed → synced → uninstall → reinstall → sign in → still there → opens in the feed
 # → Rediscover has a pick once an item is backdated. First, if HANG_E2E_EMPTY_ACCOUNT is set: a fresh install
 # signed in as an account that stays empty shows the how-to (#75).
 #
