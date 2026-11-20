@@ -45,7 +45,7 @@ const itemRow = z.object({
   thumb_path: optionalText,
   thumb_w: optionalInt,
   thumb_h: optionalInt,
-  palette: z.object({ dominant: z.string(), muted: z.string(), onDominant: z.string() }).nullish(),
+  palette: z.object({ dominant: z.string(), muted: z.string(), onDominant: z.string(), vibrant: z.string().nullish() }).nullish(),
   post: jsonObject,
   embed: jsonObject,
   ai_collection_id: optionalText,

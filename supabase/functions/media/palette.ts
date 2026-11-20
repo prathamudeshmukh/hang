@@ -1,8 +1,10 @@
-/** SPEC §5 `palette`: { dominant, muted, onDominant } as #rrggbb. Colours are DESIGN.md §3 tokens. */
+/** SPEC §5 `palette`: { dominant, muted, onDominant, vibrant } as #rrggbb. Colours are DESIGN.md §3 tokens. */
 export interface Palette {
   readonly dominant: string;
   readonly muted: string;
   readonly onDominant: string;
+  /** The picture's most saturated sizeable colour, which a room's colour is made from (#85); null when it has none. */
+  readonly vibrant: string | null;
 }
 
 export const INK = '#1B1A17';
@@ -13,6 +15,8 @@ const VISIBLE_ALPHA = 128;
 const BUCKET_SHIFT = 4;
 const MAX_SAMPLES = 50_000;
 const MUTED = { maxSaturation: 0.4, minLightness: 0.25, maxLightness: 0.75 } as const;
+/** Dominant is often a white or grey background; vibrant is the subject (#85). */
+const VIBRANT = { minShare: 0.03, minSaturation: 0.25, minLightness: 0.15, maxLightness: 0.85 } as const;
 const SOFTEN_TOWARD_GREY = 0.5;
 const MID_GREY = 128;
 
@@ -27,11 +31,29 @@ const hex = ([r, g, b]: Rgb) => '#' + [r, g, b].map((c) => Math.round(c).toStrin
 const parseHex = (value: string): Rgb => [1, 3, 5].map((at) => parseInt(value.slice(at, at + 2), 16)) as unknown as Rgb;
 const average = ({ sum, count }: Bucket): Rgb => [sum[0] / count, sum[1] / count, sum[2] / count];
 
-function isMuted([r, g, b]: Rgb): boolean {
+function saturationAndLightness([r, g, b]: Rgb): { readonly saturation: number; readonly lightness: number } {
   const [max, min] = [Math.max(r, g, b) / 255, Math.min(r, g, b) / 255];
   const lightness = (max + min) / 2;
   const saturation = max === min ? 0 : (max - min) / (1 - Math.abs(2 * lightness - 1));
+  return { saturation, lightness };
+}
+
+function isMuted(rgb: Rgb): boolean {
+  const { saturation, lightness } = saturationAndLightness(rgb);
   return saturation <= MUTED.maxSaturation && lightness >= MUTED.minLightness && lightness <= MUTED.maxLightness;
+}
+
+function isVivid(rgb: Rgb): boolean {
+  const { saturation, lightness } = saturationAndLightness(rgb);
+  return saturation >= VIBRANT.minSaturation && lightness >= VIBRANT.minLightness && lightness <= VIBRANT.maxLightness;
+}
+
+/** The most saturated vivid bucket that covers at least VIBRANT.minShare of the sampled pixels. */
+function vibrantOf(buckets: readonly Bucket[]): Rgb | null {
+  const sampled = buckets.reduce((total, { count }) => total + count, 0);
+  const sizeable = buckets.filter(({ count }) => count / sampled >= VIBRANT.minShare).map(average).filter(isVivid);
+  const bySaturation = sizeable.toSorted((a, b) => saturationAndLightness(b).saturation - saturationAndLightness(a).saturation);
+  return bySaturation[0] ?? null;
 }
 
 function relativeLuminance(rgb: Rgb): number {
@@ -74,5 +96,6 @@ export function paletteOf(rgba: Uint8Array): Palette | null {
   const mutedBucket = buckets.find((bucket) => isMuted(average(bucket)));
   const muted = mutedBucket ? average(mutedBucket) : soften(dominant);
   const onDominant = contrast(dominant, parseHex(INK)) >= contrast(dominant, parseHex(WALL)) ? INK : WALL;
-  return { dominant: hex(dominant), muted: hex(muted), onDominant };
+  const vibrant = vibrantOf(buckets);
+  return { dominant: hex(dominant), muted: hex(muted), onDominant, vibrant: vibrant ? hex(vibrant) : null };
 }

@@ -13,6 +13,8 @@ export interface Palette {
   readonly dominant: string;
   readonly muted: string;
   readonly onDominant: string;
+  /** The picture's most saturated sizeable colour (#85). Null when it has none; missing on palettes made before it existed. */
+  readonly vibrant?: string | null;
 }
 
 export type ItemKind = 'article' | 'video' | 'post' | 'image' | 'link';
