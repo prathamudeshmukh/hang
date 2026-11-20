@@ -3,6 +3,7 @@ import { createCollectionsRepository } from '@/db/collectionsRepository';
 import { createFirstPullRepository } from '@/db/firstPullRepository';
 import { createItemsRepository } from '@/db/itemsRepository';
 import { systemClock } from '@/db/types';
+import { createRoomColourStore } from '@/rooms/roomColourStore';
 import { createThumbStore } from '@/thumbs/thumbStore';
 import type { ListSources } from './homeLists';
 
@@ -16,4 +17,5 @@ export const appListSources: ListSources = {
   collections: appCollections,
   thumbs: createThumbStore(db),
   firstPulls: createFirstPullRepository(repositoryDeps),
+  rooms: createRoomColourStore(db),
 };

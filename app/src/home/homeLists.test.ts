@@ -7,6 +7,8 @@ import { createItemsRepository } from '../db/itemsRepository.ts';
 import { eq } from 'drizzle-orm';
 import { items, type Item } from '../db/schema.ts';
 import { createTestDeps, T0 } from '../db/testing/testDb.ts';
+import { createRoomColourStore } from '../rooms/roomColourStore.ts';
+import { roomColours } from '../rooms/roomColours.ts';
 import { createThumbStore } from '../thumbs/thumbStore.ts';
 import { dayKey } from './homeCopy.ts';
 import { CARD_NOW } from '../grid/testing/anItem.ts';
@@ -25,6 +27,7 @@ function setup() {
     collections: createCollectionsRepository(deps),
     thumbs: createThumbStore(deps.db),
     firstPulls: createFirstPullRepository(deps),
+    rooms: createRoomColourStore(deps.db),
   };
   const save = (id: string, collectionId: string | null = null) => {
     sources.items.save({ id, sourceUrl: URL, collectionId });
@@ -153,5 +156,36 @@ describe('readPlace', () => {
 
   it('is null for a collection that is not on the device', () => {
     assert.equal(readPlace(s.sources, { kind: 'collection', id: 'gone' }, CARD_NOW), null);
+  });
+});
+
+describe('room colours in the lists (#85)', () => {
+  let s: ReturnType<typeof setup>;
+  const GREEN_ROOM = roomColours({ kind: 'family', family: 4, base: { h: 128, s: 0.6, l: 0.4 }, others: [] }, 'c1');
+  beforeEach(() => {
+    s = setup();
+    s.collections.create({ id: 'c1', name: 'Garden' });
+    s.collections.create({ id: 'c2', name: 'New' });
+  });
+
+  it('gives each collection row its stored colour, or an icon colour until the first one is stored', () => {
+    s.rooms.save('c1', GREEN_ROOM);
+    const rows = readHome(s.sources, AT).collections;
+    assert.deepEqual(rows.map(({ colours }) => colours.light.colour), [GREEN_ROOM.light.colour, roomColours({ kind: 'none' }, 'c2').light.colour]);
+  });
+
+  it('gives a card in a collection one of its room\'s print colours, and an unsorted card none', () => {
+    s.rooms.save('c1', GREEN_ROOM);
+    s.save('hung', 'c1');
+    s.save('unsorted');
+    const swatches = new Map(readHome(s.sources, AT).recent.map(({ card }) => [card.id, card.swatch]));
+    assert.ok(GREEN_ROOM.light.prints.some((print) => print.colour === swatches.get('hung')?.light.colour));
+    assert.equal(swatches.get('unsorted'), null);
+  });
+
+  it('gives a collection its room, and the Inbox none', () => {
+    s.rooms.save('c1', GREEN_ROOM);
+    const [room, inbox] = [readPlace(s.sources, { kind: 'collection', id: 'c1' }, CARD_NOW), readPlace(s.sources, { kind: 'inbox' }, CARD_NOW)];
+    assert.deepEqual([room?.room?.light.colour, inbox?.room], [GREEN_ROOM.light.colour, null]);
   });
 });
