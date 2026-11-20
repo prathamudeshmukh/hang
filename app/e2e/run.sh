@@ -9,11 +9,14 @@
 # Needs HANG_E2E_ACCOUNT (the test Google account's email, already added to the device).
 # HANG_E2E_EMPTY_ACCOUNT (optional): a second test account, also on the device, that never saves anything.
 # HANG_E2E_SERIAL overrides the adb serial picked for the device.
+# On exit, pass or fail, the run's link and collection are soft-deleted from the hosted project (needs the Supabase CLI
+# logged in and linked; it writes to production). HANG_E2E_KEEP_DATA=1 leaves them, to look into a failure.
 set -euo pipefail
 
 readonly PACKAGE=com.prathamesh.hang
 readonly APP_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 readonly FLOWS="$APP_DIR/e2e/flows"
+readonly REPO_DIR="$(cd "$APP_DIR/.." && pwd)"
 readonly APK="$APP_DIR/android/app/build/outputs/apk/release/app-release.apk"
 readonly PHONE_WARNING="This uninstalls Hang from your phone. Anything not yet synced is lost.
 Open Hang first and check nothing says 'waiting to sync'.
@@ -40,12 +43,44 @@ build_apk() {
   (cd "$APP_DIR/android" && EXPO_PUBLIC_HANG_DEV_TOOLS=1 ./gradlew assembleRelease -PreactNativeArchitectures=arm64-v8a -q)
 }
 
-# Screen timeouts lock the device mid-flow; keep it awake while plugged in, then put the setting back.
+# Screen timeouts lock the device mid-flow; keep it awake while plugged in, then put the setting back (on_exit).
 keep_awake() {
-  local previous
-  previous="$(adb -s "$SERIAL" shell settings get global stay_on_while_plugged_in | tr -d '\r')"
-  trap 'adb -s "$SERIAL" shell settings put global stay_on_while_plugged_in "'"$previous"'"' EXIT
+  STAY_ON_BEFORE="$(adb -s "$SERIAL" shell settings get global stay_on_while_plugged_in | tr -d '\r')"
   adb -s "$SERIAL" shell svc power stayon true
+}
+
+restore_stay_on() {
+  [[ -n "${STAY_ON_BEFORE:-}" ]] || return 0
+  adb -s "$SERIAL" shell settings put global stay_on_while_plugged_in "$STAY_ON_BEFORE" || true
+}
+
+# A SQL string literal: single quotes doubled.
+sql_text() {
+  local quote="'"
+  printf "'%s'" "${1//$quote/$quote$quote}"
+}
+
+# Soft-deletes only this run's link and + New collection on the test account, so a device signed in to it drops them
+# on its next sync. Never fails the run: a failed clean-up warns and leaves the rows.
+clean_up() {
+  if [[ "${HANG_E2E_KEEP_DATA:-}" == 1 ]]; then
+    echo "e2e: keeping this run's data ($URL, collection $ROOM)"
+    return 0
+  fi
+  local owner="(select id from auth.users where email = $(sql_text "$HANG_E2E_ACCOUNT"))"
+  local sql="with items as (update public.items set deleted_at = now()
+      where user_id = $owner and deleted_at is null and source_url = $(sql_text "$URL") returning 1),
+    rooms as (update public.collections set deleted_at = now()
+      where user_id = $owner and deleted_at is null and name = $(sql_text "$ROOM") returning 1)
+    select (select count(*) from items) as items, (select count(*) from rooms) as collections"
+  echo "e2e: cleaning up this run's data"
+  npx --yes supabase db query --workdir "$REPO_DIR" --remote --yes -o csv "$sql" \
+    || echo "e2e: clean-up failed; remove $URL and collection '$ROOM' by hand" >&2
+}
+
+on_exit() {
+  restore_stay_on
+  clean_up
 }
 
 require_unlocked() {
@@ -103,9 +138,10 @@ SERIAL="${HANG_E2E_SERIAL:-$(pick_serial "$DEVICE")}"
 RUN_ID="$(date +%s)"
 URL="https://example.com/?e2e=$RUN_ID"
 URL_PATTERN="item:https://example\\.com/\\?e2e=$RUN_ID"
-# + New makes a collection per run (#76); names must be unique, so leftovers pile up on the test account.
+# + New makes a collection per run (#76); names must be unique. clean_up removes it with the link.
 ROOM="E2E $RUN_ID"
 echo "e2e: $DEVICE ($SERIAL), $URL"
+trap on_exit EXIT
 
 [[ "$SKIP_BUILD" == true ]] || build_apk
 [[ -f "$APK" ]] || fail "no release APK at $APK"

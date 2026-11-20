@@ -203,7 +203,8 @@ cd app
 HANG_E2E_ACCOUNT=<test account email> e2e/run.sh emulator        # builds the release APK, runs both flows
 HANG_E2E_ACCOUNT=<test account email> e2e/run.sh phone --i-know  # uninstalls your install; sign back in after
 # HANG_E2E_EMPTY_ACCOUNT=<second account, never saves anything> adds 00-empty-home.yaml (the how-to, #75)
-# 02 ends by re-sharing into a new collection, `E2E <run id>` (#76): one is left on the test account per run
+# 02 ends by re-sharing into a new collection, `E2E <run id>` (#76). On exit, pass or fail, run.sh soft-deletes the
+# run's link and collection on the hosted project (Supabase CLI logged in); HANG_E2E_KEEP_DATA=1 keeps them
 # --skip-build reuses android/app/build/outputs/apk/release/app-release.apk
 ```
 
