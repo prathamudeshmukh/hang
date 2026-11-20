@@ -102,7 +102,8 @@ back to a generic link card (Open Graph image, title, site), never to a broken s
 3. Smarter Rediscover: items gather "dust"; a "let go" action deletes them guilt-free
 4. TikTok / Instagram / X video embeds; X threads
 5. Custom cover and a chosen colour per collection
-6. iOS build, sharing a collection, export
+6. iOS build, sharing a collection (#103), export
+7. Others adding links to a collection shared with them (#104; added 2026-11-20, needs its own decision against "Social features" above)
 
 ---
 
