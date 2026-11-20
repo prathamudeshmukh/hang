@@ -127,7 +127,7 @@ better; a colour that can't is pushed away from its ink until it does. Inside a 
 
 | Where | How |
 |---|---|
-| Home · collections | A 3dp frame of the colour round the cover; no picture → the cover is the colour |
+| Home · collections | The cover is the picture, unframed; no picture → the cover is the colour |
 | Collection header | The title painted in the colour from the top of the screen (behind the status bar) to just under the underline; the underline draws in its ink; the status bar icons follow it until it scrolls away. Kind filters, Shuffle and notes stay on the wall |
 | Prints without a picture | Articles without an image, videos without a poster, wall-label links, failed reads: on one of the room's three shades, picked by the item's id, the same in the collection, Recently saved and Rediscover |
 | Fetching | A print still being read, and a picture still downloading, wait on their colour with *fetching…* instead of a dashed outline; the picture cross-fades over it. One that never comes or fails to load leaves the colour |

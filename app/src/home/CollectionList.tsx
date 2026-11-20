@@ -10,16 +10,12 @@ import type { CollectionRow } from './homeLists';
 import { useHomeStyles } from './homeStyles';
 import { NewCollectionRow } from './NewCollectionRow';
 
-/** The newest picture framed in the room's colour; a room without one is filled with the colour (#85). */
+/** The newest picture, unframed; a room without one is filled with its colour (#85). */
 function Cover({ uri, colours }: { readonly uri: string | null; readonly colours: RoomColours }) {
   const styles = useHomeStyles();
   const room = colours[useTheme().scheme];
   if (!uri) return <Paper fill={room.fill} style={styles.cover} />;
-  return (
-    <View style={[styles.coverFrame, { backgroundColor: room.colour }]}>
-      <Image source={{ uri }} style={styles.framedCover} contentFit="cover" accessible={false} />
-    </View>
-  );
+  return <Image source={{ uri }} style={styles.cover} contentFit="cover" accessible={false} />;
 }
 
 function CollectionLink({ collection }: { readonly collection: CollectionRow }) {
