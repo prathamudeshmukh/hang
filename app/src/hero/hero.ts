@@ -125,7 +125,7 @@ export function createHero(ports: HeroPorts) {
     const look = lookOf(request.card, ports.hasOpening(request.card.id));
     feedDrawnLatch = createLatch();
     await on.setFeedOpacity(0, INSTANT);
-    await board(on, { id: request.card.id, scope: request.scope, direction: 'out', look, from, to: landingRect(ports.feedSize(), look.landing, from) });
+    await board(on, { id: request.card.id, scope: request.scope, direction: 'out', look, paper: request.card.swatch, from, to: landingRect(ports.feedSize(), look.landing, from) });
     // Mounting the feed keeps JS busy for a while: only once the flyer is drawn, while it flies on the UI thread.
     await waitForFlyer();
     ports.pushFeed(request.ids, request.card.id);
@@ -144,7 +144,7 @@ export function createHero(ports: HeroPorts) {
 
   async function flyBack(on: Stage, { card, feed, pop }: BackRequest & { readonly card: CardModel }, at: FaceKey, to: Rect) {
     const look = lookOf(card, ports.hasOpening(card.id));
-    await board(on, { id: card.id, scope: at.scope, direction: 'back', look, from: landingRect(feed, look.landing, to), to });
+    await board(on, { id: card.id, scope: at.scope, direction: 'back', look, paper: card.swatch, from: landingRect(feed, look.landing, to), to });
     await waitForFlyer();
     const fadedAway = on.fadeFeedAway();
     await flyAndLand(on);

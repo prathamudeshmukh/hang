@@ -5,7 +5,8 @@ import { createCollectionsRepository } from './collectionsRepository.ts';
 import { createDeviceOwnerRepository } from './deviceOwnerRepository.ts';
 import { createItemsRepository } from './itemsRepository.ts';
 import { createOutboxRepository } from './outboxRepository.ts';
-import { collections, firstPull, items, syncState, thumbFiles } from './schema.ts';
+import { roomColours } from '../rooms/roomColours.ts';
+import { collections, firstPull, items, roomColours as roomColourRows, syncState, thumbFiles } from './schema.ts';
 import { createTestDeps } from './testing/testDb.ts';
 
 const ALICE = '11111111-1111-4111-8111-111111111111';
@@ -29,10 +30,12 @@ function seedLocalData(t: ReturnType<typeof setup>): void {
   t.db.insert(syncState).values({ tableName: 'items', cursorUpdatedAt: '2026-11-09T10:00:00+00:00', cursorId: 'i1' }).run();
   t.db.insert(thumbFiles).values({ itemId: 'i1', fileUri: 'file:///thumbs/i1.webp' }).run();
   t.db.insert(firstPull).values({ id: 1, pulledAt: '2026-11-09T10:00:00.000Z' }).run();
+  const { light, dark } = roomColours({ kind: 'none' }, 'c1');
+  t.db.insert(roomColourRows).values({ collectionId: 'c1', family: null, colours: { light, dark } }).run();
 }
 
 const localRowCount = (t: ReturnType<typeof setup>) =>
-  [items, syncState, thumbFiles, firstPull].reduce((sum, table) => sum + t.db.select().from(table).all().length, t.outbox.list().length);
+  [items, syncState, thumbFiles, firstPull, roomColourRows].reduce((sum, table) => sum + t.db.select().from(table).all().length, t.outbox.list().length);
 
 describe('device owner: binding a signed-in user', () => {
   let t: ReturnType<typeof setup>;

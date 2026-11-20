@@ -1,3 +1,4 @@
+import type { PrintSwatch } from '../rooms/roomOf.ts';
 import type { Rect } from './geometry.ts';
 import { FRAME, type Look } from './look.ts';
 import type { FaceKey, Scope } from './origins.ts';
@@ -11,6 +12,8 @@ export interface Flight {
   readonly scope: Scope;
   readonly direction: Direction;
   readonly look: Look;
+  /** A frame flyer's colour on the wall (#85); null draws it in the wall's `raised`. */
+  readonly paper: PrintSwatch | null;
   readonly from: Rect;
   readonly to: Rect;
 }

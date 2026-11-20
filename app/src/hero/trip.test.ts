@@ -10,6 +10,7 @@ const FLIGHT: Flight = {
   scope: 'inbox',
   direction: 'out',
   look: PICTURE,
+  paper: null,
   from: { x: 10, y: 300, width: 100, height: 120 },
   to: { x: 0, y: 0, width: 400, height: 560 },
 };

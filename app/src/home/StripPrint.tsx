@@ -2,6 +2,7 @@ import { memo } from 'react';
 import { Pressable, View } from 'react-native';
 import { CardMediaBox } from '@/grid/CardMediaBox';
 import { HeroFace } from '@/hero/HeroFace';
+import { PrintPaper, useSwatch } from '@/grid/PrintPaper';
 import { sameCard, type CardModel } from '@/grid/cardModel';
 import { TextArrival } from '@/rewards/TextArrival';
 import { ActionText, NameText, NoteText } from '@/theme/Text';
@@ -15,20 +16,24 @@ const LINES = { inPrint: 5, site: 1, caption: 2 } as const;
 const SITE_MIN_SCALE = 0.5;
 const IN_INBOX = 'in Inbox';
 
-/** Every kind at one crop: the thumbnail, else the post text or site name on `raised` (DESIGN.md §8 fallbacks, strip-sized). */
+/**
+ * Every kind at one crop: the thumbnail, else the post text or site name on `raised`, or on its room's colour when it
+ * hangs in one (DESIGN.md §8 fallbacks, strip-sized; #85).
+ */
 function Face({ card }: { readonly card: CardModel }) {
   const styles = useHomeStyles();
+  const swatch = useSwatch(card);
   if (card.variant === 'pending') {
     return (
-      <View style={styles.stripPending}>
+      <PrintPaper swatch={swatch} style={swatch ? styles.stripPendingFilled : styles.stripPending}>
         <NoteText>{card.note}</NoteText>
-      </View>
+      </PrintPaper>
     );
   }
   if (card.media) {
     return (
       <View style={styles.stripFrame}>
-        <CardMediaBox id={card.id} media={{ ...card.media, ratio: STRIP_RATIO }} playable={card.variant === 'video'} />
+        <CardMediaBox id={card.id} media={{ ...card.media, ratio: STRIP_RATIO }} playable={card.variant === 'video'} swatch={swatch} />
       </View>
     );
   }
@@ -41,9 +46,9 @@ function Face({ card }: { readonly card: CardModel }) {
   }
   // Like the grid's link card: the site set large, so the caption's title isn't said twice.
   return (
-    <View style={[styles.stripFrame, styles.stripText]}>
+    <PrintPaper swatch={swatch} style={[styles.stripFrame, styles.stripText]}>
       <NameText token="titleS" numberOfLines={LINES.site} adjustsFontSizeToFit minimumFontScale={SITE_MIN_SCALE}>{card.site}</NameText>
-    </View>
+    </PrintPaper>
   );
 }
 

@@ -1,4 +1,5 @@
 import { index, integer, real, sqliteTable, text } from 'drizzle-orm/sqlite-core';
+import type { StoredRoomColours } from '../rooms/roomColours.ts';
 
 /**
  * Local mirror of the server tables (supabase/migrations, SPEC §5), plus `outbox`, `sync_state` and
@@ -148,6 +149,16 @@ export const thumbFiles = sqliteTable('thumb_files', {
   fileUri: text('file_uri').notNull(),
 });
 
+/**
+ * Local only (#85): each collection's colour, worked out after every sync from its pictures. `family` is kept for
+ * hysteresis (null for a grey room or one without pictures); `colours` holds both schemes, ready to draw.
+ */
+export const roomColours = sqliteTable('room_colours', {
+  collectionId: text('collection_id').primaryKey(),
+  family: integer('family'),
+  colours: text('colours', { mode: 'json' }).$type<StoredRoomColours>().notNull(),
+});
+
 export const SYNC_TABLES = { collections, items, item_content: itemContent } as const;
 export type SyncTableName = keyof typeof SYNC_TABLES;
 
@@ -159,3 +170,4 @@ export type Item = typeof items.$inferSelect;
 export type ItemContent = typeof itemContent.$inferSelect;
 export type OutboxEntry = typeof outbox.$inferSelect;
 export type ThumbFile = typeof thumbFiles.$inferSelect;
+export type RoomColourRow = typeof roomColours.$inferSelect;

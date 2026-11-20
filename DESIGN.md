@@ -102,14 +102,43 @@ Nothing else. If something new "needs" an accent, use `ink` instead.
 Text on the accent (the Save and Take down labels) is `onAccent`: white in light mode, the dark wall's green-black
 in dark mode, ≥ 4.5:1 in both. (The old screen-ink label measured 3.9:1 and 3.2:1.)
 
-### Collections stay ink
+### A collection's colour comes from its pictures
 
-Collections have no colour of their own (decided 2026-11-14, #34). A tint derived from their items was
-dropped: it never showed on Home, where you choose between collections; keeping it ≥ 3:1 on both walls
-flattened every tint into the same dusty mid-tones; and it competed with vermilion. A collection's title,
-cover and prints already make it feel like its own room. Mocked and turned down along with it: a curated
-set, a colour you pick, the cover flying in as a header, a wall label, staggered "lights", a contact sheet,
-room numbers. A colour you choose stays a deferred idea (SPEC §3).
+Each collection takes a rich colour from its own pictures (decided 2026-11-19, #85; reverses #34's "collections stay
+ink"). The icon's tiles stand in for what you save; a room coloured by what you saved ties the app to its icon.
+It avoids #34's problem because the colour is always a filled area with ink chosen for it, never a coloured line or
+text that has to clear 3:1 on both walls.
+
+**How it's chosen** (on the device, after every sync; `src/rooms/`): the collection's newest 12 live items with a
+palette vote with `palette.vibrant ?? palette.dominant`. Greyish colours (saturation < 0.15, lightness < 0.08 or
+> 0.92) are dropped; the rest group into 12 hue families of 30°. Weight = recency (newest 1.0, −0.05 per step) ×
+kind (link previews 0.5, often logos; everything else 1.0). The heaviest family wins and its colours are averaged.
+The current family stays until another outweighs it by 25%.
+All grey → a grey room (the wall's grey-green). No pictures → one of the icon's colours (ochre, teal, rose, blue;
+never vermilion, and not sage, which passes for a grey room), fixed by the collection's id.
+
+**Made rich:** lightness 0.30–0.50 on the light wall; 0.22–0.38 with a little less saturation on the dark wall, so
+it doesn't glow. **Reds** (hue 345°–25°) go deep to oxblood (saturation ≤ 0.5, lightness 0.22–0.32; dark 0.18–0.28) so a
+red room never passes for vermilion. A room's three print colours are **shades of its one hue**: the colour, a
+lighter and a darker one (0.08 apart, closer in a narrow range), so neighbours differ but a print's hue always says
+which room it hangs in (decided 2026-11-20). Every fill is a gentle
+gradient whose two ends both clear 4.5:1 with its ink: ink `#151D18` or screen ink `#EEF2EC`, whichever reads
+better; a colour that can't is pushed away from its ink until it does. Inside a fill every ink is that one ink.
+
+| Where | How |
+|---|---|
+| Home · collections | A 3dp frame of the colour round the cover; no picture → the cover is the colour |
+| Collection header | The title painted in the colour from the top of the screen (behind the status bar) to just under the underline; the underline draws in its ink; the status bar icons follow it until it scrolls away. Kind filters, Shuffle and notes stay on the wall |
+| Prints without a picture | Articles without an image, videos without a poster, wall-label links, failed reads: on one of the room's three shades, picked by the item's id, the same in the collection, Recently saved and Rediscover |
+| Fetching | A print still being read, and a picture still downloading, wait on their colour with *fetching…* instead of a dashed outline; the picture cross-fades over it. One that never comes or fails to load leaves the colour |
+| Hero | A text print's frame flies from its colour to the screening room's, and back |
+
+**Never tinted:** a print's picture; posts (ruled, unboxed); unsorted items (plain paper and the dashed outline:
+colour means "hung in a room"); chips, Shuffle, kind filters, the share sheet and Move; vermilion's five uses; the
+screening room. Moving an item gives it the new room's colour.
+
+Turned down along the way: a colour per item (a mosaic), the mark beside the greeting, a painted feature wall,
+assigned icon colours per collection. A colour you choose stays a deferred idea (SPEC §3).
 
 ### Reader themes
 
@@ -121,13 +150,6 @@ room numbers. A colour you choose stays a deferred idea (SPEC §3).
 
 Light and dark are the Sage room's wall and ink; sepia is tuned to sit beside them. Defaults to the system mode;
 your choice is remembered.
-
----|---|---|
-| Light | `#F7F5F0` | `#1B1A17` |
-| Sepia | `#F1E7D3` | `#3A2E1F` |
-| Dark | `#161514` | `#E4DFD5` |
-
-Defaults to the system mode; your choice is remembered.
 
 ---
 
@@ -252,12 +274,12 @@ Light tick on Save, on moving an item, and on the finish moment. Nowhere else.
 
 | Kind | Anatomy |
 |---|---|
-| `article` | Lead image at its real aspect ratio (no image → title set in Newsreader on `raised`) · card title · *note: `9 min · site`* |
+| `article` | Lead image at its real aspect ratio (no image → title set in Newsreader on `raised`, or its room's colour, §3) · card title · *note: `9 min · site`* |
 | `video` | Thumbnail at its aspect ratio with a centred play triangle · title · *`14 min · YouTube`*. Cards that open another app show *`opens in TikTok`* |
 | `post` | Between two hairline rules: the author's name in upright Newsreader (14), then the text in Newsreader italic; media below, if any · *`post · 3 Nov`* (when it was posted). No name → `@handle` in its place; no date → *`post · x.com`* (the site: the handle is already in the byline, #59) |
 | `image` | Image at its aspect ratio · title, if any · *`image · pinterest.com`* / *`image · screenshot`* |
 | `link` | Open Graph image · title · *`site`*. **No image: a wall label** on `raised`: the title in Newsreader (`title-s`, 4 lines), then the site's description in `label` (italic, `ink-2`, 4 lines); below it only *`site`*, so the site appears once. No description → the title alone |
-| pending | Dashed `ink-3` outline at a 4:5 ratio · *`fetching…`* · the raw URL below at 50% opacity |
+| pending | Dashed `ink-3` outline at a 4:5 ratio (in a collection: its room's colour, §3) · *`fetching…`* · the raw URL below at 50% opacity |
 | failed | Same as `link` from whatever was found; *`couldn't read this · retry`* |
 
 Grid: 2 columns, 10dp gutter, 14dp vertical rhythm, 16dp screen margins.

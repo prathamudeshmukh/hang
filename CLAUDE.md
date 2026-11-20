@@ -168,6 +168,14 @@ Rediscover's develop. No collection tint (DESIGN.md §3). Dev tools (`src/dev/`)
 `EXPO_PUBLIC_HANG_DEV_TOOLS=1` (`e2e/run.sh` sets it): `hang://dev/rediscover` backdates the newest ready item on the
 device so Rediscover has a pick.
 
+Room colours (`src/rooms/`, #85): after every sync `roomColourSync` (wired in `appSession.ts` beside thumbnails)
+runs pure `roomHue` (votes = newest 12 palettes, `vibrant ?? dominant`) → `roomColours` (rich per scheme, three print
+colours, grey/icon fallbacks, each through `readableFill` for 4.5:1) and stores the result in the local-only
+`room_colours` table, writing only rooms that changed (every write wakes the live queries). The lists only read it:
+`listCard` (`src/grid/`) gives a card in a room its `swatch` (id-picked, never on posts or unsorted items), shared by
+Home and the feed so the hero lands on the right colour. `Paper` (`src/theme/`) draws a fill and switches its children
+to a `paper*` theme whose inks are all the one checked ink; `PrintPaper` falls back to plain `raised`.
+
 Sign-in (#77): the tagline is `signInTagline(unclaimedCount())` (`src/signIn/`), the count only on a device nobody
 owns. The route is mounted under the splash while the session restores and the database may still be migrating,
 so `sign-in.tsx` draws only the wall until `status` leaves `restoring`.

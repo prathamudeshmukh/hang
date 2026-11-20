@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
-import { Pressable, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import { useReducedMotion } from 'react-native-reanimated';
 import { CardMediaBox } from '@/grid/CardMediaBox';
+import { PrintPaper, useSwatch } from '@/grid/PrintPaper';
 import { Develop } from '@/rewards/Develop';
 import { rediscoverEntry } from '@/rewards/rediscoverEntry';
 import { NameText, NoteText } from '@/theme/Text';
@@ -33,6 +34,7 @@ export function RediscoverSection({ pick, day }: { readonly pick: RediscoverPick
   const reduceMotion = useReducedMotion();
   const [stampedWhenFirstShown] = useState(pick.stampedToday);
   const { card } = pick;
+  const swatch = useSwatch(card);
   useStampOnFirstShow(pick, day);
   useScrollersOrigin(HOME_SCOPE.rediscover, [card.id], null);
   return (
@@ -52,7 +54,11 @@ export function RediscoverSection({ pick, day }: { readonly pick: RediscoverPick
       >
         <Develop entry={rediscoverEntry({ stampedWhenFirstShown, reduceMotion })}>
           <HeroFace id={card.id} drawnOnLayout={!card.media?.uri} style={styles.rediscoverFrame}>
-            {card.media ? <CardMediaBox id={card.id} media={{ ...card.media, ratio: SQUARE }} /> : null}
+            {card.media ? (
+              <CardMediaBox id={card.id} media={{ ...card.media, ratio: SQUARE }} swatch={swatch} />
+            ) : (
+              <PrintPaper swatch={swatch} style={StyleSheet.absoluteFill} />
+            )}
           </HeroFace>
         </Develop>
         <View style={styles.rowText}>

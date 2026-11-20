@@ -9,6 +9,7 @@ export const HOME_SIZE = {
   stripHeight: 98,
   rediscover: 62,
   cover: 40,
+  coverFrame: 3,
   inboxDot: 6,
 } as const;
 
@@ -54,6 +55,8 @@ export const useHomeStyles = makeStyles(({ color }) => ({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  /** Fetching in a room (#85): its colour holds the place, no outline. */
+  stripPendingFilled: { ...print, width: HOME_SIZE.stripWidth, height: HOME_SIZE.stripHeight, alignItems: 'center', justifyContent: 'center' },
   stripCaption: { marginTop: SPACE.caption },
   /** While the first pull runs: the strip's three places, dashed (#75). */
   waitingStrip: { flexDirection: 'row', gap: STRIP_GAP },
@@ -77,6 +80,9 @@ export const useHomeStyles = makeStyles(({ color }) => ({
     borderColor: color.rule,
   },
   cover: { ...print, width: HOME_SIZE.cover, height: HOME_SIZE.cover, backgroundColor: color.raised },
+  /** The room's colour round its cover (#85); the cover sits inside at full print size less the frame. */
+  coverFrame: { ...print, width: HOME_SIZE.cover, height: HOME_SIZE.cover, padding: HOME_SIZE.coverFrame },
+  framedCover: { flex: 1, borderRadius: RADIUS.print / 2 },
   coverPlaceholder: { ...print, width: HOME_SIZE.cover, height: HOME_SIZE.cover, borderWidth: 1, borderStyle: 'dashed', borderColor: color.ink3 },
   collectionName: { flex: 1 },
   input: { ...textStyle('action'), color: color.ink, padding: 0, flex: 1 },

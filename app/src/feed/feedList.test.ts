@@ -7,6 +7,7 @@ import { createContentRepository } from '../db/contentRepository.ts';
 import { createItemsRepository } from '../db/itemsRepository.ts';
 import { itemContent, items, type Item } from '../db/schema.ts';
 import { createTestDeps } from '../db/testing/testDb.ts';
+import { createRoomColourStore } from '../rooms/roomColourStore.ts';
 import { createThumbStore } from '../thumbs/thumbStore.ts';
 import { CARD_NOW } from '../grid/testing/anItem.ts';
 import { originsOf, readFeed } from './feedList.ts';
@@ -20,6 +21,7 @@ function setup() {
     collections: createCollectionsRepository(deps),
     thumbs: createThumbStore(deps.db),
     content: createContentRepository(deps.db),
+    rooms: createRoomColourStore(deps.db),
   };
   sources.collections.create({ id: 'c1', name: 'Reading' });
   sources.collections.create({ id: 'c2', name: 'Recipes' });
@@ -36,6 +38,12 @@ describe('readFeed', () => {
   beforeEach(() => {
     s = setup();
     ['a', 'b', 'c'].forEach((id) => s.save(id));
+  });
+
+  it('gives a page hung in a room its print colour, so the flight back lands on it (#85), and an unsorted one none', () => {
+    s.save('loose', null);
+    const pages = readFeed(s.sources, { ids: ['a', 'loose'], origins: new Map() }, CARD_NOW);
+    assert.deepEqual(pages.map(({ card }) => card.swatch !== null), [true, false]);
   });
 
   it('keeps the order it was opened with', () => {

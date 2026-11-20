@@ -1,4 +1,5 @@
 import type { Item, ItemKind } from '../db/schema.ts';
+import type { PrintSwatch } from '../rooms/roomOf.ts';
 import { hostOf } from './host.ts';
 import { dayWords } from '../copy/dayWords.ts';
 import { durationNote, joinNote, minutesNote } from './catalogueNote.ts';
@@ -7,7 +8,7 @@ import { durationNote, joinNote, minutesNote } from './catalogueNote.ts';
 export const MIN_RATIO = 0.5;
 export const MAX_RATIO = 1.6;
 
-const FETCHING = 'fetching…';
+export const FETCHING = 'fetching…';
 const COULD_NOT_READ = 'couldn’t read this';
 const FALLBACK_KIND: ItemKind = 'link';
 /** The dashed box's shape while the size of the image isn't known (DESIGN.md §8 pending). */
@@ -48,6 +49,8 @@ export interface CardModel {
   /** The page's own description; only an imageless link's wall label draws it (#58). */
   readonly description: string | null;
   readonly accessibilityLabel: string;
+  /** Its room's colour, for when it has no picture (#85); null for an unsorted item. Set by the lists, not here. */
+  readonly swatch: PrintSwatch | null;
 }
 
 export function clampRatio({ width, height }: { readonly width: number | null; readonly height: number | null }): number | null {
@@ -156,7 +159,9 @@ export function sameCard(a: CardModel, b: CardModel): boolean {
     a.media?.naturalRatio === b.media?.naturalRatio &&
     a.media?.uri === b.media?.uri &&
     a.original === b.original &&
-    a.accessibilityLabel === b.accessibilityLabel
+    a.accessibilityLabel === b.accessibilityLabel &&
+    a.swatch?.light.colour === b.swatch?.light.colour &&
+    a.swatch?.dark.colour === b.swatch?.dark.colour
   );
 }
 
@@ -184,5 +189,6 @@ export function toCardModel(item: Item, thumbUri: string | null, now: Date): Car
     handle,
     description: item.description,
     accessibilityLabel: describe(item, { variant, title, site, note, byline }),
+    swatch: null,
   };
 }

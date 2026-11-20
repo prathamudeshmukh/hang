@@ -7,6 +7,7 @@ import { createItemsRepository } from '@/db/itemsRepository';
 import { systemClock } from '@/db/types';
 import { appCollections } from '@/home/appListSources';
 import { errorMessage } from '@/home/openItem';
+import { createRoomColourStore } from '@/rooms/roomColourStore';
 import { createThumbStore } from '@/thumbs/thumbStore';
 import type { FeedSources } from './feedList';
 import { createFeedSessions } from './feedSession';
@@ -18,7 +19,7 @@ const warn = (message: string) => console.warn(message);
 const items = createItemsRepository({ db, clock: systemClock });
 
 export const feedContent = createContentRepository(db);
-export const feedSources: FeedSources = { items, collections: appCollections, thumbs: createThumbStore(db), content: feedContent };
+export const feedSources: FeedSources = { items, collections: appCollections, thumbs: createThumbStore(db), content: feedContent, rooms: createRoomColourStore(db) };
 
 /** Pushes the feed route on the list as the opener shows it, starting at `start`. Openers go through the hero (#32). */
 export function pushFeedRoute(ids: readonly string[], start: string): void {

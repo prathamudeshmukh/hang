@@ -53,12 +53,13 @@ function Flyer({ flight, look, styles }: { readonly flight: Flight; readonly loo
 /** Over every screen: the backdrop and the one print in the air (#32). Draws nothing while idle. */
 export function HeroLayer() {
   const trip = useSyncExternalStore(hero.subscribe, hero.trip);
-  const { color } = useTheme();
-  const wallRaised = useRef(color.raised);
+  const { color, scheme } = useTheme();
+  const wall = useRef({ raised: color.raised, scheme });
   useEffect(() => {
-    wallRaised.current = color.raised;
-  }, [color.raised]);
-  const { values, stage } = useStage({ wallRaised: () => wallRaised.current, tuning: () => DEFAULT_TUNING });
+    wall.current = { raised: color.raised, scheme };
+  }, [color.raised, scheme]);
+  const wallFace = (flight: Flight) => flight.paper?.[wall.current.scheme].top ?? wall.current.raised;
+  const { values, stage } = useStage({ wallFace, tuning: () => DEFAULT_TUNING });
   const styles = useFlyerStyles(values);
   useEffect(() => hero.attachStage(stage), [stage]);
   useBlockBack(inAir(trip));

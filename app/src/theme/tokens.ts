@@ -69,6 +69,21 @@ export const PALETTES: Readonly<Record<Scheme, Palette>> = {
 /** The feed and its sheets (DESIGN.md §3 "always dark"): the dark theme on the screen colors, outlined in screen rule. */
 export const SCREENING_ROOM: Palette = { ...PALETTES.dark, wall: SCREEN.screen, ink: SCREEN.screenInk, rule: SCREEN.screenRule };
 
+/** A room colour's two inks (#85), chosen against the fill, the same in light and dark. */
+export const PAPER_INK = { dark: PALETTES.light.ink, light: SCREEN.screenInk } as const;
+export type PaperInk = keyof typeof PAPER_INK;
+
+/**
+ * Drawing on a room-coloured print (#85): every ink is the one ink `readableFill` cleared 4.5:1 for, since a softer
+ * ink2/ink3 isn't checked against the fill. Other colours are the scheme's that ink reads on.
+ */
+const paperOf = (ink: PaperInk, base: Palette): Palette => {
+  const colour = PAPER_INK[ink];
+  return { ...base, ink: colour, ink2: colour, ink3: colour, ripple: ink === 'dark' ? PALETTES.light.ripple : PALETTES.dark.ripple };
+};
+
+export const PAPER: Readonly<Record<PaperInk, Palette>> = { dark: paperOf('dark', PALETTES.light), light: paperOf('light', PALETTES.dark) };
+
 /**
  * The empty Home's how-to drawings (#75): another app's page in flat blocks of ink, on a print's `raised` paper.
  * The sample picture is a washed teal from the mark; with the mark itself, the only colour on the wall.

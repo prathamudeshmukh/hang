@@ -1,5 +1,5 @@
 import { count, isNull } from 'drizzle-orm';
-import { collections, deviceOwner, firstPull, itemContent, items, outbox, syncState, thumbFiles } from './schema.ts';
+import { collections, deviceOwner, firstPull, itemContent, items, outbox, roomColours, syncState, thumbFiles } from './schema.ts';
 import type { HangDb, RepositoryDeps } from './types.ts';
 
 /**
@@ -9,7 +9,7 @@ import type { HangDb, RepositoryDeps } from './types.ts';
  */
 export type BindOutcome = 'claimed' | 'resumed' | 'reset';
 
-const LOCAL_TABLES = [itemContent, items, collections, outbox, syncState, firstPull, thumbFiles, deviceOwner] as const;
+const LOCAL_TABLES = [itemContent, items, collections, outbox, syncState, firstPull, thumbFiles, roomColours, deviceOwner] as const;
 
 function wipeAll(tx: HangDb): void {
   LOCAL_TABLES.forEach((table) => tx.delete(table).run());

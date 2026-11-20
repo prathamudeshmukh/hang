@@ -2,7 +2,7 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 import { contrastRatio } from './contrast.ts';
-import { PALETTES, SCREENING_ROOM, SKETCH, type Scheme } from './tokens.ts';
+import { PALETTES, PAPER, PAPER_INK, SCREENING_ROOM, SKETCH, type Scheme } from './tokens.ts';
 import { textStyle, tokensOf, TYPE_SCALE } from './typeScale.ts';
 
 const SCHEMES: readonly Scheme[] = ['light', 'dark'];
@@ -13,6 +13,13 @@ const ROOM_STEP = 1.12;
 /** The how-to's sample picture must read as a picture on the print's paper, not as a smudge (#75). */
 const PICTURE_STEP = 1.3;
 const HILLS_STEP = 1.2;
+
+describe('paper (#85)', () => {
+  it('writes every ink on a room-coloured print in its one checked ink', () => {
+    const inks = (['dark', 'light'] as const).map((ink) => new Set([PAPER[ink].ink, PAPER[ink].ink2, PAPER[ink].ink3]));
+    assert.deepEqual(inks.map((set) => [...set]), [[PAPER_INK.dark], [PAPER_INK.light]]);
+  });
+});
 
 describe('palette (DESIGN.md §10)', () => {
   it('keeps every ink at AA body contrast on the wall and on raised surfaces, in both themes', () => {
