@@ -7,6 +7,7 @@ import m0002 from './0002_massive_jimmy_woo.sql';
 import m0003 from './0003_messy_namorita.sql';
 import m0004 from './0004_numerous_sandman.sql';
 import m0005 from './0005_medical_azazel.sql';
+import m0006 from './0006_redundant_shinobi_shaw.sql';
 
   export default {
     journal,
@@ -16,7 +17,8 @@ m0001,
 m0002,
 m0003,
 m0004,
-m0005
+m0005,
+m0006
     }
   }
   

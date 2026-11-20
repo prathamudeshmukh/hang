@@ -15,6 +15,8 @@ import { createExpoThumbFiles } from '@/thumbs/expoThumbFiles';
 import { createSupabaseThumbSigner } from '@/thumbs/supabaseThumbSigner';
 import { createThumbStore } from '@/thumbs/thumbStore';
 import { createThumbSync } from '@/thumbs/thumbSync';
+import { createRoomColourStore } from '@/rooms/roomColourStore';
+import { createRoomColourSync } from '@/rooms/roomColourSync';
 import { createAuthSession } from './authSession';
 import { createGoogleIdTokenProvider } from './googleIdToken';
 import { createSecureSessionStorage } from './secureSessionStorage';
@@ -67,11 +69,23 @@ const thumbs = createThumbSync({
 });
 const settleThumbs = (work: Promise<unknown>) => void work.catch((error: unknown) => console.warn(`[thumbs] ${String(error)}`));
 
-/** Thumbnails follow every sync (SPEC §4); sync only runs while signed in, which signing needs. */
+const roomColourSync = createRoomColourSync(createRoomColourStore(db));
+
+/** A room's colour is a nicety: a failure leaves the last colours drawn, never the sync failed. */
+function colourRooms(): void {
+  try {
+    roomColourSync.run();
+  } catch (error) {
+    console.warn(`[room colours] ${String(error)}`);
+  }
+}
+
+/** Thumbnails and room colours (#85) follow every sync (SPEC §4); sync only runs while signed in, which signing needs. */
 const syncer = {
   async sync(): Promise<SyncReport> {
     const report = await syncEngine.sync();
     settleThumbs(thumbs.run());
+    colourRooms();
     return report;
   },
 };

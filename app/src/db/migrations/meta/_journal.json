@@ -43,6 +43,13 @@
       "when": 1795070690544,
       "tag": "0005_medical_azazel",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1795152796855,
+      "tag": "0006_redundant_shinobi_shaw",
+      "breakpoints": true
     }
   ]
 }
