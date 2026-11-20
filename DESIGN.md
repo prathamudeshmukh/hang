@@ -112,13 +112,16 @@ text that has to clear 3:1 on both walls.
 **How it's chosen** (on the device, after every sync; `src/rooms/`): the collection's newest 12 live items with a
 palette vote with `palette.vibrant ?? palette.dominant`. Greyish colours (saturation < 0.15, lightness < 0.08 or
 > 0.92) are dropped; the rest group into 12 hue families of 30°. Weight = recency (newest 1.0, −0.05 per step) ×
-kind (link previews 0.5, often logos; everything else 1.0). The heaviest family wins and its colours are averaged; the
-next two are the room's second and third colours. The current family stays until another outweighs it by 25%.
-All grey → a grey room. No pictures → one of the icon's colours (ochre, teal, rose, blue, sage; never vermilion),
-fixed by the collection's id.
+kind (link previews 0.5, often logos; everything else 1.0). The heaviest family wins and its colours are averaged.
+The current family stays until another outweighs it by 25%.
+All grey → a grey room (the wall's grey-green). No pictures → one of the icon's colours (ochre, teal, rose, blue;
+never vermilion, and not sage, which passes for a grey room), fixed by the collection's id.
 
 **Made rich:** lightness 0.30–0.50 on the light wall; 0.22–0.38 with a little less saturation on the dark wall, so
-it doesn't glow. A missing second or third colour is the room colour 0.08 lighter or darker. Every fill is a gentle
+it doesn't glow. **Reds** (hue 345°–25°) go deep to oxblood (saturation ≤ 0.5, lightness 0.22–0.32; dark 0.18–0.28) so a
+red room never passes for vermilion. A room's three print colours are **shades of its one hue**: the colour, a
+lighter and a darker one (0.08 apart, closer in a narrow range), so neighbours differ but a print's hue always says
+which room it hangs in (decided 2026-11-20). Every fill is a gentle
 gradient whose two ends both clear 4.5:1 with its ink: ink `#151D18` or screen ink `#EEF2EC`, whichever reads
 better; a colour that can't is pushed away from its ink until it does. Inside a fill every ink is that one ink.
 
@@ -126,7 +129,7 @@ better; a colour that can't is pushed away from its ink until it does. Inside a 
 |---|---|
 | Home · collections | A 3dp frame of the colour round the cover; no picture → the cover is the colour |
 | Collection header | The title painted in the colour from the top of the screen (behind the status bar) to just under the underline; the underline draws in its ink; the status bar icons follow it until it scrolls away. Kind filters, Shuffle and notes stay on the wall |
-| Prints without a picture | Articles without an image, videos without a poster, wall-label links, failed reads: on one of the room's three colours, picked by the item's id, the same in the collection, Recently saved and Rediscover |
+| Prints without a picture | Articles without an image, videos without a poster, wall-label links, failed reads: on one of the room's three shades, picked by the item's id, the same in the collection, Recently saved and Rediscover |
 | Fetching | A print still being read, and a picture still downloading, wait on their colour with *fetching…* instead of a dashed outline; the picture cross-fades over it. One that never comes or fails to load leaves the colour |
 | Hero | A text print's frame flies from its colour to the screening room's, and back |
 

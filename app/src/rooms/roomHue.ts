@@ -7,9 +7,9 @@ export interface ColourVote {
   readonly kind: ItemKind;
 }
 
-/** The room's hue: a family (0–11, 30° each) with its average colour and up to two runners-up; or grey; or no pictures. */
+/** The room's hue: a family (0–11, 30° each) with its average colour; or grey; or no pictures. */
 export type RoomHue =
-  | { readonly kind: 'family'; readonly family: number; readonly base: Hsl; readonly others: readonly Hsl[] }
+  | { readonly kind: 'family'; readonly family: number; readonly base: Hsl }
   | { readonly kind: 'grey' }
   | { readonly kind: 'none' };
 
@@ -22,7 +22,6 @@ const KIND_WEIGHT: Partial<Record<ItemKind, number>> = { link: 0.5 };
 const GREYISH = { maxSaturation: 0.15, minLightness: 0.08, maxLightness: 0.92 } as const;
 /** Another family has to outweigh the current one by this much to take over the room. */
 const HYSTERESIS = 1.25;
-const RUNNERS_UP = 2;
 
 interface Family {
   readonly family: number;
@@ -60,7 +59,7 @@ const colourOf = ({ colours }: Family): Hsl => hexToHsl(averageColour(colours));
 /** Pure: the hue a room's newest pictures agree on (#85 rules 1–4 and hysteresis). `votes` are newest first. */
 export function roomHue(votes: readonly ColourVote[], previousFamily: number | null): RoomHue {
   if (votes.length === 0) return { kind: 'none' };
-  const [winner, ...rest] = withHysteresis(familiesOf(votes), previousFamily);
+  const [winner] = withHysteresis(familiesOf(votes), previousFamily);
   if (!winner) return { kind: 'grey' };
-  return { kind: 'family', family: winner.family, base: colourOf(winner), others: rest.slice(0, RUNNERS_UP).map(colourOf) };
+  return { kind: 'family', family: winner.family, base: colourOf(winner) };
 }

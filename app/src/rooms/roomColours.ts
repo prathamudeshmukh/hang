@@ -24,32 +24,50 @@ export interface RoomColours {
   readonly dark: SchemeColours;
 }
 
-/** Rich, like a print: never neon or muddy. Dark mode is deeper and a little calmer so it doesn't glow on the dark wall. */
 /** What `room_colours.colours` holds: both schemes (the family has its own column). */
 export type StoredRoomColours = Pick<RoomColours, 'light' | 'dark'>;
 
-const RICH: Readonly<Record<Scheme, { readonly min: number; readonly max: number; readonly saturation: number }>> = {
-  light: { min: 0.3, max: 0.5, saturation: 1 },
-  dark: { min: 0.22, max: 0.38, saturation: 0.85 },
+interface Range {
+  readonly min: number;
+  readonly max: number;
+  /** Multiplies the colour's saturation. */
+  readonly saturation: number;
+  /** Saturation is never above this. */
+  readonly maxSaturation: number;
+}
+
+/** Rich, like a print: never neon or muddy. Dark mode is deeper and a little calmer so it doesn't glow on the dark wall. */
+const RICH: Readonly<Record<Scheme, Range>> = {
+  light: { min: 0.3, max: 0.5, saturation: 1, maxSaturation: 1 },
+  dark: { min: 0.22, max: 0.38, saturation: 0.85, maxSaturation: 1 },
 };
+/** Reds go deep to oxblood, so a red room never passes for vermilion (#85). */
+const OXBLOOD: Readonly<Record<Scheme, Range>> = {
+  light: { min: 0.22, max: 0.32, saturation: 1, maxSaturation: 0.5 },
+  dark: { min: 0.18, max: 0.28, saturation: 0.85, maxSaturation: 0.45 },
+};
+const REDS = { from: 345, to: 25 } as const;
 const SHADE_STEP = 0.08;
 /** A grey room: the Sage wall's own grey-green, honest about a room of concrete. */
 const GREY: Hsl = { h: 130, s: 0.06, l: 0.42 };
-const { ochre, teal, rose, blue, sage } = MARK_COLOURS;
-const ICON_COLOURS = [ochre, teal, rose, blue, sage] as const;
+/** Sage is left out: it's the wall's own colour and passes for a grey room. */
+const { ochre, teal, rose, blue } = MARK_COLOURS;
+const ICON_COLOURS = [ochre, teal, rose, blue] as const;
 
 const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
+const isRed = ({ h }: Hsl) => h >= REDS.from || h <= REDS.to;
+const rangeFor = (hsl: Hsl, scheme: Scheme) => (isRed(hsl) ? OXBLOOD : RICH)[scheme];
 
-function enrich({ h, s, l }: Hsl, scheme: Scheme): Hsl {
-  const { min, max, saturation } = RICH[scheme];
-  return { h, s: s * saturation, l: clamp(l, min, max) };
+function enrich(hsl: Hsl, range: Range): Hsl {
+  return { h: hsl.h, s: Math.min(range.maxSaturation, hsl.s * range.saturation), l: clamp(hsl.l, range.min, range.max) };
 }
 
-/** A lighter (or darker) shade that stays in the scheme's range, going the other way at its edge. */
-function shade(base: Hsl, scheme: Scheme, step: number): Hsl {
-  const { min, max } = RICH[scheme];
-  const l = base.l + step;
-  return { ...base, l: l >= min && l <= max ? l : base.l - 2 * step };
+/** A lighter or darker shade inside the range: the other way at its edge, closer together when the range is narrow. */
+function shade(room: Hsl, range: Range, direction: 1 | -1): Hsl {
+  const step = Math.min(SHADE_STEP, (range.max - range.min) / 2);
+  const l = room.l + direction * step;
+  const inRange = l >= range.min && l <= range.max;
+  return { ...room, l: clamp(inRange ? l : room.l - 2 * direction * step, range.min, range.max) };
 }
 
 const swatchOf = (hsl: Hsl): Swatch => {
@@ -57,28 +75,22 @@ const swatchOf = (hsl: Hsl): Swatch => {
   return { colour, ...readableFill(colour) };
 };
 
-function schemeColours(base: Hsl, others: readonly Hsl[], scheme: Scheme): SchemeColours {
-  const room = enrich(base, scheme);
-  const [second, third] = [
-    others[0] ? enrich(others[0], scheme) : shade(room, scheme, SHADE_STEP),
-    others[1] ? enrich(others[1], scheme) : shade(room, scheme, -SHADE_STEP),
-  ];
+/** The room's colour, and its prints in three shades of it: neighbours differ, the hue still says which room. */
+function schemeColours(base: Hsl, scheme: Scheme): SchemeColours {
+  const range = rangeFor(base, scheme);
+  const room = enrich(base, range);
   const colour = hslToHex(room);
-  return { colour, fill: readableFill(colour), prints: [swatchOf(room), swatchOf(second), swatchOf(third)] };
+  return { colour, fill: readableFill(colour), prints: [swatchOf(room), swatchOf(shade(room, range, 1)), swatchOf(shade(room, range, -1))] };
 }
 
-function baseOf(hue: RoomHue, collectionId: string): { readonly base: Hsl; readonly others: readonly Hsl[] } {
-  if (hue.kind === 'family') return { base: hue.base, others: hue.others };
-  if (hue.kind === 'grey') return { base: GREY, others: [] };
-  return { base: hexToHsl(ICON_COLOURS[stableIndex(collectionId, ICON_COLOURS.length)]), others: [] };
+function baseOf(hue: RoomHue, collectionId: string): Hsl {
+  if (hue.kind === 'family') return hue.base;
+  if (hue.kind === 'grey') return GREY;
+  return hexToHsl(ICON_COLOURS[stableIndex(collectionId, ICON_COLOURS.length)] ?? ochre);
 }
 
 /** Pure: a room's hue made rich and readable for both walls (#85 rules 5–6). */
 export function roomColours(hue: RoomHue, collectionId: string): RoomColours {
-  const { base, others } = baseOf(hue, collectionId);
-  return {
-    family: hue.kind === 'family' ? hue.family : null,
-    light: schemeColours(base, others, 'light'),
-    dark: schemeColours(base, others, 'dark'),
-  };
+  const base = baseOf(hue, collectionId);
+  return { family: hue.kind === 'family' ? hue.family : null, light: schemeColours(base, 'light'), dark: schemeColours(base, 'dark') };
 }

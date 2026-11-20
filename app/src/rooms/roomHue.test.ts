@@ -44,10 +44,9 @@ describe('roomHue', () => {
     assert.deepEqual([gone.kind === 'family' && gone.family, beaten.kind === 'family' && beaten.family], [7, 7]);
   });
 
-  it('averages the winning family and lists the next two as its other colours', () => {
+  it('averages the winning family into the room\'s colour', () => {
     const hue = roomHue([photo(GREEN), photo(MOSS), photo(BLUE), photo(RED)], null);
     assert.ok(hue.kind === 'family');
-    assert.equal(hue.others.length, 2);
-    assert.deepEqual(hue.others.map(({ h }) => Math.floor(h / 30)), [7, 0]);
+    assert.equal(Math.floor(hue.base.h / 30), 4);
   });
 });

@@ -2,13 +2,17 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 import { MARK_COLOURS } from '../theme/hangMark.ts';
+import { contrastRatio } from '../theme/contrast.ts';
 import { hexToHsl } from './colour.ts';
 import { roomColours } from './roomColours.ts';
 import type { RoomHue } from './roomHue.ts';
 
-const NEON: RoomHue = { kind: 'family', family: 4, base: { h: 128, s: 1, l: 0.75 }, others: [] };
-const THREE: RoomHue = { kind: 'family', family: 4, base: { h: 128, s: 0.6, l: 0.4 }, others: [{ h: 225, s: 0.5, l: 0.4 }, { h: 5, s: 0.6, l: 0.45 }] };
-const ICON_HUES = ['ochre', 'teal', 'rose', 'blue', 'sage'].map((name) => Math.round(hexToHsl(MARK_COLOURS[name as 'ochre']).h));
+const NEON: RoomHue = { kind: 'family', family: 4, base: { h: 128, s: 1, l: 0.75 } };
+const RED: RoomHue = { kind: 'family', family: 0, base: { h: 2, s: 0.75, l: 0.5 } };
+const VERMILION = MARK_COLOURS.vermilion;
+const ICON_HUES = ['ochre', 'teal', 'rose', 'blue'].map((name) => Math.round(hexToHsl(MARK_COLOURS[name as 'ochre']).h));
+const SAGE_HUE = Math.round(hexToHsl(MARK_COLOURS.sage).h);
+const IDS = Array.from({ length: 40 }, (_, at) => `c${at}`);
 const hueOf = (hex: string) => Math.round(hexToHsl(hex).h);
 const lightnessOf = (hex: string) => hexToHsl(hex).l;
 
@@ -19,22 +23,29 @@ describe('roomColours', () => {
     assert.ok(lightnessOf(dark.colour) <= 0.38 + 0.01);
   });
 
-  it('prints on the room colour and its two runners-up, in that order', () => {
-    const { light } = roomColours(THREE, 'c1');
-    assert.deepEqual(light.prints.map((print) => Math.round(hueOf(print.colour) / 30)), [4, 8, 0]);
+  it('prints in three shades of the room\'s own hue, so a print says which room it hangs in', () => {
+    const { light, dark } = roomColours(NEON, 'c1');
+    const prints = [...light.prints, ...dark.prints];
+    assert.equal(new Set(light.prints.map((print) => print.colour)).size, 3);
+    assert.ok(prints.every((print) => Math.abs(hueOf(print.colour) - 128) <= 2));
   });
 
-  it('fills missing runners-up with lighter and darker shades of the room colour', () => {
-    const { light } = roomColours(NEON, 'c1');
-    const lightness = light.prints.map((print) => lightnessOf(print.colour));
+  it('darkens reds to oxblood, well clear of vermilion, with three distinct shades', () => {
+    const { light, dark } = roomColours(RED, 'c1');
+    const all = [light.colour, dark.colour, ...light.prints.map((print) => print.colour), ...dark.prints.map((print) => print.colour)];
+    assert.ok(all.every((colour) => contrastRatio(colour, VERMILION) >= 1.5), all.join(' '));
     assert.equal(new Set(light.prints.map((print) => print.colour)).size, 3);
-    assert.ok(light.prints.every((print) => Math.abs(hueOf(print.colour) - 128) <= 2), `hues ${lightness}`);
   });
 
   it('gives a room without pictures one of the icon colours, the same one every time, never vermilion', () => {
     const [first, again] = [roomColours({ kind: 'none' }, 'c1'), roomColours({ kind: 'none' }, 'c1')];
     assert.equal(first.light.colour, again.light.colour);
     assert.ok(ICON_HUES.some((hue) => Math.abs(hue - hueOf(first.light.colour)) <= 3));
+  });
+
+  it('never gives a room without pictures sage, which would pass for a grey room', () => {
+    const hues = IDS.map((id) => hueOf(roomColours({ kind: 'none' }, id).light.colour));
+    assert.ok(hues.every((hue) => Math.abs(hue - SAGE_HUE) > 5), hues.join(' '));
   });
 
   it('gives an all-grey room a grey, and remembers no family for it', () => {

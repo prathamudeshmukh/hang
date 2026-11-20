@@ -161,7 +161,7 @@ describe('readPlace', () => {
 
 describe('room colours in the lists (#85)', () => {
   let s: ReturnType<typeof setup>;
-  const GREEN_ROOM = roomColours({ kind: 'family', family: 4, base: { h: 128, s: 0.6, l: 0.4 }, others: [] }, 'c1');
+  const GREEN_ROOM = roomColours({ kind: 'family', family: 4, base: { h: 128, s: 0.6, l: 0.4 } }, 'c1');
   beforeEach(() => {
     s = setup();
     s.collections.create({ id: 'c1', name: 'Garden' });
