@@ -21,3 +21,4 @@ export function lookOf(card: CardModel, hasOpening = false): Look {
   const landing: Landing = media.kind === 'image' ? { fit: 'contain', ratio: media.media.naturalRatio } : MEDIA_BOX;
   return { kind: 'picture', uri: media.media.uri, landing };
 }
+

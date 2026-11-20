@@ -24,7 +24,7 @@ export interface StageValues {
   /** 1 = the screening room's color over everything. */
   readonly backdrop: SharedValue<number>;
   readonly flyerOpacity: SharedValue<number>;
-  /** A frame flyer's color at `from` and at `to`: the wall's `raised` and the room's. */
+  /** A frame flyer's color at `from` and at `to`: the print's on the wall (its room colour or `raised`) and the room's. */
   readonly colors: SharedValue<readonly [string, string]>;
 }
 
@@ -39,12 +39,13 @@ function animated(start: (resolve: Resolve) => void): Promise<void> {
 }
 
 interface StageInputs {
-  readonly wallRaised: () => string;
+  /** The flyer's color on the wall: its room colour (#85), else the wall's `raised`. */
+  readonly wallFace: (flight: Flight) => string;
   /** Read at each flight, so a change applies to the next one. */
   readonly tuning: () => FlightTuning;
 }
 
-function createStage(values: StageValues, { wallRaised, tuning }: StageInputs): Stage {
+function createStage(values: StageValues, { wallFace, tuning }: StageInputs): Stage {
   const { from, to, progress, backdrop, flyerOpacity, colors } = values;
   const roomRaised = SCREENING_ROOM.raised;
   /** A post page has no media box: its print lands in the screen's own color and melts into the page (#59). */
@@ -57,7 +58,7 @@ function createStage(values: StageValues, { wallRaised, tuning }: StageInputs): 
       flyerOpacity.set(1);
       // Going back, the feed itself is the ground: it fades off the wall under the flyer (fadeFeedAway).
       backdrop.set(0);
-      colors.set(flight.direction === 'out' ? [wallRaised(), roomColor(flight)] : [roomColor(flight), wallRaised()]);
+      colors.set(flight.direction === 'out' ? [wallFace(flight), roomColor(flight)] : [roomColor(flight), wallFace(flight)]);
       if (flight.direction === 'out') feedTrailOpacity.set(0);
     },
     fly(flight: Flight) {

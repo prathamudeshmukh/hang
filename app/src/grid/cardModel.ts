@@ -8,7 +8,7 @@ import { durationNote, joinNote, minutesNote } from './catalogueNote.ts';
 export const MIN_RATIO = 0.5;
 export const MAX_RATIO = 1.6;
 
-const FETCHING = 'fetching…';
+export const FETCHING = 'fetching…';
 const COULD_NOT_READ = 'couldn’t read this';
 const FALLBACK_KIND: ItemKind = 'link';
 /** The dashed box's shape while the size of the image isn't known (DESIGN.md §8 pending). */

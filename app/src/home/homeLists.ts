@@ -4,9 +4,10 @@ import type { ItemsRepository } from '../db/itemsRepository.ts';
 import type { Item } from '../db/schema.ts';
 import type { RoomColours } from '../rooms/roomColours.ts';
 import type { RoomColourStore } from '../rooms/roomColourStore.ts';
-import { printSwatch, roomOf } from '../rooms/roomOf.ts';
+import { roomOf } from '../rooms/roomOf.ts';
 import type { ThumbStore } from '../thumbs/thumbStore.ts';
-import { toCardModel, type CardModel } from '../grid/cardModel.ts';
+import type { CardModel } from '../grid/cardModel.ts';
+import { listCard, type CardContext } from '../grid/listCard.ts';
 import { dayKey, savedMonthNote } from './homeCopy.ts';
 import { wallState, type WallState } from './homeWall.ts';
 import { pickRediscover, rediscoverWindow } from './rediscover.ts';
@@ -63,18 +64,6 @@ export interface ListSources {
   readonly rooms: Pick<RoomColourStore, 'all'>;
 }
 
-/** What every card on a list is read with: thumbnails, room colours and the time. */
-interface CardContext {
-  readonly thumbs: ReadonlyMap<string, string>;
-  readonly rooms: ReadonlyMap<string, RoomColours>;
-  readonly now: Date;
-}
-
-function cardOf(item: Item, { thumbs, rooms, now }: CardContext): CardModel {
-  const card = toCardModel(item, thumbs.get(item.id) ?? null, now);
-  return item.collectionId === null ? card : { ...card, swatch: printSwatch(roomOf(rooms, item.collectionId), item.id) };
-}
-
 function cardContext(sources: ListSources, now: Date): CardContext {
   return { thumbs: sources.thumbs.fileUris(), rooms: sources.rooms.all(), now };
 }
@@ -91,7 +80,7 @@ function readRediscover(sources: ListSources, context: CardContext): RediscoverP
   const item = picked ? sources.items.getById(picked.id) : undefined;
   if (!item) return null;
   return {
-    card: cardOf(item, context),
+    card: listCard(item, context),
     savedNote: savedMonthNote(item.createdAt, now),
     stampedToday: item.rediscoveredOn === dayKey(now),
   };
@@ -107,7 +96,7 @@ function readCollections(sources: ListSources, counts: ReadonlyMap<string | null
 export function readHome(sources: ListSources, { now, syncFailed }: HomeMoment): HomeLists {
   const counts = sources.items.countByCollection();
   const context = cardContext(sources, now);
-  const toPrint = (item: Item): RecentPrint => ({ card: cardOf(item, context), inInbox: item.collectionId === null });
+  const toPrint = (item: Item): RecentPrint => ({ card: listCard(item, context), inInbox: item.collectionId === null });
   const recent = sources.items.listRecent(RECENT_LIMIT).map(toPrint);
   return {
     wall: wallState({ hasItems: recent.length > 0, hasPulled: sources.firstPulls.hasPulled(), syncFailed }),
@@ -120,7 +109,7 @@ export function readHome(sources: ListSources, { now, syncFailed }: HomeMoment):
 
 function toCards(sources: ListSources, items: readonly Item[], now: Date): readonly CardModel[] {
   const context = cardContext(sources, now);
-  return items.map((item) => cardOf(item, context));
+  return items.map((item) => listCard(item, context));
 }
 
 /** Null when the collection isn't on the device (deleted elsewhere, or a stale link). */

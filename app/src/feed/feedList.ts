@@ -2,7 +2,8 @@ import type { CollectionsRepository } from '../db/collectionsRepository.ts';
 import type { ContentRepository } from '../db/contentRepository.ts';
 import type { ItemsRepository } from '../db/itemsRepository.ts';
 import type { Item } from '../db/schema.ts';
-import { toCardModel } from '../grid/cardModel.ts';
+import { listCard } from '../grid/listCard.ts';
+import type { RoomColourStore } from '../rooms/roomColourStore.ts';
 import type { ThumbStore } from '../thumbs/thumbStore.ts';
 import { toFeedPage, type FeedPage } from './feedPage.ts';
 import { placeName } from './moveChoices.ts';
@@ -13,6 +14,7 @@ export interface FeedSources {
   readonly collections: Pick<CollectionsRepository, 'list'>;
   readonly thumbs: Pick<ThumbStore, 'fileUris'>;
   readonly content: Pick<ContentRepository, 'openings'>;
+  readonly rooms: Pick<RoomColourStore, 'all'>;
 }
 
 /** Where each item hung when the feed opened, so a move shows as *moved to X*. */
@@ -36,12 +38,12 @@ export function originsOf(sources: FeedSources, ids: readonly string[]): Origins
 
 /** The snapshot's order with each item's latest contents; items deleted since are dropped (#31). */
 export function readFeed(sources: FeedSources, { ids, origins }: FeedSnapshot, now: Date): readonly FeedPage[] {
-  const thumbs = sources.thumbs.fileUris();
+  const context = { thumbs: sources.thumbs.fileUris(), rooms: sources.rooms.all(), now };
   const collections = sources.collections.list();
   const openings = sources.content.openings(ids);
   return liveItems(sources, ids).map((item) => {
     const moved = origins.has(item.id) && origins.get(item.id) !== item.collectionId;
-    return toFeedPage(toCardModel(item, thumbs.get(item.id) ?? null, now), {
+    return toFeedPage(listCard(item, context), {
       summary: item.summary ?? item.description,
       opening: openings.get(item.id) ?? null,
       saved: savedNote(item.createdAt, now),

@@ -183,6 +183,12 @@ describe('room colours in the lists (#85)', () => {
     assert.equal(swatches.get('unsorted'), null);
   });
 
+  it('never tints a post (ruled, unboxed)', () => {
+    s.save('post', 'c1');
+    s.update('post', { status: 'ready', kind: 'post', post: { text: 'A thread' } });
+    assert.equal(readHome(s.sources, AT).recent[0]?.card.swatch, null);
+  });
+
   it('gives a collection its room, and the Inbox none', () => {
     s.rooms.save('c1', GREEN_ROOM);
     const [room, inbox] = [readPlace(s.sources, { kind: 'collection', id: 'c1' }, CARD_NOW), readPlace(s.sources, { kind: 'inbox' }, CARD_NOW)];

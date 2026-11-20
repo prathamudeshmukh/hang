@@ -1,5 +1,5 @@
 import { contrastRatio } from '../theme/contrast.ts';
-import { PALETTES, SCREENING_ROOM } from '../theme/tokens.ts';
+import { PAPER_INK } from '../theme/tokens.ts';
 import { mix } from './colour.ts';
 
 /** A room colour as a print's gradient (top-left to bottom-right) and the ink written on it (#85). */
@@ -10,8 +10,8 @@ export interface Fill {
 }
 
 /** The two inks a fill can take, the same in light and dark: they're chosen against the fill, not the wall. */
-export const DARK_INK = PALETTES.light.ink;
-export const LIGHT_INK = SCREENING_ROOM.ink;
+export const DARK_INK = PAPER_INK.dark;
+export const LIGHT_INK = PAPER_INK.light;
 
 const AA = 4.5;
 const WHITE = '#ffffff';

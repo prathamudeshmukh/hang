@@ -11,6 +11,9 @@ export const useGridStyles = makeStyles(({ color }) => ({
   wall: { flex: 1, backgroundColor: color.wall },
   content: { paddingHorizontal: SPACE.margin - SPACE.gutter / 2 },
   header: { paddingHorizontal: SPACE.gutter / 2, paddingBottom: SPACE.rhythm * 2, gap: SPACE.tight },
+  /** A collection's painted title (#85): out to the screen edges and up behind the status bar. */
+  bandPlace: { marginHorizontal: -SPACE.margin, marginBottom: SPACE.rhythm },
+  band: { paddingHorizontal: SPACE.margin, paddingBottom: SPACE.rhythm * 2 },
   /** As wide as the title, so its underline is too. */
   title: { alignSelf: 'flex-start', gap: SPACE.tight },
   cell: { paddingHorizontal: SPACE.gutter / 2, paddingBottom: SPACE.rhythm },
@@ -50,5 +53,9 @@ export const useGridStyles = makeStyles(({ color }) => ({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  /** Fetching in a room (#85): the room's colour holds the place, no outline. */
+  pendingFilled: { aspectRatio: PENDING_RATIO, borderRadius: RADIUS.print, alignItems: 'center', justifyContent: 'center' },
+  /** Under a thumbnail in a room: the room's colour, saying *fetching…* until the picture lands over it. */
+  tile: { ...StyleSheet.absoluteFill, alignItems: 'center', justifyContent: 'center' },
   faded: { opacity: FADED },
 }));

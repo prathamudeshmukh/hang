@@ -298,8 +298,10 @@ Storage bucket `media` (private): `{user_id}/thumbs/{item_id}.webp` and
   opened. Opening an item from anywhere sets `last_opened_at`.
 - **Collection cover** (Home) = the newest live item in the collection with a downloaded thumbnail,
   derived on the device.
-- **No collection tint** (decided 2026-11-14, #34): collections are drawn in ink like the rest of the app; their
-  covers and prints already tell them apart (DESIGN.md §3).
+- **Collection colour** (#85, replacing #34's "no tint"): derived on the device after every sync from the newest
+  12 live items' `palette` (`vibrant`, else `dominant`), and kept in the local-only `room_colours` table (never
+  synced, wiped with the account), which also holds the current hue family so one new save doesn't flip it. No
+  server column. Rules and where it shows: DESIGN.md §3.
 - **Shuffle** = a seeded random order, stable while you're looking at it (a fresh seed each time it's turned on; #42).
 
 ---

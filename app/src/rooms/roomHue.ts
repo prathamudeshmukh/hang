@@ -40,12 +40,12 @@ function familiesOf(votes: readonly ColourVote[]): readonly Family[] {
     .map((vote, index) => ({ colour: vote.colour, hsl: hexToHsl(vote.colour), weight: weightOf(vote, index) }))
     .filter(({ hsl }) => !isGreyish(hsl));
   const ids = [...new Set(coloured.map(({ hsl }) => familyOf(hsl)))];
-  return ids
-    .map((family) => {
-      const colours = coloured.filter(({ hsl }) => familyOf(hsl) === family);
-      return { family, weight: colours.reduce((sum, { weight }) => sum + weight, 0), colours };
-    })
-    .toSorted((a, b) => b.weight - a.weight);
+  const families = ids.map((family) => {
+    const colours = coloured.filter(({ hsl }) => familyOf(hsl) === family);
+    return { family, weight: colours.reduce((sum, { weight }) => sum + weight, 0), colours };
+  });
+  // Sorts the fresh array `map` made; Hermes has no `toSorted`.
+  return families.sort((a, b) => b.weight - a.weight);
 }
 
 function withHysteresis(families: readonly Family[], previous: number | null): readonly Family[] {

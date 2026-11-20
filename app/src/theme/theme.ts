@@ -1,9 +1,9 @@
 import { createContext, useContext } from 'react';
 import { useColorScheme, type ColorSchemeName, type ImageStyle, type TextStyle, type ViewStyle } from 'react-native';
-import { PALETTES, SCREENING_ROOM, type Palette, type Scheme } from './tokens.ts';
+import { PALETTES, PAPER, PAPER_INK, SCREENING_ROOM, type Palette, type Scheme } from './tokens.ts';
 
-/** `screen` is the screening room: the feed and anything opened over it. */
-export type ThemeName = Scheme | 'screen';
+/** `screen` is the screening room: the feed and anything opened over it. `paper*` is a room-coloured print (#85). */
+export type ThemeName = Scheme | 'screen' | 'paperDarkInk' | 'paperLightInk';
 
 export interface Theme {
   readonly name: ThemeName;
@@ -15,7 +15,12 @@ const THEMES: Readonly<Record<ThemeName, Theme>> = {
   light: { name: 'light', scheme: 'light', color: PALETTES.light },
   dark: { name: 'dark', scheme: 'dark', color: PALETTES.dark },
   screen: { name: 'screen', scheme: 'dark', color: SCREENING_ROOM },
+  paperDarkInk: { name: 'paperDarkInk', scheme: 'light', color: PAPER.dark },
+  paperLightInk: { name: 'paperLightInk', scheme: 'dark', color: PAPER.light },
 };
+
+/** The theme for drawing on a fill whose ink is `ink`. */
+export const paperTheme = (ink: string): Theme => (ink === PAPER_INK.light ? THEMES.paperLightInk : THEMES.paperDarkInk);
 
 export const SCREEN_THEME = THEMES.screen;
 

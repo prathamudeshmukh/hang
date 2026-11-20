@@ -5,6 +5,7 @@ import { ActionText, NameText, NoteText } from '@/theme/Text';
 import { postWords, type CardModel, type CardVariant } from './cardModel';
 import { CardMediaBox } from './CardMediaBox';
 import { useGridStyles } from './gridStyles';
+import { PrintPaper, useSwatch } from './PrintPaper';
 
 const LINES = { cardTitle: 3, textCardTitle: 5, labelTitle: 4, description: 4, site: 2, byline: 1, post: 8, rawUrl: 2 } as const;
 
@@ -20,14 +21,16 @@ function Caption({ card, withTitle = true }: { readonly card: CardModel; readonl
   );
 }
 
-/** No image: the title set in Newsreader on `raised` (articles, and videos without a poster). */
+/** No image: the title set in Newsreader on its room's colour, or `raised` (articles, and videos without a poster). */
 function TitleCard({ card }: { readonly card: CardModel }) {
   const styles = useGridStyles();
   return (
     <>
-      <HeroFace id={card.id} drawnOnLayout style={styles.textCard}>
-        <NameText token="titleS" numberOfLines={LINES.textCardTitle}>{card.title ?? card.site}</NameText>
-        {card.variant === 'video' ? <Icon name="play" /> : null}
+      <HeroFace id={card.id} drawnOnLayout>
+        <PrintPaper swatch={useSwatch(card)} style={styles.textCard}>
+          <NameText token="titleS" numberOfLines={LINES.textCardTitle}>{card.title ?? card.site}</NameText>
+          {card.variant === 'video' ? <Icon name="play" /> : null}
+        </PrintPaper>
       </HeroFace>
       <Caption card={card} withTitle={false} />
     </>
@@ -39,8 +42,10 @@ function SiteCard({ card }: { readonly card: CardModel }) {
   const styles = useGridStyles();
   return (
     <>
-      <HeroFace id={card.id} drawnOnLayout style={styles.textCard}>
-        <NameText token="title" numberOfLines={LINES.site}>{card.site}</NameText>
+      <HeroFace id={card.id} drawnOnLayout>
+        <PrintPaper swatch={useSwatch(card)} style={styles.textCard}>
+          <NameText token="title" numberOfLines={LINES.site}>{card.site}</NameText>
+        </PrintPaper>
       </HeroFace>
       <Caption card={card} />
     </>
@@ -50,12 +55,15 @@ function SiteCard({ card }: { readonly card: CardModel }) {
 /** An imageless link (#58): its title, then what the page says about itself; the site only in the note below. */
 function WallLabelCard({ card }: { readonly card: CardModel }) {
   const styles = useGridStyles();
+  const swatch = useSwatch(card);
   if (!card.title) return <SiteCard card={card} />;
   return (
     <>
-      <HeroFace id={card.id} drawnOnLayout style={[styles.textCard, styles.wallLabel]}>
-        <NameText token="titleS" numberOfLines={LINES.labelTitle}>{card.title}</NameText>
-        {card.description ? <NoteText token="label" color="ink2" numberOfLines={LINES.description}>{card.description}</NoteText> : null}
+      <HeroFace id={card.id} drawnOnLayout>
+        <PrintPaper swatch={swatch} style={[styles.textCard, styles.wallLabel]}>
+          <NameText token="titleS" numberOfLines={LINES.labelTitle}>{card.title}</NameText>
+          {card.description ? <NoteText token="label" color="ink2" numberOfLines={LINES.description}>{card.description}</NoteText> : null}
+        </PrintPaper>
       </HeroFace>
       <Caption card={card} withTitle={false} />
     </>
@@ -64,11 +72,12 @@ function WallLabelCard({ card }: { readonly card: CardModel }) {
 
 function withMedia(Fallback: Body, options: { readonly playable?: boolean } = {}): Body {
   return function MediaCard({ card }) {
+    const swatch = useSwatch(card);
     if (!card.media) return <Fallback card={card} />;
     return (
       <>
         <HeroFace id={card.id} drawnOnLayout={card.media.uri === null}>
-          <CardMediaBox id={card.id} media={card.media} playable={options.playable} />
+          <CardMediaBox id={card.id} media={card.media} playable={options.playable} swatch={swatch} />
         </HeroFace>
         <Caption card={card} />
       </>
@@ -94,12 +103,16 @@ function PostCard({ card }: { readonly card: CardModel }) {
   );
 }
 
+/** Fetching: on its room's colour once it hangs in one (#85), else a dashed outline. */
 function PendingCard({ card }: { readonly card: CardModel }) {
   const styles = useGridStyles();
+  const swatch = useSwatch(card);
   return (
     <>
-      <HeroFace id={card.id} drawnOnLayout style={styles.pending}>
-        <NoteText>{card.note}</NoteText>
+      <HeroFace id={card.id} drawnOnLayout>
+        <PrintPaper swatch={swatch} style={swatch ? styles.pendingFilled : styles.pending}>
+          <NoteText>{card.note}</NoteText>
+        </PrintPaper>
       </HeroFace>
       <View style={[styles.caption, styles.faded]}>
         <NoteText numberOfLines={LINES.rawUrl}>{card.url}</NoteText>
