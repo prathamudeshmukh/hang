@@ -34,8 +34,8 @@ export interface CollectionRow {
   readonly name: string;
   readonly count: number;
   readonly coverUri: string | null;
-  /** The room's colour (#85): the cover's frame, and the cover itself when it has no picture. */
-  readonly colours: RoomColours;
+  /** The room's colour (#85), the cover while its picture hasn't come; null when nothing it holds gives one (#96). */
+  readonly colours: RoomColours | null;
 }
 
 /** Home's shape (SPEC #16): the feature wall's state, Recently saved (holding the Inbox), one Rediscover pick, collections. */

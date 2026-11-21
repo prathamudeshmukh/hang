@@ -1,9 +1,7 @@
-import { MARK_COLOURS } from '../theme/hangMark.ts';
 import type { Scheme } from '../theme/tokens.ts';
-import { hexToHsl, hslToHex, type Hsl } from './colour.ts';
+import { hslToHex, type Hsl } from './colour.ts';
 import { readableFill, type Fill } from './readableFill.ts';
 import type { RoomHue } from './roomHue.ts';
-import { stableIndex } from './stableIndex.ts';
 
 /** A colour as drawn: the flat colour (frames, the hero's start) and its readable gradient. */
 export interface Swatch extends Fill {
@@ -17,7 +15,7 @@ export interface SchemeColours {
   readonly prints: readonly [Swatch, Swatch, Swatch];
 }
 
-/** What the sync step stores per collection (#85): the family for hysteresis (null for grey or no pictures), both schemes. */
+/** What the sync step stores per collection (#85): the family for hysteresis (null for a grey room), both schemes. */
 export interface RoomColours {
   readonly family: number | null;
   readonly light: SchemeColours;
@@ -50,9 +48,6 @@ const REDS = { from: 345, to: 25 } as const;
 const SHADE_STEP = 0.08;
 /** A grey room: the Sage wall's own grey-green, honest about a room of concrete. */
 const GREY: Hsl = { h: 130, s: 0.06, l: 0.42 };
-/** Sage is left out: it's the wall's own colour and passes for a grey room. */
-const { ochre, teal, rose, blue } = MARK_COLOURS;
-const ICON_COLOURS = [ochre, teal, rose, blue] as const;
 
 const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
 const isRed = ({ h }: Hsl) => h >= REDS.from || h <= REDS.to;
@@ -83,14 +78,12 @@ function schemeColours(base: Hsl, scheme: Scheme): SchemeColours {
   return { colour, fill: readableFill(colour), prints: [swatchOf(room), swatchOf(shade(room, range, 1)), swatchOf(shade(room, range, -1))] };
 }
 
-function baseOf(hue: RoomHue, collectionId: string): Hsl {
-  if (hue.kind === 'family') return hue.base;
-  if (hue.kind === 'grey') return GREY;
-  return hexToHsl(ICON_COLOURS[stableIndex(collectionId, ICON_COLOURS.length)] ?? ochre);
-}
-
-/** Pure: a room's hue made rich and readable for both walls (#85 rules 5–6). */
-export function roomColours(hue: RoomHue, collectionId: string): RoomColours {
-  const base = baseOf(hue, collectionId);
+/**
+ * Pure: a room's hue made rich and readable for both walls (#85 rules 5–6). A room whose pictures give no colour has
+ * none (#96): colour only says what hangs there, so it's never made up.
+ */
+export function roomColours(hue: RoomHue): RoomColours | null {
+  if (hue.kind === 'none') return null;
+  const base = hue.kind === 'family' ? hue.base : GREY;
   return { family: hue.kind === 'family' ? hue.family : null, light: schemeColours(base, 'light'), dark: schemeColours(base, 'dark') };
 }

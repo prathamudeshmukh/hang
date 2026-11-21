@@ -161,17 +161,26 @@ describe('readPlace', () => {
 
 describe('room colours in the lists (#85)', () => {
   let s: ReturnType<typeof setup>;
-  const GREEN_ROOM = roomColours({ kind: 'family', family: 4, base: { h: 128, s: 0.6, l: 0.4 } }, 'c1');
+  const GREEN_ROOM = roomColours({ kind: 'family', family: 4, base: { h: 128, s: 0.6, l: 0.4 } })!;
   beforeEach(() => {
     s = setup();
     s.collections.create({ id: 'c1', name: 'Garden' });
     s.collections.create({ id: 'c2', name: 'New' });
   });
 
-  it('gives each collection row its stored colour, or an icon colour until the first one is stored', () => {
+  it('gives each collection row its stored colour, or none when nothing it holds gives one (#96)', () => {
     s.rooms.save('c1', GREEN_ROOM);
     const rows = readHome(s.sources, AT).collections;
-    assert.deepEqual(rows.map(({ colours }) => colours.light.colour), [GREEN_ROOM.light.colour, roomColours({ kind: 'none' }, 'c2').light.colour]);
+    assert.deepEqual(rows.map(({ colours }) => colours?.light.colour ?? null), [GREEN_ROOM.light.colour, null]);
+  });
+
+  it('leaves a card in a room without colour on plain paper (#96)', () => {
+    s.save('words', 'c2');
+    assert.equal(readHome(s.sources, AT).recent[0]?.card.swatch, null);
+  });
+
+  it('leaves a room without colour unpainted (#96)', () => {
+    assert.equal(readPlace(s.sources, { kind: 'collection', id: 'c2' }, CARD_NOW)?.room, null);
   });
 
   it('gives a card in a collection one of its room\'s print colours, and an unsorted card none', () => {

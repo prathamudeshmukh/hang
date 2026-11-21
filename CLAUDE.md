@@ -170,8 +170,10 @@ device so Rediscover has a pick.
 
 Room colours (`src/rooms/`, #85): after every sync `roomColourSync` (wired in `appSession.ts` beside thumbnails)
 runs pure `roomHue` (votes = newest 12 palettes, `vibrant ?? dominant`) → `roomColours` (rich per scheme, three print
-colours, grey/icon fallbacks, each through `readableFill` for 4.5:1) and stores the result in the local-only
-`room_colours` table, writing only rooms that changed (every write wakes the live queries). The lists only read it:
+colours, a grey fallback, each through `readableFill` for 4.5:1) and stores the result in the local-only
+`room_colours` table, writing only rooms that changed (every write wakes the live queries). A room whose pictures
+give no colour has none and no row (#96): colour only says what hangs there, repeats are fine, nothing makes it unique.
+Home's cover (`collectionCover`, pure): newest picture → colour → initial on `raised` → plain `raised` when empty. The lists only read it:
 `listCard` (`src/grid/`) gives a card in a room its `swatch` (id-picked, never on posts or unsorted items), shared by
 Home and the feed so the hero lands on the right colour. `Paper` (`src/theme/`) draws a fill and switches its children
 to a `paper*` theme whose inks are all the one checked ink; `PrintPaper` falls back to plain `raised`.
