@@ -15,8 +15,8 @@ describe('lookOf', () => {
     assert.deepEqual(lookOf(cardOf({ kind: 'image', ...TALL })), { kind: 'picture', uri: THUMB, landing: { fit: 'contain', ratio: 3 } });
   });
 
-  it('flies a video poster to fill the media box', () => {
-    assert.deepEqual(lookOf(cardOf({ kind: 'video', ...TALL })), { kind: 'picture', uri: THUMB, landing: { fit: 'cover' } });
+  it('flies a video poster to the media box, at its own ratio (#95)', () => {
+    assert.deepEqual(lookOf(cardOf({ kind: 'video', ...TALL })), { kind: 'picture', uri: THUMB, landing: { fit: 'media', ratio: 3 } });
   });
 
   it('flies an empty frame for a text face (decision 2), to the media box', () => {
@@ -32,7 +32,7 @@ describe('lookOf', () => {
   });
 
   it('still flies an article’s picture when it has an opening', () => {
-    assert.deepEqual(lookOf(cardOf({ kind: 'article', ...TALL }), true), { kind: 'picture', uri: THUMB, landing: { fit: 'cover' } });
+    assert.deepEqual(lookOf(cardOf({ kind: 'article', ...TALL }), true), { kind: 'picture', uri: THUMB, landing: { fit: 'media', ratio: 3 } });
   });
 
   it('flies an empty frame while the thumbnail is not on the device yet', () => {

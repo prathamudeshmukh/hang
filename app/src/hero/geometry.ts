@@ -19,11 +19,13 @@ export interface Size {
 export type FeedFrame = PostFrame & TextFrame;
 
 /**
- * Where a feed page draws its media: an image fits whole on the page (#60), everything else fills the box (#31);
- * a post lands on its words' place instead (#59), an imageless article on its text block (#61).
+ * Where a feed page draws its media: an image fits whole on the page (#60), a picture sits in the box as `mediaFit`
+ * places it (#95), a text face fills the box (#31); a post lands on its words' place instead (#59), an imageless
+ * article on its text block (#61).
  */
 export type Landing =
   | { readonly fit: 'contain'; readonly ratio: number }
+  | { readonly fit: 'media'; readonly ratio: number }
   | { readonly fit: 'cover' }
   | { readonly fit: 'words' }
   | { readonly fit: 'text' };
@@ -48,11 +50,33 @@ export function fittedRect(box: Rect, ratio: number): Rect {
   return { x: box.x + (box.width - width) / 2, y: box.y + (box.height - height) / 2, width, height };
 }
 
+/** How much of a picture's width cover may cut before the feed draws it whole instead (#95): thin bands look like a mistake. */
+export const COVER_CROP_LIMIT = 0.1;
+
+/** How a feed page draws a picture in its media box: cropped to fill it, or whole at this rect (#95). */
+export type MediaFit = { readonly fit: 'cover' } | { readonly fit: 'whole'; readonly rect: Rect };
+
+const COVER: MediaFit = { fit: 'cover' };
+
+/** Wider pictures are drawn whole, centred; taller ones and near-fits keep cover, cropped from the bottom. */
+export function mediaFit(box: Rect, ratio: number): MediaFit {
+  if (!(ratio > 0)) return COVER;
+  const coverCrop = 1 - (box.width * ratio) / box.height;
+  return coverCrop > COVER_CROP_LIMIT ? { fit: 'whole', rect: fittedRect(box, ratio) } : COVER;
+}
+
+function pictureRect(box: Rect, ratio: number): Rect {
+  const placed = mediaFit(box, ratio);
+  return placed.fit === 'whole' ? placed.rect : box;
+}
+
 /** The rect a flight to (or from) the feed uses, so the swap with the real image is pixel-identical. */
 export function landingRect(feed: FeedFrame, landing: Landing, print: Rect): Rect {
   if (landing.fit === 'words') return wordsPlace(feed, print.height / print.width);
   if (landing.fit === 'text') return textPlace(feed);
-  return landing.fit === 'contain' ? fittedRect(feedPageRect(feed), landing.ratio) : feedMediaRect(feed);
+  if (landing.fit === 'contain') return fittedRect(feedPageRect(feed), landing.ratio);
+  if (landing.fit === 'media') return pictureRect(feedMediaRect(feed), landing.ratio);
+  return feedMediaRect(feed);
 }
 
 const SIZE_OF: Readonly<Record<Axis, 'width' | 'height'>> = { x: 'width', y: 'height' };

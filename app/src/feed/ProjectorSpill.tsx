@@ -35,4 +35,18 @@ export function ProjectorSpill({ uri, pageHeight, mediaHeight }: ProjectorSpillP
   );
 }
 
+interface PictureGlowProps {
+  readonly uri: string;
+  readonly mediaHeight: number;
+}
+
+/** Behind a picture drawn whole (#95): the same faint glow as the spill, filling the box so it has no hard edge. */
+export function PictureGlow({ uri, mediaHeight }: PictureGlowProps) {
+  return (
+    <View pointerEvents="none" accessible={false} importantForAccessibility="no-hide-descendants" style={[styles.spill, { top: 0, height: mediaHeight }]}>
+      <Image source={{ uri }} blurRadius={SPILL.blurRadius} contentFit="cover" style={[StyleSheet.absoluteFill, { opacity: SPILL.opacity }]} />
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({ spill: { position: 'absolute', left: 0, right: 0, overflow: 'hidden' } });

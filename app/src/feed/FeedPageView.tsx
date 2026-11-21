@@ -10,7 +10,8 @@ import { useFeedStyles } from './feedStyles';
 import { PAGE_ACTIONS, stepOf, type PageStep } from './pageA11y';
 import { ImagePageView } from './image/ImagePageView';
 import { PostPageView } from './post/PostPageView';
-import { ProjectorSpill } from './ProjectorSpill';
+import { PictureGlow, ProjectorSpill } from './ProjectorSpill';
+import { usePictureFit } from './usePictureFit';
 import { OpeningText } from './text/OpeningText';
 import { TextPageView } from './text/TextPageView';
 import { useFeedTextFade } from './useFeedHero';
@@ -35,10 +36,12 @@ function MediaPageView({ page, height, bottomInset, onOpen, onMove, onStep, onMe
   const textFade = useFeedTextFade();
   const media = mediaHeight(height);
   const spillUri = page.media.kind === 'picture' ? page.media.media.uri : null;
+  const fit = usePictureFit(page.media, media);
   return (
     <View style={[styles.page, { height }]}>
       {spillUri ? (
         <Animated.View pointerEvents="none" style={[StyleSheet.absoluteFill, textFade]}>
+          {fit.fit === 'whole' ? <PictureGlow uri={spillUri} mediaHeight={media} /> : null}
           <ProjectorSpill uri={spillUri} pageHeight={height} mediaHeight={media} />
         </Animated.View>
       ) : null}
@@ -51,7 +54,7 @@ function MediaPageView({ page, height, bottomInset, onOpen, onMove, onStep, onMe
           if (step) onStep(step);
         }}
       >
-        <FeedMediaView page={page} height={media} onDrawn={onMediaDrawn} />
+        <FeedMediaView page={page} height={media} fit={fit} onDrawn={onMediaDrawn} />
       </View>
       <Animated.View style={[styles.text, { paddingBottom: bottomInset }, textFade]}>
         <View style={[styles.words, page.opening && styles.wordsFilling]}>

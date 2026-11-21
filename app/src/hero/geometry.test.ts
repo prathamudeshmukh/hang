@@ -1,7 +1,7 @@
 /// <reference types="node" />
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
-import { centringShift, feedMediaRect, fittedRect, insetRect, isFullyInside, landingRect } from './geometry.ts';
+import { centringShift, feedMediaRect, fittedRect, insetRect, isFullyInside, landingRect, mediaFit } from './geometry.ts';
 
 const FEED = { width: 400, height: 1000, wordsTop: 120, textTop: 80, textBottom: 880 };
 const PRINT = { x: 20, y: 300, width: 180, height: 90 };
@@ -27,6 +27,30 @@ describe('fittedRect', () => {
   });
 });
 
+describe('mediaFit', () => {
+  const BOX = { x: 0, y: 0, width: 400, height: 560 };
+
+  it('draws a picture wider than the box whole, centred down (#95)', () => {
+    assert.deepEqual(mediaFit(BOX, 0.5), { fit: 'whole', rect: { x: 0, y: 180, width: 400, height: 200 } });
+  });
+
+  it('keeps cover when it would cut at most a tenth of the picture’s width', () => {
+    assert.deepEqual(mediaFit(BOX, 1.3), { fit: 'cover' });
+  });
+
+  it('draws whole once cover would cut more than a tenth', () => {
+    assert.equal(mediaFit(BOX, 1.2).fit, 'whole');
+  });
+
+  it('keeps cover for a picture taller than the box', () => {
+    assert.deepEqual(mediaFit(BOX, 2), { fit: 'cover' });
+  });
+
+  it('keeps cover when the ratio is not a usable number', () => {
+    assert.deepEqual(mediaFit(BOX, 0), { fit: 'cover' });
+  });
+});
+
 describe('landingRect', () => {
   it('lands a whole (contain) image on its rect fitted to the whole page (#60)', () => {
     assert.deepEqual(landingRect(FEED, { fit: 'contain', ratio: 0.5 }, PRINT), { x: 0, y: 400, width: 400, height: 200 });
@@ -34,6 +58,14 @@ describe('landingRect', () => {
 
   it('lands a tall whole image on the page’s full height, centred across', () => {
     assert.deepEqual(landingRect(FEED, { fit: 'contain', ratio: 5 }, PRINT), { x: 100, y: 0, width: 200, height: 1000 });
+  });
+
+  it('lands a wide picture on its whole rect in the media box (#95)', () => {
+    assert.deepEqual(landingRect(FEED, { fit: 'media', ratio: 0.5 }, PRINT), { x: 0, y: 180, width: 400, height: 200 });
+  });
+
+  it('lands a tall picture on the media box', () => {
+    assert.deepEqual(landingRect(FEED, { fit: 'media', ratio: 2 }, PRINT), { x: 0, y: 0, width: 400, height: 560 });
   });
 
   it('lands everything else on the media box', () => {

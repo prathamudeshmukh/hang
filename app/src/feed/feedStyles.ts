@@ -11,6 +11,8 @@ export const useFeedStyles = makeStyles(({ color }) => ({
   screen: { flex: 1, backgroundColor: color.wall },
   page: { backgroundColor: color.wall },
   media: { width: '100%', backgroundColor: color.raised, overflow: 'hidden' },
+  /** A picture drawn whole sits on its own glow, not on a raised box (#95). */
+  mediaOpen: { backgroundColor: 'transparent' },
   picture: { width: '100%', height: '100%' },
   playDisc: {
     position: 'absolute',

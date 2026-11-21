@@ -20,12 +20,21 @@ async function openAndLand(harness: ReturnType<typeof heroHarness>) {
 }
 
 describe('hero: out to the feed', () => {
-  it('flies the tapped print to the feed media box, with the feed hidden until it lands', async () => {
+  it('flies the tapped wide print whole into the feed media box, with the feed hidden until it lands', async () => {
     const harness = withFace(heroHarness());
     await openAndLand(harness);
     assert.deepEqual(harness.calls, ['feed:0:0', 'board:out', 'push', 'fly:picture', 'feed:1:0', 'leave:out']);
-    assert.deepEqual(harness.flights[0].to, { x: 0, y: 0, width: FEED.width, height: 560 });
+    assert.deepEqual(harness.flights[0].to, { x: 0, y: (560 - 225) / 2, width: FEED.width, height: 225 });
     assert.equal(harness.hero.trip().phase, 'idle');
+  });
+
+  it('flies a picture taller than the box to fill the whole media box (#95)', async () => {
+    const harness = withFace(heroHarness());
+    harness.hero.open({ ids: IDS, card: aCard({ thumbW: 900, thumbH: 1600 }), scope: SCOPE });
+    await flush();
+    harness.hero.flyerDrawn();
+    await flush();
+    assert.deepEqual(harness.flights[0].to, { x: 0, y: 0, width: FEED.width, height: 560 });
   });
 
   it('flies a post’s print to the words’ place, at the print’s own shape (#59)', async () => {
