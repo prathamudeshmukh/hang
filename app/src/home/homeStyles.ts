@@ -79,6 +79,7 @@ export const useHomeStyles = makeStyles(({ color }) => ({
     borderColor: color.rule,
   },
   cover: { ...print, width: HOME_SIZE.cover, height: HOME_SIZE.cover, backgroundColor: color.raised },
+  coverInitial: { alignItems: 'center', justifyContent: 'center' },
   coverPlaceholder: { ...print, width: HOME_SIZE.cover, height: HOME_SIZE.cover, borderWidth: 1, borderStyle: 'dashed', borderColor: color.ink3 },
   collectionName: { flex: 1 },
   input: { ...textStyle('action'), color: color.ink, padding: 0, flex: 1 },

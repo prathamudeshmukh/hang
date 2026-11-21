@@ -30,7 +30,7 @@ function seedLocalData(t: ReturnType<typeof setup>): void {
   t.db.insert(syncState).values({ tableName: 'items', cursorUpdatedAt: '2026-11-09T10:00:00+00:00', cursorId: 'i1' }).run();
   t.db.insert(thumbFiles).values({ itemId: 'i1', fileUri: 'file:///thumbs/i1.webp' }).run();
   t.db.insert(firstPull).values({ id: 1, pulledAt: '2026-11-09T10:00:00.000Z' }).run();
-  const { light, dark } = roomColours({ kind: 'none' }, 'c1');
+  const { light, dark } = roomColours({ kind: 'grey' })!;
   t.db.insert(roomColourRows).values({ collectionId: 'c1', family: null, colours: { light, dark } }).run();
 }
 

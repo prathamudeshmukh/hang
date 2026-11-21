@@ -11,12 +11,16 @@ export function createRoomColourSync(store: RoomColourStore) {
       const ids = store.collectionIds();
       const votes = store.votes();
       const stored = store.all();
-      ids.forEach((id) => {
+      const coloured = ids.flatMap((id) => {
         const before = stored.get(id);
-        const after = roomColours(roomHue(votes.get(id) ?? [], before?.family ?? null), id);
+        const after = roomColours(roomHue(votes.get(id) ?? [], before?.family ?? null));
+        if (!after) return [];
         if (!same(before, after)) store.save(id, after);
+        return [id];
       });
-      store.keepOnly(ids);
+      // A room without colour (#96) keeps no row: an emptied room forgets the colour of things that have left, family
+      // included, so it starts fresh (no hysteresis) when pictures come back.
+      store.keepOnly(coloured);
     },
   };
 }
