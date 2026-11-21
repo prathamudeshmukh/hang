@@ -151,7 +151,7 @@ export const thumbFiles = sqliteTable('thumb_files', {
 
 /**
  * Local only (#85): each collection's colour, worked out after every sync from its pictures. `family` is kept for
- * hysteresis (null for a grey room or one without pictures); `colours` holds both schemes, ready to draw.
+ * hysteresis (null for a grey room); a room without colour has no row (#96); `colours` holds both schemes, ready to draw.
  */
 export const roomColours = sqliteTable('room_colours', {
   collectionId: text('collection_id').primaryKey(),

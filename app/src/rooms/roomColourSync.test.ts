@@ -1,15 +1,17 @@
 /// <reference types="node" />
 import assert from 'node:assert/strict';
 import { beforeEach, describe, it } from 'node:test';
-import { collections, items, type ItemKind } from '../db/schema.ts';
+import { collections, items, roomColours as roomColourRows, type ItemKind } from '../db/schema.ts';
 import { createTestDb } from '../db/testing/testDb.ts';
 import type { HangDb } from '../db/types.ts';
 import { createRoomColourStore } from './roomColourStore.ts';
 import { createRoomColourSync } from './roomColourSync.ts';
+import { roomColours } from './roomColours.ts';
 
 const GREEN = '#3f8f4a';
 const BLUE = '#2e4a9d';
 const WHITE = '#fafafa';
+const GREEN_ROOM = roomColours({ kind: 'family', family: 4, base: { h: 128, s: 0.6, l: 0.4 } })!;
 
 interface Seed {
   readonly id: string;
@@ -78,10 +80,29 @@ describe('room colour sync', () => {
     assert.deepEqual(saves, []);
   });
 
-  it('gives a room without pictures a colour, and forgets rooms that were deleted', () => {
-    collection('gone', true);
+  it('stores no colour for a room without pictures (#96)', () => {
     db.insert(items).values({ id: 'text', collectionId: 'c1', sourceUrl: 'https://a.test/t', status: 'ready', createdAt: '2026-11-10T00:00:00Z' }).run();
     run();
-    assert.deepEqual([store().all().get('c1')?.family, store().all().has('gone')], [null, false]);
+    assert.equal(store().all().has('c1'), false);
+  });
+
+  it('keeps a grey room\'s colour: grey is what its pictures say', () => {
+    item({ id: 'concrete', day: 9 });
+    run();
+    assert.deepEqual([store().all().has('c1'), familyOf('c1')], [true, null]);
+  });
+
+  it('forgets the colour of a room that was deleted', () => {
+    collection('gone', true);
+    db.insert(roomColourRows).values({ collectionId: 'gone', family: 4, colours: { light: GREEN_ROOM.light, dark: GREEN_ROOM.dark } }).run();
+    run();
+    assert.equal(store().all().has('gone'), false);
+  });
+
+  it('forgets an emptied room\'s colour, so it never shows things that have left (#96)', () => {
+    item({ id: 'g', vibrant: GREEN, day: 9, deleted: true });
+    db.insert(roomColourRows).values({ collectionId: 'c1', family: 4, colours: { light: GREEN_ROOM.light, dark: GREEN_ROOM.dark } }).run();
+    run();
+    assert.equal(store().all().has('c1'), false);
   });
 });

@@ -10,9 +10,10 @@ export interface CardContext {
   readonly now: Date;
 }
 
-/** A card as the lists draw it: an item hung in a room takes one of the room's print colours; a post (ruled, unboxed) never does. */
+/** A card as the lists draw it: an item hung in a coloured room takes one of its print colours; a post (ruled, unboxed) never does. */
 export function listCard(item: Item, { thumbs, rooms, now }: CardContext): CardModel {
   const card = toCardModel(item, thumbs.get(item.id) ?? null, now);
-  if (item.collectionId === null || card.variant === 'post') return card;
-  return { ...card, swatch: printSwatch(roomOf(rooms, item.collectionId), item.id) };
+  const room = item.collectionId === null ? null : roomOf(rooms, item.collectionId);
+  if (!room || card.variant === 'post') return card;
+  return { ...card, swatch: printSwatch(room, item.id) };
 }

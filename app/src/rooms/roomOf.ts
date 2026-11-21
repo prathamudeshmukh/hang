@@ -1,4 +1,4 @@
-import { roomColours, type RoomColours, type Swatch } from './roomColours.ts';
+import type { RoomColours, Swatch } from './roomColours.ts';
 import { stableIndex } from './stableIndex.ts';
 
 /** A print's colour in both schemes, drawn when it has no picture (#85). */
@@ -9,9 +9,9 @@ export interface PrintSwatch {
 
 const PRINT_COLOURS = 3;
 
-/** A collection's stored colours, or its icon colour until the sync step has stored some (a collection just made). */
-export const roomOf = (stored: ReadonlyMap<string, RoomColours>, collectionId: string): RoomColours =>
-  stored.get(collectionId) ?? roomColours({ kind: 'none' }, collectionId);
+/** A collection's stored colours; null when nothing it holds gives one, or before the sync step has run (#96). */
+export const roomOf = (stored: ReadonlyMap<string, RoomColours>, collectionId: string): RoomColours | null =>
+  stored.get(collectionId) ?? null;
 
 /** One of the room's three print colours, the same for the item everywhere it's drawn. */
 export function printSwatch(room: RoomColours, itemId: string): PrintSwatch {
