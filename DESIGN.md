@@ -130,7 +130,7 @@ better; a colour that can't is pushed away from its ink until it does. Inside a 
 
 | Where | How |
 |---|---|
-| Home · collections | The cover is the newest picture, unframed; no picture yet → the colour; no colour → the room's initial on `raised`; nothing in it → plain `raised` |
+| Home · room tiles | Pictures unframed; cells the pictures can't fill take the room's three shades (§8 "Rooms on Home"); no colour → the newest title on `raised`; nothing in it → plain `raised` |
 | Collection header | The title painted in the colour from the top of the screen (behind the status bar) to just under the underline; the underline draws in its ink; the status bar icons follow it until it scrolls away. Kind filters, Shuffle and notes stay on the wall |
 | Prints without a picture | Articles without an image, videos without a poster, wall-label links, failed reads: on one of the room's three shades, picked by the item's id, the same in the collection, Recently saved and Rediscover |
 | Fetching | A print still being read, and a picture still downloading, wait on their colour with *fetching…* instead of a dashed outline; the picture cross-fades over it. One that never comes or fails to load leaves the colour |
@@ -176,7 +176,7 @@ Newsreader's optical-size axis is set automatically from the point size.
 | `display` | Newsreader | 40 / 1.0, −3% | 350 | Collection title, "Good evening" |
 | `title-l` | Newsreader | 30 / 1.05, −2% | 350 | Swipe feed title |
 | `title` | Newsreader | 26 / 1.1, −2% | 400 | Reader headline |
-| `title-s` | Newsreader | 18 / 1.15 | 400 | Section names, Rediscover, collection rows |
+| `title-s` | Newsreader | 18 / 1.15 | 400 | Section names, Rediscover, room labels and a room of words' title on Home |
 | `body-read` | Newsreader | 17 / 1.6 | 400 | Reader body (user can adjust 15–21) |
 | `note` | Newsreader *italic* | 13 / 1.35 | 400 | Catalogue notes |
 | `byline` | Newsreader | 14 / 1.3 | 400 | A post card's author, above its words |
@@ -292,6 +292,29 @@ Reviewed kind by kind on 2026-11-16 (`.lavish/print-kinds.html`). Posts gained t
 Mocked and turned down: serif titles and a "first page" for articles; a film-black mat or a corner stamp instead of
 the play disc on videos; a hanging quote mark for posts (breaks the ruled post); a bare print or source-only note for
 images; the host as a nameplate for links (every link from one site still looks the same).
+
+### Rooms on Home (#106)
+
+Under *Collections · ten*, rooms hang as a two-column wall of square tiles (12dp between columns, 16dp between
+rows). Each tile is a small mosaic of what hangs there: the newest picture takes the left two thirds and the next two
+stack on the right, with 2dp wall gaps between cells, like the icon's tiles. No frame and no colour border (#90).
+
+- **Too few pictures:** the cells left take the room's three print shades (§3), as `Paper` gradients. A room whose
+  pictures haven't downloaded yet is all shades.
+- **A room of words** (items, no colour): its newest item's title in `title-s`, up to five lines, on `raised` in the
+  large cell; the small cells plain `raised`.
+- **Empty:** three plain `raised` cells.
+- **Label:** under the tile, like a wall label: the name in `title-s` on one line (cut off) and the count as a note,
+  right-aligned.
+- **Order:** the room whose newest item was saved most recently comes first; empty rooms last, in the order they
+  were made. Moving an older item in doesn't bring a room up. Manual reorder waits for housekeeping.
+- **＋ New room:** the last place on the wall, an empty square with a hairline `rule` outline (never dashed: dashed
+  means fetching or waiting on Home) and *＋ New room* in the action voice. Tapping it turns the label into the name
+  field (*Name the room*); Enter creates, empty or tapping away cancels.
+
+Chosen 2026-11-21 (`.lavish/room-tiles.html`) over a flat list of rows. Turned down: an equal 2×2 mosaic (cells too
+small, rooms look alike), a shelf of prints per room (long page, sideways scroll in a page that scrolls down), one
+cover per tile, the name over the pictures (needs a scrim), and a painted name band (the frame #90 removed).
 
 ### Empty Home: the how-to (#75)
 

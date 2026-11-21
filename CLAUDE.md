@@ -173,7 +173,7 @@ runs pure `roomHue` (votes = newest 12 palettes, `vibrant ?? dominant`) → `roo
 colours, a grey fallback, each through `readableFill` for 4.5:1) and stores the result in the local-only
 `room_colours` table, writing only rooms that changed (every write wakes the live queries). A room whose pictures
 give no colour has none and no row (#96): colour only says what hangs there, repeats are fine, nothing makes it unique.
-Home's cover (`collectionCover`, pure): newest picture → colour → initial on `raised` → plain `raised` when empty. The lists only read it:
+Home's rooms (#106) are mosaic tiles: pure `roomMosaic` (3 newest pictures → room shades → newest title → plain `raised`), `roomOrder` (newest item first), drawn by `RoomGrid` as one keyed wrapping list; `useKeyboardRoom` pads and scrolls Home so the name field clears the keyboard. The lists only read the colour:
 `listCard` (`src/grid/`) gives a card in a room its `swatch` (id-picked, never on posts or unsorted items), shared by
 Home and the feed so the hero lands on the right colour. `Paper` (`src/theme/`) draws a fill and switches its children
 to a `paper*` theme whose inks are all the one checked ink; `PrintPaper` falls back to plain `raised`.

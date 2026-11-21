@@ -1,14 +1,12 @@
 import { makeStyles } from '@/theme/theme';
 import { RADIUS, SPACE } from '@/theme/tokens';
-import { textStyle } from '@/theme/typeScale';
 
-/** DESIGN.md Home sheet: a 76×98 strip print, a 62dp Rediscover print, 40dp collection covers, 88dp how-to prints (#75). */
+/** DESIGN.md Home sheet: a 76×98 strip print, a 62dp Rediscover print, 88dp how-to prints (#75). */
 export const HOME_SIZE = {
   howto: 88,
   stripWidth: 76,
   stripHeight: 98,
   rediscover: 62,
-  cover: 40,
   inboxDot: 6,
 } as const;
 
@@ -17,7 +15,6 @@ const STRIP_GAP = 8;
 const ROW_GAP = 10;
 const HOWTO_STEP_GAP = 12;
 const HOWTO_TEXT_GAP = 14;
-const ROW_PADDING = 9;
 const FADED = 0.5;
 
 const print = { borderRadius: RADIUS.print, overflow: 'hidden' } as const;
@@ -68,21 +65,6 @@ export const useHomeStyles = makeStyles(({ color }) => ({
   rediscover: { flexDirection: 'row', alignItems: 'center', gap: ROW_GAP },
   rediscoverFrame: { ...print, width: HOME_SIZE.rediscover, height: HOME_SIZE.rediscover, backgroundColor: color.raised },
   rowText: { flex: 1, gap: SPACE.hair },
-  /** One style object: expo-router's `Link asChild` rejects style arrays. */
-  collectionRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: ROW_GAP,
-    paddingVertical: ROW_PADDING,
-    minHeight: SPACE.touch,
-    borderTopWidth: 1,
-    borderColor: color.rule,
-  },
-  cover: { ...print, width: HOME_SIZE.cover, height: HOME_SIZE.cover, backgroundColor: color.raised },
-  coverInitial: { alignItems: 'center', justifyContent: 'center' },
-  coverPlaceholder: { ...print, width: HOME_SIZE.cover, height: HOME_SIZE.cover, borderWidth: 1, borderStyle: 'dashed', borderColor: color.ink3 },
-  collectionName: { flex: 1 },
-  input: { ...textStyle('action'), color: color.ink, padding: 0, flex: 1 },
   footer: { marginTop: SPACE.screenBottom, paddingTop: SPACE.rhythm, borderTopWidth: 1, borderColor: color.rule, flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap' },
   footerAction: { minHeight: SPACE.touch, justifyContent: 'center' },
 }));

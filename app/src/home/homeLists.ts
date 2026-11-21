@@ -1,16 +1,19 @@
 import type { CollectionsRepository } from '../db/collectionsRepository.ts';
 import type { FirstPullRepository } from '../db/firstPullRepository.ts';
-import type { ItemsRepository } from '../db/itemsRepository.ts';
+import type { ItemsRepository, NewestItem } from '../db/itemsRepository.ts';
 import type { Item } from '../db/schema.ts';
 import type { RoomColours } from '../rooms/roomColours.ts';
 import type { RoomColourStore } from '../rooms/roomColourStore.ts';
 import { roomOf } from '../rooms/roomOf.ts';
 import type { ThumbStore } from '../thumbs/thumbStore.ts';
 import type { CardModel } from '../grid/cardModel.ts';
+import { hostOf } from '../grid/host.ts';
 import { listCard, type CardContext } from '../grid/listCard.ts';
 import { dayKey, savedMonthNote } from './homeCopy.ts';
 import { wallState, type WallState } from './homeWall.ts';
 import { pickRediscover, rediscoverWindow } from './rediscover.ts';
+import { MOSAIC_PICTURES, type MosaicSource } from './roomMosaic.ts';
+import { roomOrder } from './roomOrder.ts';
 
 /** SPEC §5 "Recently saved": the latest 12 items by created_at. */
 export const RECENT_LIMIT = 12;
@@ -29,13 +32,13 @@ export interface RediscoverPick {
   readonly stampedToday: boolean;
 }
 
-export interface CollectionRow {
+/** A room's tile on Home (#106): what `roomMosaic` hangs, and what orders it. */
+export interface CollectionRow extends MosaicSource {
   readonly id: string;
   readonly name: string;
-  readonly count: number;
-  readonly coverUri: string | null;
-  /** The room's colour (#85), the cover while its picture hasn't come; null when nothing it holds gives one (#96). */
+  /** The room's colour (#85): its shades fill the cells pictures can't; null when nothing it holds gives one (#96). */
   readonly colours: RoomColours | null;
+  readonly newestAt: string | null;
 }
 
 /** Home's shape (SPEC #16): the feature wall's state, Recently saved (holding the Inbox), one Rediscover pick, collections. */
@@ -57,9 +60,9 @@ export interface PlaceList {
 }
 
 export interface ListSources {
-  readonly items: Pick<ItemsRepository, 'listRecent' | 'listInbox' | 'listInCollection' | 'listRediscoverCandidates' | 'getById' | 'countByCollection'>;
+  readonly items: Pick<ItemsRepository, 'listRecent' | 'listInbox' | 'listInCollection' | 'listRediscoverCandidates' | 'getById' | 'countByCollection' | 'newestByCollection'>;
   readonly collections: Pick<CollectionsRepository, 'list'>;
-  readonly thumbs: Pick<ThumbStore, 'fileUris' | 'coversByCollection'>;
+  readonly thumbs: Pick<ThumbStore, 'fileUris' | 'picturesByCollection'>;
   readonly firstPulls: Pick<FirstPullRepository, 'hasPulled'>;
   readonly rooms: Pick<RoomColourStore, 'all'>;
 }
@@ -86,11 +89,25 @@ function readRediscover(sources: ListSources, context: CardContext): RediscoverP
   };
 }
 
+/** What a room of words is called on its tile: its newest item's name, as its card would say it. */
+const wordsOf = (item: NewestItem) => item.title ?? item.sharedTitle ?? item.siteName ?? hostOf(item.sourceUrl);
+
 function readCollections(sources: ListSources, counts: ReadonlyMap<string | null, number>, rooms: ReadonlyMap<string, RoomColours>): readonly CollectionRow[] {
-  const covers = sources.thumbs.coversByCollection();
-  return sources.collections
-    .list()
-    .map(({ id, name }) => ({ id, name, count: counts.get(id) ?? 0, coverUri: covers.get(id) ?? null, colours: roomOf(rooms, id) }));
+  const pictures = sources.thumbs.picturesByCollection(MOSAIC_PICTURES);
+  const newest = sources.items.newestByCollection();
+  const rows = sources.collections.list().map(({ id, name }): CollectionRow => {
+    const item = newest.get(id);
+    return {
+      id,
+      name,
+      count: counts.get(id) ?? 0,
+      pictures: pictures.get(id) ?? [],
+      colours: roomOf(rooms, id),
+      newestAt: item?.createdAt ?? null,
+      newestWords: item ? wordsOf(item) : null,
+    };
+  });
+  return roomOrder(rows);
 }
 
 export function readHome(sources: ListSources, { now, syncFailed }: HomeMoment): HomeLists {

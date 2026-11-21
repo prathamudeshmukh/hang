@@ -1,4 +1,4 @@
-import { and, count, desc, eq, inArray, isNull, lt, or, type SQL } from 'drizzle-orm';
+import { and, count, desc, eq, inArray, isNotNull, isNull, lt, or, sql, type SQL } from 'drizzle-orm';
 import type { RediscoverFields, RediscoverWindow } from '../home/rediscover.ts';
 import { chunksOf } from './chunks.ts';
 import { enqueue } from './outboxRepository.ts';
@@ -16,6 +16,17 @@ export interface NewItem {
 
 /** The fields a user (or Home, on their behalf) can change on an item; everything else is the server's enrichment. */
 type ItemUserFields = Partial<Pick<Item, 'collectionId' | 'readAt' | 'progress' | 'lastOpenedAt' | 'rediscoveredOn' | 'deletedAt'>>;
+
+/** What Home's tile reads of a room's newest item (#106). */
+export type NewestItem = Pick<Item, 'createdAt' | 'title' | 'sharedTitle' | 'siteName' | 'sourceUrl'>;
+
+const NEWEST_ITEM_COLUMNS = {
+  createdAt: items.createdAt,
+  title: items.title,
+  sharedTitle: items.sharedTitle,
+  siteName: items.siteName,
+  sourceUrl: items.sourceUrl,
+};
 
 const live = isNull(items.deletedAt);
 function assertCollectionExists(tx: HangDb, collectionId: string): void {
@@ -108,6 +119,22 @@ export function createItemsRepository({ db, clock }: RepositoryDeps) {
     countByCollection(): ReadonlyMap<string | null, number> {
       const rows = db.select({ collectionId: items.collectionId, total: count() }).from(items).where(live).groupBy(items.collectionId).all();
       return new Map(rows.map(({ collectionId, total }) => [collectionId, total]));
+    },
+
+    /** Each collection's newest live item, light: when it came and what it's called (Home's tiles, #106). */
+    newestByCollection(): ReadonlyMap<string, NewestItem> {
+      // Ranked in SQLite so Home, re-read on every sync write, reads one row a room, not the library.
+      const ranked = db
+        .select({
+          collectionId: items.collectionId,
+          ...NEWEST_ITEM_COLUMNS,
+          rank: sql<number>`row_number() over (partition by ${items.collectionId} order by ${items.createdAt} desc, ${items.id} desc)`.as('rank'),
+        })
+        .from(items)
+        .where(and(live, isNotNull(items.collectionId)))
+        .as('ranked');
+      const rows = db.select().from(ranked).where(eq(ranked.rank, 1)).all();
+      return new Map(rows.flatMap(({ collectionId, rank: _rank, ...item }) => (collectionId ? [[collectionId, item] as const] : [])));
     },
 
     /**

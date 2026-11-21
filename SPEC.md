@@ -76,7 +76,7 @@ back to a generic link card (Open Graph image, title, site), never to a broken s
 | 13 | AI | **Claude Haiku 5.5**, one structured call per item → collection, title, summary, tags (with vision for images) |
 | 14 | Offline | Local SQLite copy of metadata, article text and downscaled images; offline shares queue; simple pull-and-push sync |
 | 15 | Search | On-device SQLite **FTS5** over title, site, summary, tags and article text; type filters |
-| 16 | Home | Recently saved strip (holds the Inbox) → one Rediscover pick → collections list |
+| 16 | Home | Recently saved strip (holds the Inbox) → one Rediscover pick → collections as a wall of mosaic tiles, newest first (#106) |
 | 17 | Design | "Curious on a calm base": Gallery direction. Full detail in DESIGN.md |
 | 18 | Name | **Hang** |
 
@@ -297,8 +297,9 @@ Storage bucket `media` (private): `{user_id}/thumbs/{item_id}.webp` and
   item qualifies, the section is hidden. The pick is stamped (`rediscovered_on` = today, local date)
   the first time Home shows it, and an item stamped today stays the pick until tomorrow, even once
   opened. Opening an item from anywhere sets `last_opened_at`.
-- **Collection cover** (Home) = the newest live item in the collection with a downloaded thumbnail,
-  derived on the device.
+- **Room tile** (Home, #106) = the collection's three newest live items with a downloaded thumbnail, and its newest
+  live item (for its title when there's no picture, and for the order: newest `created_at` first, empty rooms last
+  by `position`), derived on the device.
 - **Collection colour** (#85, replacing #34's "no tint"): derived on the device after every sync from the newest
   12 live items' `palette` (`vibrant`, else `dominant`), and kept in the local-only `room_colours` table (never
   synced, wiped with the account), which also holds the current hue family so one new save doesn't flip it. No

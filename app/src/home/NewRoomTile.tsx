@@ -5,16 +5,16 @@ import { COLLECTION_NAME_MAX } from '@/db/validation';
 import { syncTriggers } from '@/sync/syncWiring';
 import { ActionText, NoteText } from '@/theme/Text';
 import { useTheme } from '@/theme/theme';
-import { useHomeStyles } from './homeStyles';
+import { useRoomTileStyles } from './roomTileStyles';
 
 type Draft = { readonly kind: 'idle' } | { readonly kind: 'editing'; readonly error: string | null };
 
 const IDLE: Draft = { kind: 'idle' };
 
-/** "New collection" turns into a field in place: Enter creates, an empty name or tapping away cancels. */
-export function NewCollectionRow() {
+/** The last place on the wall (#106): an empty frame whose label turns into a name field. Enter creates; an empty name or tapping away cancels. */
+export function NewRoomTile({ width }: { readonly width: number }) {
   const [draft, setDraft] = useState<Draft>(IDLE);
-  const styles = useHomeStyles();
+  const styles = useRoomTileStyles();
   const { color } = useTheme();
 
   function create(name: string) {
@@ -27,21 +27,22 @@ export function NewCollectionRow() {
 
   if (draft.kind === 'idle') {
     return (
-      <Pressable testID="new-collection" accessibilityRole="button" android_ripple={{ color: color.ripple }} onPress={() => setDraft({ kind: 'editing', error: null })} style={styles.collectionRow}>
-        <View style={styles.coverPlaceholder} />
-        <ActionText token="action" color="ink3">New collection</ActionText>
+      <Pressable testID="new-collection" accessibilityRole="button" android_ripple={{ color: color.ripple, foreground: true }} onPress={() => setDraft({ kind: 'editing', error: null })} style={{ width }}>
+        <View style={styles.newFrame}>
+          <ActionText token="action" color="ink3">＋ New room</ActionText>
+        </View>
       </Pressable>
     );
   }
 
   return (
-    <View style={styles.collectionRow}>
-      <View style={styles.coverPlaceholder} />
-      <View style={styles.rowText}>
+    <View style={{ width }}>
+      <View style={styles.newFrame} />
+      <View style={styles.newField}>
         <TextInput
           testID="new-collection-name"
           autoFocus
-          placeholder="Name"
+          placeholder="Name the room"
           placeholderTextColor={color.ink3}
           maxLength={COLLECTION_NAME_MAX}
           returnKeyType="done"

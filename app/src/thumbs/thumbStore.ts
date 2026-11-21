@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, inArray, isNotNull, isNull, or } from 'drizzle-orm';
+import { and, asc, desc, eq, inArray, isNotNull, isNull, lte, or, sql } from 'drizzle-orm';
 import { items, thumbFiles, type ThumbFile } from '../db/schema.ts';
 import type { HangDb } from '../db/types.ts';
 
@@ -18,8 +18,19 @@ export interface ThumbStore {
   all(): readonly ThumbFile[];
   /** Live items' files, for the lists. */
   fileUris(): ReadonlyMap<string, string>;
-  /** Each collection's newest live item that has a file: its cover on Home (derived here; #30). */
-  coversByCollection(): ReadonlyMap<string, string>;
+  /** Each collection's newest live items that have a file, newest first, at most `limit`: its tile on Home (#106). */
+  picturesByCollection(limit: number): ReadonlyMap<string, readonly string[]>;
+}
+
+interface CollectionFile {
+  readonly collectionId: string | null;
+  readonly fileUri: string;
+}
+
+/** Rows come newest first within each collection. */
+function groupNewest(rows: readonly CollectionFile[]): ReadonlyMap<string, readonly string[]> {
+  return rows.reduce((groups, { collectionId, fileUri }) =>
+    collectionId ? groups.set(collectionId, [...(groups.get(collectionId) ?? []), fileUri]) : groups, new Map<string, readonly string[]>());
 }
 
 export function createThumbStore(db: HangDb): ThumbStore {
@@ -54,16 +65,24 @@ export function createThumbStore(db: HangDb): ThumbStore {
           .all()
           .map(({ itemId, fileUri }) => [itemId, fileUri] as const),
       ),
-    // Oldest first: a Map keeps the last value per key, so each collection ends on its newest file.
-    coversByCollection: () =>
-      new Map(
-        db.select({ collectionId: items.collectionId, fileUri: thumbFiles.fileUri })
-          .from(thumbFiles)
-          .innerJoin(items, eq(items.id, thumbFiles.itemId))
-          .where(and(isNull(items.deletedAt), isNotNull(items.collectionId)))
-          .orderBy(asc(items.createdAt), asc(items.id))
-          .all()
-          .flatMap(({ collectionId, fileUri }) => (collectionId ? [[collectionId, fileUri] as const] : [])),
-      ),
+    picturesByCollection: (limit) => {
+      // Ranked in SQLite so Home, re-read on every sync write, reads at most `limit` rows a room, not the library.
+      const ranked = db
+        .select({
+          collectionId: items.collectionId,
+          fileUri: thumbFiles.fileUri,
+          rank: sql<number>`row_number() over (partition by ${items.collectionId} order by ${items.createdAt} desc, ${items.id} desc)`.as('rank'),
+        })
+        .from(thumbFiles)
+        .innerJoin(items, eq(items.id, thumbFiles.itemId))
+        .where(and(isNull(items.deletedAt), isNotNull(items.collectionId)))
+        .as('ranked');
+      const rows = db.select({ collectionId: ranked.collectionId, fileUri: ranked.fileUri })
+        .from(ranked)
+        .where(lte(ranked.rank, limit))
+        .orderBy(asc(ranked.collectionId), asc(ranked.rank))
+        .all();
+      return groupNewest(rows);
+    },
   };
 }

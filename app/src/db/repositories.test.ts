@@ -152,6 +152,20 @@ describe('items repository', () => {
     assert.deepEqual(repo.items.countByCollection(), new Map([[null, 1], ['c1', 2]]));
   });
 
+  it('gives each collection its newest live item, leaving out the Inbox (#106)', () => {
+    repo.collections.create({ id: 'c1', name: 'Reading' });
+    repo.items.save({ id: 'older', sourceUrl: URL, sharedTitle: 'Older', collectionId: 'c1' });
+    repo.clock.advance(1000);
+    repo.items.save({ id: 'newer', sourceUrl: URL, sharedTitle: 'Newer', collectionId: 'c1' });
+    repo.clock.advance(1000);
+    repo.items.save({ id: 'removed', sourceUrl: URL, collectionId: 'c1' });
+    repo.items.save({ id: 'unsorted', sourceUrl: URL });
+    repo.items.remove('removed');
+    const newest = repo.items.newestByCollection();
+    assert.deepEqual([...newest.keys()], ['c1']);
+    assert.equal(newest.get('c1')?.sharedTitle, 'Newer');
+  });
+
   it('has no counts on a new device', () => {
     assert.equal(repo.items.countByCollection().size, 0);
   });

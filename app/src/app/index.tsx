@@ -3,7 +3,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AccountLine } from '@/auth/AccountLine';
 import { PageScroller, useScroller } from '@/hero/useOrigins';
 import { appListSources } from '@/home/appListSources';
-import { CollectionList } from '@/home/CollectionList';
+import { RoomGrid } from '@/home/RoomGrid';
 import { dayKey, dayLine, greetingFor } from '@/home/homeCopy';
 import { readHome } from '@/home/homeLists';
 import { HowToWall } from '@/home/howto/HowToWall';
@@ -14,6 +14,7 @@ import { RediscoverSection } from '@/home/RediscoverSection';
 import { SyncProblem } from '@/home/SyncProblem';
 import { useLiveQuery } from '@/home/useLiveQuery';
 import { useRefresh } from '@/home/useRefresh';
+import { useKeyboardRoom } from '@/home/useKeyboardRoom';
 import { useToday } from '@/home/useToday';
 import { NameText, NoteText } from '@/theme/Text';
 import { useAuth } from '@/auth/useAuth';
@@ -35,15 +36,16 @@ export default function Home() {
   const home = useLiveQuery(() => readHome(appListSources, { now: new Date(), syncFailed }), `home:${day}:${syncFailed}`);
   const { refreshing, onRefresh } = useRefresh();
   const { attach: attachPage, onScroll: onPageScroll, step: pageStep } = useScroller('y');
+  const { ref: pageRef, keyboardHeight } = useKeyboardRoom(attachPage);
 
   return (
     <PageScroller.Provider value={pageStep}>
     <ScrollView
-      ref={attachPage}
+      ref={pageRef}
       onScroll={onPageScroll}
       scrollEventThrottle={SCROLL_THROTTLE_MS}
       style={styles.wall}
-      contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + SPACE.screenBottom }]}
+      contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + SPACE.screenBottom + keyboardHeight }]}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[color.ink]} progressBackgroundColor={color.raised} />}
     >
       <View style={[styles.featureWall, { paddingTop: insets.top + SPACE.screenTop }]}>
@@ -60,7 +62,7 @@ export default function Home() {
         </View>
         {home.rediscover ? <RediscoverSection key={`${home.rediscover.card.id}:${day}`} pick={home.rediscover} day={day} /> : null}
       </View>
-      <CollectionList collections={home.collections} />
+      <RoomGrid collections={home.collections} />
       <AccountLine />
     </ScrollView>
     </PageScroller.Provider>

@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react';
 import { Keyboard } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-function useKeyboardHeight(): number {
+/** The software keyboard's height once shown; 0 while it's hidden. */
+export function useKeyboardHeight(): number {
   const [height, setHeight] = useState(0);
   useEffect(() => {
     const shown = Keyboard.addListener('keyboardDidShow', (event) => setHeight(event.endCoordinates.height));

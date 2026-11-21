@@ -94,12 +94,26 @@ describe('readHome', () => {
     assert.deepEqual(home.collections.map(({ id, count }) => ({ id, count })), [{ id: 'c1', count: 1 }, { id: 'c2', count: 0 }]);
   });
 
-  it('covers a collection with its newest downloaded thumbnail, else nothing', () => {
+  it('hangs a collection\'s newest downloaded thumbnails on its tile, else none (#106)', () => {
     s.collections.create({ id: 'c1', name: 'Reading' });
     s.collections.create({ id: 'c2', name: 'Watch' });
+    ['i1', 'i2'].forEach((id) => s.save(id, 'c1'));
+    ['i1', 'i2'].forEach((id) => s.thumbs.record(id, `file:///thumbs/${id}.webp`));
+    const pictures = readHome(s.sources, AT).collections.map(({ pictures }) => pictures);
+    assert.deepEqual(pictures, [['file:///thumbs/i2.webp', 'file:///thumbs/i1.webp'], []]);
+  });
+
+  it('puts the collection that got the newest item first, empty ones last (#106)', () => {
+    ['c1', 'c2', 'c3'].forEach((id) => s.collections.create({ id, name: id }));
+    s.save('i1', 'c3');
+    s.save('i2', 'c2');
+    assert.deepEqual(readHome(s.sources, AT).collections.map(({ id }) => id), ['c2', 'c3', 'c1']);
+  });
+
+  it('names a room of words by its newest item: title, shared title, site, then host (#106)', () => {
+    s.collections.create({ id: 'c1', name: 'Reading' });
     s.save('i1', 'c1');
-    s.thumbs.record('i1', 'file:///thumbs/i1.webp');
-    assert.deepEqual(readHome(s.sources, AT).collections.map(({ coverUri }) => coverUri), ['file:///thumbs/i1.webp', null]);
+    assert.equal(readHome(s.sources, AT).collections[0]?.newestWords, 'aeon.co');
   });
 
   it('offers an old, unopened item for Rediscover, not yet stamped today', () => {
