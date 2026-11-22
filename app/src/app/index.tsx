@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { RefreshControl, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AccountLine } from '@/auth/AccountLine';
@@ -36,7 +37,8 @@ export default function Home() {
   const home = useLiveQuery(() => readHome(appListSources, { now: new Date(), syncFailed }), `home:${day}:${syncFailed}`);
   const { refreshing, onRefresh } = useRefresh();
   const { attach: attachPage, onScroll: onPageScroll, step: pageStep } = useScroller('y');
-  const { ref: pageRef, keyboardHeight } = useKeyboardRoom(attachPage);
+  const [naming, setNaming] = useState(false);
+  const { ref: pageRef, bottomPadding } = useKeyboardRoom(attachPage, naming);
 
   return (
     <PageScroller.Provider value={pageStep}>
@@ -45,7 +47,7 @@ export default function Home() {
       onScroll={onPageScroll}
       scrollEventThrottle={SCROLL_THROTTLE_MS}
       style={styles.wall}
-      contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + SPACE.screenBottom + keyboardHeight }]}
+      contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + SPACE.screenBottom + bottomPadding }]}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[color.ink]} progressBackgroundColor={color.raised} />}
     >
       <View style={[styles.featureWall, { paddingTop: insets.top + SPACE.screenTop }]}>
@@ -62,7 +64,7 @@ export default function Home() {
         </View>
         {home.rediscover ? <RediscoverSection key={`${home.rediscover.card.id}:${day}`} pick={home.rediscover} day={day} /> : null}
       </View>
-      <RoomGrid collections={home.collections} />
+      <RoomGrid collections={home.collections} onNaming={setNaming} />
       <AccountLine />
     </ScrollView>
     </PageScroller.Provider>

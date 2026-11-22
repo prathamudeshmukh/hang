@@ -11,17 +11,25 @@ type Draft = { readonly kind: 'idle' } | { readonly kind: 'editing'; readonly er
 
 const IDLE: Draft = { kind: 'idle' };
 
+type NewRoomTileProps = { readonly width: number; readonly onNaming: (naming: boolean) => void };
+
 /** The last place on the wall (#106): an empty frame whose label turns into a name field. Enter creates; an empty name or tapping away cancels. */
-export function NewRoomTile({ width }: { readonly width: number }) {
+export function NewRoomTile({ width, onNaming }: NewRoomTileProps) {
   const [draft, setDraft] = useState<Draft>(IDLE);
   const styles = useRoomTileStyles();
   const { color } = useTheme();
 
+  // The field unmounts on its way back to idle, and an unmounted field may never report its blur.
+  function stopNaming() {
+    onNaming(false);
+    setDraft(IDLE);
+  }
+
   function create(name: string) {
-    if (name.trim().length === 0) return setDraft(IDLE);
+    if (name.trim().length === 0) return stopNaming();
     const outcome = createAppCollection(name);
     if (outcome.kind === 'invalid') return setDraft({ kind: 'editing', error: outcome.message });
-    setDraft(IDLE);
+    stopNaming();
     void syncTriggers.syncNow();
   }
 
@@ -48,7 +56,8 @@ export function NewRoomTile({ width }: { readonly width: number }) {
           returnKeyType="done"
           submitBehavior="submit"
           onSubmitEditing={(event) => create(event.nativeEvent.text)}
-          onBlur={() => setDraft(IDLE)}
+          onFocus={() => onNaming(true)}
+          onBlur={stopNaming}
           style={styles.input}
         />
         {draft.error && <NoteText color="ink2">{draft.error}</NoteText>}

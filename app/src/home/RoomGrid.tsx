@@ -14,11 +14,17 @@ function useTileWidth(): number {
   return Math.floor((width - 2 * SPACE.margin - (TILES_PER_ROW - 1) * TILE_COLUMN_GAP) / TILES_PER_ROW);
 }
 
+type RoomGridProps = {
+  readonly collections: readonly CollectionRow[];
+  /** Whether ＋ New room's name field is focused, so Home moves for its keyboard and no other (#111). */
+  readonly onNaming: (naming: boolean) => void;
+};
+
 /**
  * Home's rooms as a wall of mosaic tiles, two to a row, ending in a place for a new one (#106). One wrapping list with
  * a key per tile, so a room arriving from a sync never remounts ＋ New room while its name is being typed.
  */
-export function RoomGrid({ collections }: { readonly collections: readonly CollectionRow[] }) {
+export function RoomGrid({ collections, onNaming }: RoomGridProps) {
   const homeStyles = useHomeStyles();
   const styles = useRoomTileStyles();
   const width = useTileWidth();
@@ -30,7 +36,7 @@ export function RoomGrid({ collections }: { readonly collections: readonly Colle
       </View>
       <View style={styles.grid}>
         {collections.map((collection) => <RoomTile key={collection.id} collection={collection} width={width} />)}
-        <NewRoomTile key="new" width={width} />
+        <NewRoomTile key="new" width={width} onNaming={onNaming} />
       </View>
     </>
   );

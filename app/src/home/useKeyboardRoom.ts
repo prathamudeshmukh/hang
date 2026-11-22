@@ -1,23 +1,24 @@
 import { useCallback, useEffect, useRef, type ComponentRef } from 'react';
 import type { ScrollView } from 'react-native';
 import { useKeyboardHeight } from '@/collections/useSheetLift';
+import { keyboardRoom } from './keyboardRoom';
 
 type PageHandle = ComponentRef<typeof ScrollView>;
 
 /**
- * Room under Home's page while the keyboard is up (#106). Edge-to-edge means `adjustResize` no longer shrinks the
- * window, so the page pads itself by the keyboard and scrolls to its end, where the one field on Home (＋ New room's
- * name) sits, above the keys.
+ * Room under Home's page while ＋ New room's name is typed (#106). Edge-to-edge means `adjustResize` no longer shrinks
+ * the window, so the page pads itself by the keyboard and scrolls to its end, where that field sits, above the keys.
+ * Any other keyboard leaves Home as it is (#111).
  */
-export function useKeyboardRoom(attach: (view: PageHandle | null) => void) {
+export function useKeyboardRoom(attach: (view: PageHandle | null) => void, naming: boolean) {
   const page = useRef<PageHandle | null>(null);
-  const keyboardHeight = useKeyboardHeight();
+  const { bottomPadding, scrollToEnd } = keyboardRoom({ naming, keyboardHeight: useKeyboardHeight() });
   useEffect(() => {
-    if (keyboardHeight > 0) page.current?.scrollToEnd({ animated: true });
-  }, [keyboardHeight]);
+    if (scrollToEnd) page.current?.scrollToEnd({ animated: true });
+  }, [scrollToEnd, bottomPadding]);
   const ref = useCallback((view: PageHandle | null) => {
     page.current = view;
     attach(view);
   }, [attach]);
-  return { ref, keyboardHeight };
+  return { ref, bottomPadding };
 }
