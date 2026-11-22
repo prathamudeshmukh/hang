@@ -46,6 +46,8 @@ export interface CardModel {
   /** A post's author's name and `@handle`, apart, for the feed page's imprint (#59). Null on every other kind. */
   readonly author: string | null;
   readonly handle: string | null;
+  /** Who made a video (#108): the channel oEmbed named. Null on every other kind. */
+  readonly channel: string | null;
   /** The page's own description; only an imageless link's wall label draws it (#58). */
   readonly description: string | null;
   readonly accessibilityLabel: string;
@@ -127,13 +129,13 @@ function saysLast(note: string, part: string): boolean {
   return note === part || note.endsWith(` ${part}`);
 }
 
-type Described = Pick<CardModel, 'variant' | 'title' | 'site' | 'note' | 'byline'>;
+type Described = Pick<CardModel, 'variant' | 'title' | 'site' | 'note' | 'byline' | 'channel'>;
 
 /** Kind, byline, title, note (DESIGN.md §10), skipping what isn't known yet or the note already says. */
-function describe(item: Item, { variant, title, site, note, byline }: Described): string {
+function describe(item: Item, { variant, title, site, note, byline, channel }: Described): string {
   const kind = variant === 'pending' ? null : (item.kind ?? FALLBACK_KIND);
   const unsaid = (part: string | null) => (part === null || saysLast(note, part) ? null : part);
-  return [kind, unsaid(byline), title ?? unsaid(site), note].filter((part) => part !== null).join(', ');
+  return [kind, unsaid(byline ?? channel), title ?? unsaid(site), note].filter((part) => part !== null).join(', ');
 }
 
 /** What a post print sets between its rules (#58): its words; a picture-only post has none when its name fills the rules. */
@@ -153,6 +155,7 @@ export function sameCard(a: CardModel, b: CardModel): boolean {
     a.note === b.note &&
     a.postText === b.postText &&
     a.byline === b.byline &&
+    a.channel === b.channel &&
     a.handle === b.handle &&
     a.description === b.description &&
     a.media?.ratio === b.media?.ratio &&
@@ -174,6 +177,7 @@ export function toCardModel(item: Item, thumbUri: string | null, now: Date): Car
   const author = authorOf(item, variant);
   const handle = variant === 'post' ? handleOf(item) : null;
   const byline = author ?? handle;
+  const channel = variant === 'video' ? item.author : null;
   return {
     id: item.id,
     url: item.sourceUrl,
@@ -187,8 +191,9 @@ export function toCardModel(item: Item, thumbUri: string | null, now: Date): Car
     byline,
     author,
     handle,
+    channel,
     description: item.description,
-    accessibilityLabel: describe(item, { variant, title, site, note, byline }),
+    accessibilityLabel: describe(item, { variant, title, site, note, byline, channel }),
     swatch: null,
   };
 }

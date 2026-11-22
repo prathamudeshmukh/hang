@@ -173,6 +173,23 @@ describe('toCardModel: posts show who said it (#58)', () => {
   });
 });
 
+describe('toCardModel: videos name their channel (#108)', () => {
+  const video = (overrides: Parameters<typeof anItem>[0] = {}) => ready({ kind: 'video', siteName: 'YouTube', author: 'Veritasium', ...overrides });
+
+  it('carries the channel the server found', () => {
+    assert.equal(toCardModel(video(), null, CARD_NOW).channel, 'Veritasium');
+  });
+
+  it('has no channel when the server found none, or on other kinds', () => {
+    const channels = [video({ author: null }), ready({ kind: 'article', author: 'Ada' })].map((item) => toCardModel(item, null, CARD_NOW).channel);
+    assert.deepEqual(channels, [null, null]);
+  });
+
+  it('says the channel in its label, after the kind', () => {
+    assert.equal(toCardModel(video(), null, CARD_NOW).accessibilityLabel, 'video, Veritasium, On boredom, YouTube');
+  });
+});
+
 describe('toCardModel: link descriptions (#58)', () => {
   it('carries the page description for the wall label', () => {
     assert.equal(toCardModel(ready({ kind: 'link', description: 'Why we drift' }), null, CARD_NOW).description, 'Why we drift');
@@ -223,6 +240,11 @@ describe('sameCard', () => {
   it('sees a byline arriving', () => {
     const post = ready({ kind: 'post', post: { handle: 'ada' } });
     assert.equal(sameCard(toCardModel(post, null, CARD_NOW), toCardModel({ ...post, post: { handle: 'ada', author: 'Ada' } }, null, CARD_NOW)), false);
+  });
+
+  it('sees a channel arriving', () => {
+    const video = ready({ kind: 'video' });
+    assert.equal(sameCard(toCardModel(video, null, CARD_NOW), toCardModel({ ...video, author: 'Veritasium' }, null, CARD_NOW)), false);
   });
 
   it('sees a description arriving', () => {

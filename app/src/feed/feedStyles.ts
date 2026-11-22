@@ -42,8 +42,9 @@ export const useFeedStyles = makeStyles(({ color }) => ({
   faded: { opacity: FADED },
   /** The flyer stands in for it on the way back (#33). */
   hidden: { opacity: 0 },
-  text: { flex: 1, justifyContent: 'space-between', paddingHorizontal: SPACE.margin, paddingTop: SPACE.rhythm },
-  words: { gap: SPACE.caption },
+  /** Short words sit on the pills, so the room left opens under the picture, where its light spills (#108). */
+  text: { flex: 1, justifyContent: 'flex-end', paddingHorizontal: SPACE.margin, paddingTop: SPACE.rhythm },
+  words: { gap: SPACE.caption, marginBottom: SPACE.rhythm },
   /** An article's opening takes the room the pills leave (#61). */
   wordsFilling: { flex: 1, marginBottom: TEXT_PILLS_GAP },
   pills: { flexDirection: 'row', gap: SPACE.chip },

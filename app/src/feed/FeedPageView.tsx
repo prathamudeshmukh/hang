@@ -30,7 +30,7 @@ export interface FeedPageViewProps {
   readonly onMediaDrawn: (id: string) => void;
 }
 
-/** Media, then note, title, summary (or an article's opening, #61) and the Read/Watch/Open and Move pills (DESIGN.md §8). */
+/** Media, then note, title, a video's channel (#108), summary (or an article's opening, #61) and the Read/Watch/Open and Move pills (DESIGN.md §8). */
 function MediaPageView({ page, height, bottomInset, onOpen, onMove, onStep, onMediaDrawn }: FeedPageViewProps) {
   const styles = useFeedStyles();
   const textFade = useFeedTextFade();
@@ -60,6 +60,7 @@ function MediaPageView({ page, height, bottomInset, onOpen, onMove, onStep, onMe
         <View style={[styles.words, page.opening && styles.wordsFilling]}>
           <NoteText testID="feed-note" numberOfLines={1}>{page.note}</NoteText>
           {page.showTitle && page.card.title ? <NameText token="titleL" numberOfLines={TITLE_LINES}>{page.card.title}</NameText> : null}
+          {page.card.channel ? <NoteText testID="feed-channel" numberOfLines={1}>{page.card.channel}</NoteText> : null}
           {page.summary ? <NameText token="bodyRead" color="ink2" numberOfLines={page.summaryLines}>{page.summary}</NameText> : null}
           {page.opening ? <OpeningText opening={page.opening} onPress={() => onOpen(page)} /> : null}
         </View>

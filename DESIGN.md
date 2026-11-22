@@ -362,7 +362,9 @@ Picking another chip brings Save and *Moves it from Tech*. Re-sharing doesn't bu
 
 ### Swipe feed (screening room)
 
-Media fills the top ~56%; below it are the note, title (`title-l`) and a one-to-two-line summary.
+Media fills the top ~56%; below it are the note, title (`title-l`), a video's channel (in the note voice, #108) and a
+one-to-two-line summary. The words sit on the pills, a rhythm above them, so a short page's spare room opens under
+the picture, where its spill glows, never as black under the words (#94); an article's opening still runs from the top.
 **Wide pictures** (#95): a picture is cropped to fill the box (kept from its top) unless that would cut more than a
 tenth of its width; then it's drawn whole, centred in the box, on the spill's glow of itself instead of `raised`, so
 a link card's words and a video's frame stay whole. The hero lands on that rect.
