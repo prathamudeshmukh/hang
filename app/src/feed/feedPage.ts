@@ -1,6 +1,6 @@
 import { joinNote } from '../grid/catalogueNote.ts';
 import { postWords, sameCard, type CardMedia, type CardModel } from '../grid/cardModel.ts';
-import { actionFor, movedNote, type FeedAction } from './feedCopy.ts';
+import { actionFor, movedNote, PICTURE_LOST, type FeedAction } from './feedCopy.ts';
 
 export type FeedMedia =
   /** Thumbnails crop to fill the top of the page (#31). */
@@ -33,6 +33,8 @@ export interface PostMedia {
   readonly words: string | null;
   readonly imprint: Imprint | null;
   readonly picture: CardMedia | null;
+  /** It showed a picture that never came (#110): the page says so where the picture would be. */
+  readonly pictureLost: boolean;
 }
 
 /** `item_content.text` separates paragraphs with a blank line (#61). */
@@ -85,8 +87,8 @@ export interface FeedPageExtras {
 
 /** The same words the post's print sets (#58), so a flight never lands words on a page without them. */
 function postMediaOf(card: CardModel): PostMedia {
-  const { author, handle } = card;
-  return { kind: 'post', words: postWords(card), imprint: author || handle ? { author, handle } : null, picture: card.media };
+  const { author, handle, pictureLost } = card;
+  return { kind: 'post', words: postWords(card), imprint: author || handle ? { author, handle } : null, picture: card.media, pictureLost };
 }
 
 export function feedMediaOf(card: CardModel): FeedMedia {
@@ -122,6 +124,11 @@ function noteOf(card: CardModel, { movedTo, saved }: FeedPageExtras): string {
   return card.variant === 'link' ? joinNote([card.note, saved ?? null]) : card.note;
 }
 
+/** The card's label, plus what the page alone says: a post's picture never came (#110). */
+function labelOf(card: CardModel, media: FeedMedia): string {
+  return media.kind === 'post' && media.pictureLost ? `${card.accessibilityLabel}, ${PICTURE_LOST}` : card.accessibilityLabel;
+}
+
 export function toFeedPage(card: CardModel, extras: FeedPageExtras): FeedPage {
   const opening = openingOf(card, extras.opening);
   const media = pageMediaOf(card, opening !== null);
@@ -135,6 +142,6 @@ export function toFeedPage(card: CardModel, extras: FeedPageExtras): FeedPage {
     opening,
     action: actionFor(card.variant),
     placeId: extras.placeId,
-    accessibilityLabel: card.accessibilityLabel,
+    accessibilityLabel: labelOf(card, media),
   };
 }

@@ -59,7 +59,12 @@ export function answerCap({ pageHeight, content, fontScale }: { readonly pageHei
   return Math.max(0, Math.min(pictureCap(pageHeight), content - SEAM - SMALLEST_LINE * fontScale));
 }
 
-/** What the words may fill: the content room, less the seam and the picture when one answers them. */
+/** A picture that never came answers with one line in the note voice (#110): the room it takes after the seam. */
+export function lostAnswerHeight(fontScale: number): number {
+  return textStyle('note').lineHeight * fontScale;
+}
+
+/** What the words may fill: the content room, less the seam and whatever answers them (a picture, or its lost line). */
 export function wordsRoom(content: number, pictureHeight: number | null): number {
   return pictureHeight === null ? content : Math.max(0, content - SEAM - pictureHeight);
 }

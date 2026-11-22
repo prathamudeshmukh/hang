@@ -20,3 +20,6 @@ export function counterText(index: number, total: number): string | null {
 export function movedNote(placeName: string | null): string {
   return placeName === null ? 'moved' : `moved to ${placeName}`;
 }
+
+/** Where a post's picture would be, when it never came (#110). */
+export const PICTURE_LOST = 'the picture didn’t come through';

@@ -133,6 +133,15 @@ describe('toFeedPage: a post page’s parts (#59)', () => {
     assert.deepEqual(postOf({ text: 'hi' }).imprint, { author: null, handle: '@ada' });
   });
 
+  it('says when the picture it showed never came (#110)', () => {
+    assert.deepEqual([postOf({ text: 'Here’s mine:', media: ['https://pbs.test/p.jpg'] }).pictureLost, postOf({ text: 'Hi' }).pictureLost], [true, false]);
+  });
+
+  it('tells TalkBack the picture never came, after the rest of the label', () => {
+    const page = pageOf({ status: 'ready', kind: 'post', title: 'Here’s mine:', post: { handle: 'ada', text: 'Here’s mine:', media: ['https://pbs.test/p.jpg'] } });
+    assert.match(page.accessibilityLabel, /, the picture didn’t come through$/);
+  });
+
   it('has no imprint when the server knew neither author nor handle', () => {
     assert.equal(postOf({ text: 'hi', handle: null }).imprint, null);
   });

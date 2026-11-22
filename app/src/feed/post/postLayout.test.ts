@@ -1,7 +1,7 @@
 /// <reference types="node" />
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
-import { answerCap, contentRoom, pictureBox, pictureCap, postWordsTop, wordsPlace, wordsRoom } from './postLayout.ts';
+import { answerCap, contentRoom, lostAnswerHeight, pictureBox, pictureCap, postWordsTop, wordsPlace, wordsRoom } from './postLayout.ts';
 
 describe('postWordsTop', () => {
   it('starts the words under the status bar, the counter row, the note and one rhythm', () => {
@@ -84,5 +84,15 @@ describe('answerCap', () => {
 
   it('is never negative', () => {
     assert.equal(answerCap({ pageHeight: 700, content: 20, fontScale: 2 }), 0);
+  });
+});
+
+describe('lostAnswerHeight (#110)', () => {
+  it('is one note line, where the picture would have been', () => {
+    assert.equal(lostAnswerHeight(1), 18);
+  });
+
+  it('grows with the system font scale', () => {
+    assert.equal(lostAnswerHeight(2), 36);
   });
 });

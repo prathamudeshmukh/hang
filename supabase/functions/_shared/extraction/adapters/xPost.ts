@@ -1,4 +1,5 @@
 import { parseHTML } from 'linkedom';
+import type { z } from 'zod';
 import { postMirrorSchema, postOEmbedSchema } from '../schemas.ts';
 import { truncate } from '../text.ts';
 import type { ContentSource, ExtractContext, Extracted, PostSnapshot } from '../types.ts';
@@ -27,6 +28,17 @@ function sizedPhoto(address: string): string {
   return url.toString();
 }
 
+const isPresent = (url: string | undefined): url is string => url !== undefined;
+
+type MirrorMedia = z.infer<typeof postMirrorSchema>['tweet']['media'];
+
+/** Photos at X's large size, then each video's or GIF's frame (#110): a post's picture is whatever it showed. */
+function pictureUrls(media: MirrorMedia): string[] {
+  const photos = (media?.photos ?? []).map((photo) => photo.url).filter(isPresent).map(sizedPhoto);
+  const frames = (media?.videos ?? []).map((video) => video.thumbnail_url).filter(isPresent);
+  return [...photos, ...frames];
+}
+
 async function fromMirror(ctx: ExtractContext, ref: StatusRef): Promise<PostSnapshot> {
   const { tweet } = postMirrorSchema.parse(await ctx.fetchJson(`${MIRROR}/${ref.user}/status/${ref.id}`));
   return {
@@ -34,7 +46,7 @@ async function fromMirror(ctx: ExtractContext, ref: StatusRef): Promise<PostSnap
     handle: tweet.author.screen_name,
     avatarUrl: tweet.author.avatar_url,
     text: tweet.text,
-    mediaUrls: (tweet.media?.photos ?? []).map((photo) => photo.url).filter((u): u is string => u !== undefined).map(sizedPhoto),
+    mediaUrls: pictureUrls(tweet.media),
     postedAt: tweet.created_at,
   };
 }

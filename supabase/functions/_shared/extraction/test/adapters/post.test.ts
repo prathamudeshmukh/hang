@@ -49,6 +49,26 @@ describe('xPost adapter', () => {
     });
   });
 
+  describe('videos and GIFs answer with their frame (#110)', () => {
+    const withMedia = (media: Record<string, unknown>) => ({ ...MIRROR_BODY, tweet: { ...MIRROR_BODY.tweet, media } });
+    const extractWith = (media: Record<string, unknown>) => xPost.extract(makeContext(POST_URL, { json: { [MIRROR]: withMedia(media) } }));
+
+    it('takes a video’s frame as the picture when the post has no photo', async () => {
+      const result = await extractWith({ videos: [{ type: 'video', url: 'https://video.test/v.mp4', thumbnail_url: 'https://pbs.test/v-frame.jpg' }] });
+      expect(result?.imageUrl).toBe('https://pbs.test/v-frame.jpg');
+    });
+
+    it('keeps photos ahead of video and GIF frames', async () => {
+      const result = await extractWith({ photos: [{ url: 'https://pbs.test/p1.jpg' }], videos: [{ type: 'gif', thumbnail_url: 'https://pbs.test/g-frame.jpg' }] });
+      expect(result?.post?.mediaUrls).toEqual(['https://pbs.test/p1.jpg', 'https://pbs.test/g-frame.jpg']);
+    });
+
+    it('skips a video that comes without a frame', async () => {
+      const result = await extractWith({ videos: [{ type: 'video', url: 'https://video.test/v.mp4' }] });
+      expect(result?.imageUrl).toBeUndefined();
+    });
+  });
+
   it('uses the first line of text as the title, truncated', async () => {
     const long = { ...MIRROR_BODY, tweet: { ...MIRROR_BODY.tweet, text: 'x'.repeat(200), media: undefined } };
     const result = await xPost.extract(makeContext(POST_URL, { json: { [MIRROR]: long } }));

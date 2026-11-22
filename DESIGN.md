@@ -184,7 +184,7 @@ Newsreader's optical-size axis is set automatically from the point size.
 | `action` | Hanken Grotesk | 15 / 1.2 | 600 | Buttons |
 | `action-s` | Hanken Grotesk | 13 / 1.2 | 600 | Chips, filters |
 | `card` | Hanken Grotesk | 13 / 1.25 | 500 | Card titles in the masonry grid |
-| `post-fit` | Newsreader *italic* | 40 · 36 · 30 · 26 · 22 · 19, leading 1.06–1.42 | 350 (40, 36) / 400 | A post page's words: the largest step that fits (§8) |
+| `post-fit` | Newsreader *italic* | 56 · 48 · 40 · 36 · 30 · 26 · 22 · 19, leading 1.02–1.42 | 350 (56–36) / 400 | A post page's words: the largest step that fits (§8) |
 
 Minimum rendered size is 12sp for anything functional. Everything scales with the system font size.
 
@@ -415,9 +415,10 @@ post with its media on top, a tap-to-zoom image on the usual split page, and pil
 
 - **Order, top to bottom:** the note (*post · 3 Nov*; no posted date → *post · x.com*), the words, the imprint,
   then (with media) one `rule` hairline seam and the pictures. Pills at the foot; the spare room sits above them.
-- **One fitted size:** the words are Newsreader italic at the largest step of **40 · 36 · 30 · 26 · 22 · 19sp** that
-  fits between the note and the imprint (the `post-fit` ladder, §4). 40 and 36 use the 350 weight. The ladder is the
-  only freedom: sizes are never in-between.
+- **One fitted size:** the words are Newsreader italic at the largest step of **56 · 48 · 40 · 36 · 30 · 26 · 22 ·
+  19sp** that fits between the note and the imprint (the `post-fit` ladder, §4). 56 to 36 use the 350 weight; 56 and 48
+  let a short post own the page instead of floating at the top (#110). The ladder is the only freedom: sizes are
+  never in-between.
 - **Never scrolls:** swiping is the feed's navigation. Below 19sp the words stop with an ellipsis, and Open has the
   rest. At large system font scales the same ladder scales and clamps the same way.
 - **Imprint, not a header:** directly under the last line, the author's name in upright Newsreader 16 then
@@ -425,6 +426,10 @@ post with its media on top, a tap-to-zoom image on the usual split page, and pil
 - **The picture answers:** across the seam, at its own shape, capped at 40% of the page height (a tall picture sits
   narrower, left-aligned). Several pictures sit in one strip at one height, in posting order; tapping one opens it
   full screen, as image pages do. The words fit the space left above. For now only the first picture shows (#64).
+  A video or GIF answers with its frame (#110).
+- **A picture that never came** (listed in the post, no thumbnail): across the seam, one line in the note voice,
+  *the picture didn't come through*, so words ending on a colon still lead somewhere. Not a frame: dashed means
+  still coming (#110).
 - **No words** (a picture-only post): the picture takes the words' place, at its own shape in the room they'd have
   had, with no seam; the imprint signs under it.
 - **A tap on the words does nothing:** they're already read whole, and Open sits at the foot.

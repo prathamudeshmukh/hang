@@ -11,35 +11,14 @@ import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { makeExtractItem } from '../../extract/extractItem.ts';
 import { toItemContent } from '../../extract/itemContent.ts';
 import type { ClaimedItem } from '../../extract/types.ts';
+import { failIf, listAll, required } from '../_shared/supabaseScript.ts';
 import { type BackfillStore, runBackfill } from './backfill.ts';
-
-const PAGE = 1000;
 
 interface ArticleRow {
   readonly id: string;
   readonly user_id: string;
   readonly source_url: string;
   readonly shared_title: string | null;
-}
-
-function required(name: string): string {
-  const value = Deno.env.get(name);
-  if (!value) throw new Error(`${name} is not set`);
-  return value;
-}
-
-function failIf(error: { code?: string } | null, step: string): void {
-  if (error) throw new Error(`backfill ${step} failed (${error.code ?? 'unknown'})`);
-}
-
-async function listAll<T>(page: (from: number, to: number) => PromiseLike<{ data: T[] | null; error: { code?: string } | null }>, step: string) {
-  const rows: T[] = [];
-  for (let from = 0; ; from += PAGE) {
-    const { data, error } = await page(from, from + PAGE - 1);
-    failIf(error, step);
-    rows.push(...(data ?? []));
-    if ((data ?? []).length < PAGE) return rows;
-  }
 }
 
 function supabaseStore(client: SupabaseClient): BackfillStore {

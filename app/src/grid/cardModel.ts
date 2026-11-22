@@ -46,6 +46,8 @@ export interface CardModel {
   /** A post's author's name and `@handle`, apart, for the feed page's imprint (#59). Null on every other kind. */
   readonly author: string | null;
   readonly handle: string | null;
+  /** A post that showed a picture whose thumbnail never came (#110); false on every other kind. */
+  readonly pictureLost: boolean;
   /** Who made a video (#108): the channel oEmbed named. Null on every other kind. */
   readonly channel: string | null;
   /** The page's own description; only an imageless link's wall label draws it (#58). */
@@ -113,6 +115,12 @@ function noteFor(item: Item, variant: CardVariant, site: string, now: Date): str
   return notes[variant]();
 }
 
+/** Whether the post showed a picture: its snapshot lists one (`post` is server JSON, so its shape isn't trusted). */
+function listsPicture(item: Item): boolean {
+  const media = item.post?.['media'];
+  return Array.isArray(media) && media.some((url) => typeof url === 'string');
+}
+
 function awaitsImage(item: Item, now: Date): boolean {
   if (item.imageUrl === null || item.updatedAt === null) return false;
   return now.getTime() - Date.parse(item.updatedAt) < IMAGE_WAIT_MS;
@@ -156,6 +164,7 @@ export function sameCard(a: CardModel, b: CardModel): boolean {
     a.postText === b.postText &&
     a.byline === b.byline &&
     a.channel === b.channel &&
+    a.pictureLost === b.pictureLost &&
     a.handle === b.handle &&
     a.description === b.description &&
     a.media?.ratio === b.media?.ratio &&
@@ -178,6 +187,7 @@ export function toCardModel(item: Item, thumbUri: string | null, now: Date): Car
   const handle = variant === 'post' ? handleOf(item) : null;
   const byline = author ?? handle;
   const channel = variant === 'video' ? item.author : null;
+  const media = variant === 'pending' ? null : mediaOf(item, thumbUri, now);
   return {
     id: item.id,
     url: item.sourceUrl,
@@ -185,12 +195,13 @@ export function toCardModel(item: Item, thumbUri: string | null, now: Date): Car
     title,
     site,
     note,
-    media: variant === 'pending' ? null : mediaOf(item, thumbUri, now),
+    media,
     original: item.imageUrl,
     postText: plainLetters(textField(item.post, 'text')),
     byline,
     author,
     handle,
+    pictureLost: variant === 'post' && media === null && listsPicture(item),
     channel,
     description: item.description,
     accessibilityLabel: describe(item, { variant, title, site, note, byline, channel }),

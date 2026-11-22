@@ -3,12 +3,12 @@ import type { LayoutChangeEvent } from 'react-native';
 import type { CardMedia } from '@/grid/cardModel';
 import { POST_FIT, type PostFitStep } from '@/theme/typeScale';
 import { fitStep, type MeasuredStep, type WordsFit } from './postFit';
-import { answerCap, contentRoom, pictureBox, wordsRoom, type Box } from './postLayout';
+import { answerCap, contentRoom, lostAnswerHeight, pictureBox, wordsRoom, type Box } from './postLayout';
 
 type Slots = readonly (MeasuredStep | null)[];
 const UNMEASURED: Slots = POST_FIT.map(() => null);
 
-/** The six hidden settings of the words, keyed so new words or a new width measure again (#59 decision 5). */
+/** The hidden settings of the words, one per `post-fit` step, keyed so new words or a new width measure again (#59 decision 5). */
 function useMeasuredSteps(key: string) {
   const [state, setState] = useState<{ readonly key: string; readonly slots: Slots }>({ key, slots: UNMEASURED });
   const slots = state.key === key ? state.slots : UNMEASURED;
@@ -39,6 +39,8 @@ export interface PostFitInput {
   /** False when nobody signs: no imprint line, and no gap kept for one. */
   readonly signed: boolean;
   readonly picture: CardMedia | null;
+  /** The post showed a picture that never came: its line answers the words instead (#110). */
+  readonly pictureLost: boolean;
   readonly pageHeight: number;
   readonly fontScale: number;
 }
@@ -56,7 +58,7 @@ export interface PostFit {
 const stepOfSize = (fit: WordsFit | null) => POST_FIT.find(({ size }) => size === fit?.size) ?? null;
 
 /** Lays a post page out: which `post-fit` step the words take, and the picture's box (DESIGN.md §8). */
-export function usePostFit({ words, signed, picture, pageHeight, fontScale }: PostFitInput) {
+export function usePostFit({ words, signed, picture, pictureLost, pageHeight, fontScale }: PostFitInput) {
   const [body, onBodyLayout] = useLaidOutBox();
   const [imprint, onImprintLayout] = useLaidOutBox();
   const { measured, onMeasured, key: measureKey } = useMeasuredSteps(`${body?.width ?? 0}:${fontScale}:${words ?? ''}`);
@@ -65,9 +67,10 @@ export function usePostFit({ words, signed, picture, pageHeight, fontScale }: Po
     const content = body && signing !== null ? contentRoom({ body: body.height, imprint: signed ? signing : null }) : null;
     const maxHeight = words && content !== null ? answerCap({ pageHeight, content, fontScale }) : content;
     const box = body && picture && maxHeight !== null ? pictureBox({ width: body.width, ratio: picture.naturalRatio, maxHeight }) : null;
-    const wordsFit = words && content !== null && measured ? fitStep(wordsRoom(content, box?.height ?? null), measured) : null;
+    const answer = box?.height ?? (pictureLost ? lostAnswerHeight(fontScale) : null);
+    const wordsFit = words && content !== null && measured ? fitStep(wordsRoom(content, answer), measured) : null;
     const ready = words ? wordsFit !== null : content !== null;
     return { step: stepOfSize(wordsFit), maxLines: wordsFit?.maxLines ?? null, picture: box, ready, measuring: Boolean(words && body && !measured) };
-  }, [body, imprint, measured, picture, pageHeight, words, signed, fontScale]);
+  }, [body, imprint, measured, picture, pictureLost, pageHeight, words, signed, fontScale]);
   return { fit, onBodyLayout, onImprintLayout, onMeasured, measureKey };
 }

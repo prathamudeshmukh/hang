@@ -139,7 +139,7 @@ keeps that order and re-reads contents live; `originsOf` lets a moved item say *
 `db/contentRepository.ts` reads the start of `item_content.text`; an imageless one is a text page, `src/feed/text/`); a link's runs to five lines and its
 note adds `savedNote` (*saved 3 days ago*, #54). Read/Watch/Open goes through
 `openItem` (records `last_opened_at`, opens the Custom Tab) until Phase 3. A post page (`src/feed/post/`, #59) is its own layout, set as a broadside: `PostMeasure`
-sets the words at all six `post-fit` steps unseen, pure `fitStep` picks the largest that fits the room `postLayout`
+sets the words at all eight `post-fit` steps unseen, pure `fitStep` picks the largest that fits the room `postLayout`
 works out, and the hero flies the print to `wordsPlace` (the feed reports `wordsTop` with its size). Everything inside `ScreeningRoom`
 (`src/theme/ScreeningRoom.tsx`) draws with the always-dark `SCREENING_ROOM` palette. `CollectionChips`
 (`src/collections/`) is shared by the share sheet and Move, and ends in **+ New** (#76): the chip turns into a
@@ -190,6 +190,11 @@ clean-up is `supabase/functions/scripts/dedupe/run.ts` (dry run unless `--apply`
 Reader text (#61): `extract` writes `item_content` for articles (`text` = the `<p>` paragraphs, blank-line separated,
 without the title or byline; `_shared/extraction/paragraphs.ts`) before the item turns ready. Articles saved before
 that get theirs from `supabase/functions/scripts/backfill-content/run.ts` (dry run unless `--apply`; service-role key).
+
+Post pictures (#110): the mirror keeps a video's or GIF's frame as the post's picture; a post that lists a picture with
+no thumbnail says *the picture didn't come through* (`card.pictureLost`). Posts saved before get theirs from
+`supabase/functions/scripts/backfill-post-pictures/run.ts` (re-extracts, writes `post` and `image_url`; dry run unless
+`--apply`; service-role key). The scripts share `scripts/_shared/supabaseScript.ts`.
 
 Room colour input (#85): `media`'s palette has `vibrant` (most saturated colour covering ≥ 3%, or null), since
 `dominant` is often the background. Palettes made before it get it from `supabase/functions/scripts/backfill-palette/run.ts`

@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Pill } from '@/theme/Pill';
 import { NoteText, PostFitText } from '@/theme/Text';
 import type { FeedPageViewProps } from '../FeedPageView';
+import { PICTURE_LOST } from '../feedCopy';
 import type { PostMedia } from '../feedPage';
 import { PAGE_ACTIONS, stepOf } from '../pageA11y';
 import { useFeedTextFade, useFeedTrailFade, useHiddenUnderFlyer } from '../useFeedHero';
@@ -34,13 +35,23 @@ function Words({ id, post, fit }: WordsProps) {
   return !post.words && post.picture && fit.picture ? <PostPicture id={id} media={post.picture} box={fit.picture} /> : null;
 }
 
+/** What answers the words under the seam: their picture, or the line saying it never came (#110). */
 function Answer({ id, post, fit }: WordsProps) {
   const styles = usePostStyles();
-  if (!post.words || !post.picture || !fit.picture) return null;
+  if (!post.words) return null;
+  if (post.picture && fit.picture) {
+    return (
+      <>
+        <View style={styles.seam} />
+        <PostPicture id={id} media={post.picture} box={fit.picture} />
+      </>
+    );
+  }
+  if (!post.pictureLost) return null;
   return (
     <>
       <View style={styles.seam} />
-      <PostPicture id={id} media={post.picture} box={fit.picture} />
+      <NoteText testID="feed-picture-lost" numberOfLines={1}>{PICTURE_LOST}</NoteText>
     </>
   );
 }
@@ -58,6 +69,7 @@ export function PostPageView({ page, post, height, bottomInset, onOpen, onMove, 
     words: post.words,
     signed: post.imprint !== null,
     picture: post.picture,
+    pictureLost: post.pictureLost,
     pageHeight: height,
     fontScale,
   });

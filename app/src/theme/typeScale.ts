@@ -51,9 +51,12 @@ export type TypeToken = keyof typeof TYPE_SCALE;
 
 /**
  * `post-fit` (DESIGN.md §4): a post page's words take the largest step that fits, never a size in between (#59).
- * Largest first; 40 and 36 are in the 350 weight, like the feed's titles.
+ * Largest first; 56 to 36 are in the 350 weight, like the feed's titles.
  */
 export const POST_FIT = [
+  /** A short post grows past the scale's 40 so its words own the page (#110). */
+  { size: 56, leading: 1.02, font: FONT_FILE.displayItalicBook },
+  { size: 48, leading: 1.04, font: FONT_FILE.displayItalicBook },
   { size: 40, leading: 1.06, font: FONT_FILE.displayItalicBook },
   { size: 36, leading: 1.12, font: FONT_FILE.displayItalicBook },
   { size: 30, leading: 1.17, font: FONT_FILE.displayItalic },

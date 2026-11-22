@@ -190,6 +190,28 @@ describe('toCardModel: videos name their channel (#108)', () => {
   });
 });
 
+describe('toCardModel: a post’s picture that never came (#110)', () => {
+  const NOW = new Date('2026-11-12T10:05:00.000Z');
+  const LONG_AGO = '2026-11-12T10:02:00.000Z';
+  const JUST_NOW = '2026-11-12T10:04:30.000Z';
+  const post = (overrides: Parameters<typeof anItem>[0] = {}) =>
+    ready({ kind: 'post', updatedAt: LONG_AGO, post: { handle: 'alex', text: 'Here’s mine:', media: ['https://pbs.test/p.jpg'] }, ...overrides });
+
+  it('says so when the post listed a picture and no thumbnail came', () => {
+    assert.equal(toCardModel(post(), null, NOW).pictureLost, true);
+  });
+
+  it('says nothing once the thumbnail is there, or while it may still come', () => {
+    const lost = [post({ thumbW: 100, thumbH: 100 }), post({ imageUrl: 'https://pbs.test/p.jpg', updatedAt: JUST_NOW })].map((item) => toCardModel(item, THUMB, NOW).pictureLost);
+    assert.deepEqual(lost, [false, false]);
+  });
+
+  it('says nothing for a post that had no picture, or for other kinds', () => {
+    const lost = [post({ post: { handle: 'alex', text: 'Hi', media: [] } }), ready({ kind: 'article', post: { media: ['https://pbs.test/p.jpg'] } })].map((item) => toCardModel(item, null, NOW).pictureLost);
+    assert.deepEqual(lost, [false, false]);
+  });
+});
+
 describe('toCardModel: link descriptions (#58)', () => {
   it('carries the page description for the wall label', () => {
     assert.equal(toCardModel(ready({ kind: 'link', description: 'Why we drift' }), null, CARD_NOW).description, 'Why we drift');

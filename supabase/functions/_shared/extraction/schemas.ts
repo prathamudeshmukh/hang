@@ -26,7 +26,11 @@ export const postMirrorSchema = z.object({
       avatar_url: httpUrl.optional(),
     }),
     media: z
-      .object({ photos: z.array(z.object({ url: httpUrl })).optional() })
+      .object({
+        photos: z.array(z.object({ url: httpUrl })).optional(),
+        /** Videos and GIFs: only their frame is kept, as the post's picture (#110). */
+        videos: z.array(z.object({ thumbnail_url: httpUrl.optional() })).optional(),
+      })
       .optional(),
   }),
 });
