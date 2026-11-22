@@ -19,8 +19,16 @@ describe('lookOf', () => {
     assert.deepEqual(lookOf(cardOf({ kind: 'video', ...TALL })), { kind: 'picture', uri: THUMB, landing: { fit: 'media', ratio: 3 } });
   });
 
-  it('flies an empty frame for a text face (decision 2), to the media box', () => {
-    assert.deepEqual(lookOf(cardOf({ kind: 'article', title: 'On boredom' })), { kind: 'frame', landing: { fit: 'cover' } });
+  it('flies an empty frame for a text face (decision 2), to the whole page: it is a label page (#109)', () => {
+    assert.deepEqual(lookOf(cardOf({ kind: 'link', title: 'On boredom' })), { kind: 'frame', landing: { fit: 'page' } });
+  });
+
+  it('flies a pictureless video to the label page too (#109)', () => {
+    assert.deepEqual(lookOf(cardOf({ kind: 'video', title: 'On boredom' })).landing, { fit: 'page' });
+  });
+
+  it('flies a fetching print to the media box, where the page draws it waiting', () => {
+    assert.equal(lookOf(cardOf({ status: 'extracting' })), FRAME);
   });
 
   it('flies an empty frame for a post, even with an image, to the words’ place (#59)', () => {

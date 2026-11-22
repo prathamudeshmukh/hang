@@ -21,14 +21,15 @@ export type FeedFrame = PostFrame & TextFrame;
 /**
  * Where a feed page draws its media: an image fits whole on the page (#60), a picture sits in the box as `mediaFit`
  * places it (#95), a text face fills the box (#31); a post lands on its words' place instead (#59), an imageless
- * article on its text block (#61).
+ * article on its text block (#61), a label page on the whole page (#109).
  */
 export type Landing =
   | { readonly fit: 'contain'; readonly ratio: number }
   | { readonly fit: 'media'; readonly ratio: number }
   | { readonly fit: 'cover' }
   | { readonly fit: 'words' }
-  | { readonly fit: 'text' };
+  | { readonly fit: 'text' }
+  | { readonly fit: 'page' };
 
 export type Axis = 'x' | 'y';
 
@@ -74,6 +75,7 @@ function pictureRect(box: Rect, ratio: number): Rect {
 export function landingRect(feed: FeedFrame, landing: Landing, print: Rect): Rect {
   if (landing.fit === 'words') return wordsPlace(feed, print.height / print.width);
   if (landing.fit === 'text') return textPlace(feed);
+  if (landing.fit === 'page') return feedPageRect(feed);
   if (landing.fit === 'contain') return fittedRect(feedPageRect(feed), landing.ratio);
   if (landing.fit === 'media') return pictureRect(feedMediaRect(feed), landing.ratio);
   return feedMediaRect(feed);

@@ -368,6 +368,10 @@ the picture, where its spill glows, never as black under the words (#94); an art
 **Wide pictures** (#95): a picture is cropped to fill the box (kept from its top) unless that would cut more than a
 tenth of its width; then it's drawn whole, centred in the box, on the spill's glow of itself instead of `raised`, so
 a link card's words and a video's frame stay whole. The hero lands on that rect.
+**Label pages** (#109): a page with no picture and no reader text (a link's wall label; a video or post whose
+picture never came) is the label, edge to edge: its print's room colour (dark scheme) or plain `raised`, the note
+where a post's sits, the title in `display` (8 lines) and the description under it centred in the room, the pills on
+the colour. The print's frame grows to fill the page.
 **Link pages** (#54): a link has nothing behind *Open* but the site, so its page says more: the description runs to five
 lines, and the note adds how long it has hung (*aeon.co · saved 3 days ago*: today, yesterday, 2–6 days ago, last
 week, 2–4 weeks ago, then *in March*, or *in March 2025* from another year). Other kinds keep their note and two lines.

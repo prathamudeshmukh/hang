@@ -1,7 +1,8 @@
 import { useMemo } from 'react';
 import { Easing, useSharedValue, withDelay, withTiming, type SharedValue } from 'react-native-reanimated';
 import { scheduleOnRN } from 'react-native-worklets';
-import { MOTION, SCREENING_ROOM } from '@/theme/tokens';
+import { MOTION } from '@/theme/tokens';
+import { feedFace } from './feedFace';
 import { flightPlan, type FlightTuning, type Timing } from './flightPlan';
 import type { Rect } from './geometry';
 import type { Stage } from './hero';
@@ -47,9 +48,7 @@ interface StageInputs {
 
 function createStage(values: StageValues, { wallFace, tuning }: StageInputs): Stage {
   const { from, to, progress, backdrop, flyerOpacity, colors } = values;
-  const roomRaised = SCREENING_ROOM.raised;
-  /** A post page has no media box: its print lands in the screen's own color and melts into the page (#59). */
-  const roomColor = (flight: Flight) => (flight.look.landing.fit === 'words' ? SCREENING_ROOM.wall : roomRaised);
+  const roomColor = (flight: Flight) => feedFace({ landing: flight.look.landing, paper: flight.paper });
   return {
     board(flight: Flight) {
       from.set(flight.from);

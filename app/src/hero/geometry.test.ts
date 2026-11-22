@@ -68,6 +68,10 @@ describe('landingRect', () => {
     assert.deepEqual(landingRect(FEED, { fit: 'media', ratio: 2 }, PRINT), { x: 0, y: 0, width: 400, height: 560 });
   });
 
+  it('lands a label page’s frame on the whole page (#109)', () => {
+    assert.deepEqual(landingRect(FEED, { fit: 'page' }, PRINT), { x: 0, y: 0, width: 400, height: 1000 });
+  });
+
   it('lands everything else on the media box', () => {
     assert.deepEqual(landingRect(FEED, { fit: 'cover' }, PRINT), { x: 0, y: 0, width: 400, height: 560 });
   });

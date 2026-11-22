@@ -26,7 +26,6 @@ export const useFeedStyles = makeStyles(({ color }) => ({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  titleMedia: { justifyContent: 'flex-end', padding: SPACE.margin, paddingBottom: SPACE.rhythm * 2 },
   pendingFrame: { flex: 1, padding: SPACE.margin, backgroundColor: color.wall },
   pending: {
     flex: 1,

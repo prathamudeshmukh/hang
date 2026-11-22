@@ -11,12 +11,15 @@ export const FRAME: Look = { kind: 'frame', landing: MEDIA_BOX };
 const POST_FRAME: Look = { kind: 'frame', landing: { fit: 'words' } };
 /** An imageless article that opens on its text has no media box either: its print lands on the text block (#61). */
 const TEXT_FRAME: Look = { kind: 'frame', landing: { fit: 'text' } };
+/** A page whose media is its title is a label page: its print grows to fill it (#109). */
+const LABEL_FRAME: Look = { kind: 'frame', landing: { fit: 'page' } };
 
 /** Only pictures that exist at both ends fly as pictures; text would reflow mid-flight. */
 export function lookOf(card: CardModel, hasOpening = false): Look {
   const media = pageMediaOf(card, hasOpening);
   if (media.kind === 'post') return POST_FRAME;
   if (media.kind === 'none') return TEXT_FRAME;
+  if (media.kind === 'title') return LABEL_FRAME;
   if ((media.kind !== 'picture' && media.kind !== 'image') || !media.media.uri) return FRAME;
   const fit = media.kind === 'image' ? 'contain' : 'media';
   const landing: Landing = { fit, ratio: media.media.naturalRatio };
