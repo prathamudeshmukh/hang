@@ -61,7 +61,7 @@
     "lint": "expo lint",
     "test": "node --test 'src/**/*.test.ts' 'plugins/**/*.test.js' 'scripts/**/*.test.ts'",
     "typecheck": "tsc --noEmit",
-    "test:coverage": "node --test --experimental-test-coverage --test-coverage-include='src/**/*.ts' --test-coverage-include='plugins/withConfigChanges.js' --test-coverage-include='scripts/icon/*.ts' --test-coverage-exclude='scripts/**/*.test.ts' --test-coverage-exclude='src/**/*.test.ts' --test-coverage-exclude='src/**/testing/**' --test-coverage-lines=80 --test-coverage-branches=80 --test-coverage-functions=80 'src/**/*.test.ts' 'plugins/**/*.test.js' 'scripts/**/*.test.ts'",
+    "test:coverage": "node --test --experimental-test-coverage --test-coverage-include='src/**/*.ts' --test-coverage-include='plugins/withConfigChanges.js' --test-coverage-include='plugins/withReleaseSigning.js' --test-coverage-include='plugins/releaseVersion.js' --test-coverage-include='scripts/icon/*.ts' --test-coverage-exclude='scripts/**/*.test.ts' --test-coverage-exclude='src/**/*.test.ts' --test-coverage-exclude='src/**/testing/**' --test-coverage-lines=80 --test-coverage-branches=80 --test-coverage-functions=80 'src/**/*.test.ts' 'plugins/**/*.test.js' 'scripts/**/*.test.ts'",
     "db:generate": "drizzle-kit generate",
     "test:integration": "sh scripts/test-integration.sh",
     "icon": "node scripts/icon/buildIcon.ts"

@@ -28,6 +28,7 @@
       "expo-router",
       "./plugins/withShareActivity.js",
       "./plugins/withConfigChanges.js",
+      "./plugins/withReleaseSigning.js",
       [
         "expo-splash-screen",
         {

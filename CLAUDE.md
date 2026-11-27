@@ -11,7 +11,7 @@ Guidance for Claude Code when working in this project.
 | Design explorations | [design/explorations/](./design/explorations/) |
 | Repo | [github.com/prathamudeshmukh/hang](https://github.com/prathamudeshmukh/hang) (public), `main` |
 | Supabase project | `ffofgzyudtloekityjfw` (hosted, linked; `npx supabase … --remote`) |
-| Play Console / internal testing | — |
+| Play Console / internal testing | `com.prathamesh.hang`, internal track (set up per #25) |
 | CI | [Actions](https://github.com/prathamudeshmukh/hang/actions) · `.github/workflows/ci.yml` |
 | Kanban board | [GitHub Project #4 "Hang"](https://github.com/users/prathamudeshmukh/projects/4) |
 | Error tracking | — |
@@ -240,7 +240,24 @@ Migrations are forward-only: fix a bad one with a new migration.
   `SUPABASE_ACCESS_TOKEN`, `SUPABASE_DB_PASSWORD`. Runtime secrets (`EXTRACT_SECRET`, Vault) stay manual.
 - Versions are pinned in the workflow's `env`: Node 22, Deno 2.9.6, Supabase CLI 3.1.0.
 - A change to `ci.yml` itself re-runs both deploys.
-- Not in CI: E2E (#24), Android build (#25), `spikes/`.
+- Not in CI: E2E (#24), `spikes/`.
+
+## Release (#25)
+
+Every push to `main` that touches the app (`app/**` minus tests and `e2e/`, or `_shared/links/`) runs
+`release-android` after `test` and the backend deploys: prebuild → `bundleRelease` → check the AAB has the JS bundle
+and isn't debug-signed → Play **internal testing**, status completed. The Play Store updates the phone. Also runs
+from the Actions tab (`workflow_dispatch`). No OTA (#112).
+
+- `versionCode` = `git rev-list --count HEAD`, `versionName` = `1.0.<count>`: `app.config.js` reads
+  `HANG_VERSION_CODE` (`plugins/releaseVersion.js`); unset locally, so local builds stay 1 / 1.0.0.
+- Signing: `plugins/withReleaseSigning.js` signs release builds with the upload key when `HANG_UPLOAD_STORE_FILE`
+  (+ `_STORE_PASSWORD`, `_KEY_ALIAS`, `_KEY_PASSWORD`) is set, else debug.keystore (E2E unchanged). Google holds the
+  app signing key; its SHA-1 has its own Android OAuth client.
+- `production` secrets: `ANDROID_UPLOAD_KEYSTORE_BASE64`, `ANDROID_UPLOAD_STORE_PASSWORD`, `ANDROID_UPLOAD_KEY_ALIAS`,
+  `ANDROID_UPLOAD_KEY_PASSWORD`, `PLAY_SERVICE_ACCOUNT_JSON`; variables: the three `EXPO_PUBLIC_*`.
+- A broken release: revert and merge; the next `versionCode` ships. Re-running a commit that already shipped fails
+  at upload ("version code already used"); that's harmless.
 
 ## Architecture notes
 
