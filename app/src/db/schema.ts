@@ -142,11 +142,13 @@ export const deviceOwner = sqliteTable('device_owner', {
 
 /**
  * Local only, never synced: the thumbnail files this device has downloaded (SPEC §4, #27). A row means the file
- * at `file_uri` holds that item's thumbnail; it's written once and never re-checked.
+ * at `file_uri` holds that item's thumbnail, made from `thumb_path`; it's fetched again only when the item's path changes.
  */
 export const thumbFiles = sqliteTable('thumb_files', {
   itemId: text('item_id').primaryKey(),
   fileUri: text('file_uri').notNull(),
+  /** The server path the file was made from; a different one on the item means a new thumbnail (#107). Null: unknown. */
+  thumbPath: text('thumb_path'),
 });
 
 /**

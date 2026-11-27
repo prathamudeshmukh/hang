@@ -8,6 +8,7 @@ interface SourceRow {
   readonly id: string;
   readonly user_id: string;
   readonly image_url: string;
+  readonly thumb_path: string | null;
 }
 
 function throwIfError(result: { error: { code?: string; name?: string } | null }, step: string): void {
@@ -21,7 +22,7 @@ export function makeSupabaseMediaStore(client: SupabaseClient): MediaStore {
   return {
     load: async (id) => {
       const result = await items()
-        .select('id, user_id, image_url')
+        .select('id, user_id, image_url, thumb_path')
         .eq('id', id)
         .eq('status', 'ready')
         .is('deleted_at', null)
@@ -29,13 +30,16 @@ export function makeSupabaseMediaStore(client: SupabaseClient): MediaStore {
         .maybeSingle<SourceRow>();
       throwIfError(result, 'load');
       const row = result.data;
-      return row ? ({ id: row.id, userId: row.user_id, imageUrl: row.image_url } satisfies MediaSource) : null;
+      return row ? ({ id: row.id, userId: row.user_id, imageUrl: row.image_url, thumbPath: row.thumb_path } satisfies MediaSource) : null;
     },
     save: async (source: MediaSource, patch: MediaPatch) => {
-      throwIfError(await items().update(patch).eq('id', source.id).eq('image_url', source.imageUrl), 'save');
+      const result = await items().update(patch).eq('id', source.id).eq('image_url', source.imageUrl).select('id');
+      throwIfError(result, 'save');
+      return (result.data ?? []).length > 0;
     },
     // Setting it to null never re-fires the media trigger, which only runs for a new non-null address. An earlier
-    // image's thumbnail goes too, so the card doesn't keep showing a picture that's no longer the item's.
+    // image's thumbnail columns go too, so the card doesn't keep showing a picture that's no longer the item's (its
+    // file stays in the bucket).
     dropImage: async (source: MediaSource) => {
       const noImage = { image_url: null, thumb_path: null, thumb_w: null, thumb_h: null, palette: null };
       throwIfError(await items().update(noImage).eq('id', source.id).eq('image_url', source.imageUrl), 'drop');
@@ -48,6 +52,9 @@ export function makeSupabaseThumbStorage(client: SupabaseClient): ThumbStorage {
     upload: async (path, webp) => {
       const result = await client.storage.from(BUCKET).upload(path, webp, { contentType: WEBP_TYPE, upsert: true });
       throwIfError(result, 'upload');
+    },
+    remove: async (path) => {
+      throwIfError(await client.storage.from(BUCKET).remove([path]), 'remove');
     },
   };
 }

@@ -8,12 +8,14 @@ import type { MediaDeps, MediaPatch, MediaSource } from './types.ts';
 const SECRET = 'media-test-secret';
 const ITEM_ID = '0190f1c2-7a3b-7c4d-8e5f-0123456789ab';
 const HEX = /^#[0-9a-f]{6}$/;
-const SOURCE: MediaSource = { id: ITEM_ID, userId: 'user-1', imageUrl: 'https://cdn.test/private/lead.jpg' };
+const SOURCE: MediaSource = { id: ITEM_ID, userId: 'user-1', imageUrl: 'https://cdn.test/private/lead.jpg', thumbPath: null };
+const VERSIONED = new RegExp(`^user-1/thumbs/${ITEM_ID}-[0-9a-f]{12}\\.webp$`);
 
 interface Recorder {
   saved: Array<{ source: MediaSource; patch: MediaPatch }>;
   dropped: MediaSource[];
   uploads: Array<{ path: string; size: number }>;
+  removed: string[];
   logs: Array<{ level: string; event: string; fields: LogFields }>;
 }
 
@@ -23,10 +25,13 @@ function depsWith(rec: Recorder, overrides: Partial<MediaDeps> = {}): MediaDeps 
     secret: SECRET,
     store: {
       load: () => Promise.resolve(SOURCE),
-      save: (source, patch) => (rec.saved.push({ source, patch }), Promise.resolve()),
+      save: (source, patch) => (rec.saved.push({ source, patch }), Promise.resolve(true)),
       dropImage: (source) => (rec.dropped.push(source), Promise.resolve()),
     },
-    storage: { upload: (path, webp) => (rec.uploads.push({ path, size: webp.length }), Promise.resolve()) },
+    storage: {
+      upload: (path, webp) => (rec.uploads.push({ path, size: webp.length }), Promise.resolve()),
+      remove: (path) => (rec.removed.push(path), Promise.resolve()),
+    },
     fetchImage: async () => await new Image(2160, 1080).fill(0x336699ff).encodeJPEG(80),
     log: { info: at('info'), warn: at('warn'), error: at('error') },
     ...overrides,
@@ -46,19 +51,48 @@ const outcome = async (res: Response) => [res.status, (await res.json()).outcome
 describe('media handler', () => {
   let rec: Recorder;
   beforeEach(() => {
-    rec = { saved: [], dropped: [], uploads: [], logs: [] };
+    rec = { saved: [], dropped: [], uploads: [], removed: [], logs: [] };
   });
 
   it('stores a 1080-wide WebP under the owner and writes size and palette', async () => {
     const res = await run(depsWith(rec));
     expect(await outcome(res)).toEqual([200, 'stored']);
-    expect(rec.uploads.map((u) => u.path)).toEqual([`user-1/thumbs/${ITEM_ID}.webp`]);
+    expect(rec.uploads.map((u) => u.path)).toEqual([expect.stringMatching(VERSIONED)]);
     expect(rec.saved[0]?.patch).toEqual({
-      thumb_path: `user-1/thumbs/${ITEM_ID}.webp`,
+      thumb_path: rec.uploads[0]?.path,
       thumb_w: 1080,
       thumb_h: 540,
       palette: { dominant: expect.stringMatching(HEX), muted: expect.stringMatching(HEX), onDominant: '#F7F5F0', vibrant: expect.stringMatching(HEX) },
     });
+  });
+
+  it('names the file after the image, so a new image gets a new path (#107)', async () => {
+    const other = { ...SOURCE, imageUrl: 'https://cdn.test/private/other.jpg' };
+    await run(depsWith(rec));
+    await run(depsWith(rec, { store: { ...depsWith(rec).store, load: () => Promise.resolve(other) } }));
+    expect(new Set(rec.uploads.map((u) => u.path)).size).toBe(2);
+  });
+
+  it('removes the earlier thumbnail once the new one is saved', async () => {
+    const earlier = { ...SOURCE, thumbPath: `user-1/thumbs/${ITEM_ID}.webp` };
+    await run(depsWith(rec, { store: { ...depsWith(rec).store, load: () => Promise.resolve(earlier) } }));
+    expect(rec.removed).toEqual([`user-1/thumbs/${ITEM_ID}.webp`]);
+  });
+
+  it('still answers stored, with a warning, when the earlier thumbnail cannot be removed', async () => {
+    const earlier = { ...SOURCE, thumbPath: `user-1/thumbs/${ITEM_ID}.webp` };
+    const storage = { upload: () => Promise.resolve(), remove: () => Promise.reject(new Error('storage down')) };
+    const res = await run(depsWith(rec, { storage, store: { ...depsWith(rec).store, load: () => Promise.resolve(earlier) } }));
+    expect(await outcome(res)).toEqual([200, 'stored']);
+    expect(rec.logs.at(-1)).toEqual({ level: 'warn', event: 'media.thumb_not_removed', fields: { item_id: ITEM_ID, error: 'Error' } });
+  });
+
+  it('keeps the earlier thumbnail and drops its own when a newer image arrived meanwhile', async () => {
+    const earlier = { ...SOURCE, thumbPath: `user-1/thumbs/${ITEM_ID}.webp` };
+    const store = { ...depsWith(rec).store, load: () => Promise.resolve(earlier), save: () => Promise.resolve(false) };
+    const res = await run(depsWith(rec, { store }));
+    expect(await outcome(res)).toEqual([200, 'superseded']);
+    expect(rec.removed).toEqual([rec.uploads[0]?.path]);
   });
 
   it('rejects a wrong secret and a body without an item id', async () => {
@@ -101,7 +135,8 @@ describe('media handler', () => {
   });
 
   it('answers 500 when storing fails, so the failure is visible', async () => {
-    const res = await run(depsWith(rec, { storage: { upload: () => Promise.reject(new Error('storage down')) } }));
+    const storage = { upload: () => Promise.reject(new Error('storage down')), remove: () => Promise.resolve() };
+    const res = await run(depsWith(rec, { storage }));
     expect(await outcome(res)).toEqual([500, 'failed']);
     expect(rec.logs.at(-1)).toEqual({ level: 'error', event: 'media.failed', fields: { item_id: ITEM_ID, error: 'Error' } });
   });

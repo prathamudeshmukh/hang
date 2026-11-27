@@ -71,7 +71,8 @@ describe('media against the local stack', () => {
     const id = await readyItem();
     await setImage(id, PUBLIC_IMAGE);
     const row = await waitForThumb(id);
-    expect(row).toMatchObject({ thumb_path: `${userId}/thumbs/${id}.webp`, thumb_w: 544, thumb_h: 184 });
+    expect(row).toMatchObject({ thumb_w: 544, thumb_h: 184 });
+    expect(row.thumb_path).toMatch(new RegExp(`^${userId}/thumbs/${id}-[0-9a-f]{12}\\.webp$`));
     expect(row.palette?.dominant).toMatch(/^#[0-9a-f]{6}$/);
     const { data: file, error } = await admin.storage.from('media').download(row.thumb_path ?? '');
     if (error) throw error;

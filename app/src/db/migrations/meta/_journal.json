@@ -50,6 +50,13 @@
       "when": 1795152796855,
       "tag": "0006_redundant_shinobi_shaw",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "6",
+      "when": 1795761492427,
+      "tag": "0007_wakeful_terror",
+      "breakpoints": true
     }
   ]
 }

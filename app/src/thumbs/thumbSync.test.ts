@@ -7,7 +7,9 @@ import type { HangDb } from '../db/types.ts';
 import { createThumbStore, type ThumbStore } from './thumbStore.ts';
 import { createThumbSync, type ThumbFilesPort, type ThumbSigner, type ThumbSyncDeps } from './thumbSync.ts';
 
-const uriFor = (itemId: string) => `file:///thumbs/${itemId}.webp`;
+const uriFor = (thumbPath: string) => `file:///thumbs/${thumbPath.split('/').at(-1)}`;
+const pathOf = (id: string) => `u/thumbs/${id}.webp`;
+const fileOf = (id: string) => uriFor(pathOf(id));
 
 interface FakeFiles extends ThumbFilesPort {
   readonly onDisk: Set<string>;
@@ -42,7 +44,7 @@ const signer: ThumbSigner = { sign: (paths) => Promise.resolve(new Map(paths.map
 
 function seedReady(db: HangDb, ids: readonly string[]): void {
   ids.forEach((id, i) =>
-    db.insert(items).values({ id, sourceUrl: `https://a.test/${id}`, status: 'ready', thumbPath: `u/thumbs/${id}.webp`, createdAt: `2026-11-${10 + i}T00:00:00Z` }).run());
+    db.insert(items).values({ id, sourceUrl: `https://a.test/${id}`, status: 'ready', thumbPath: pathOf(id), createdAt: `2026-11-${10 + i}T00:00:00Z` }).run());
 }
 
 describe('thumb sync', () => {
@@ -63,7 +65,7 @@ describe('thumb sync', () => {
     const files = fakeFiles();
     const report = await createThumbSync(deps(files)).run();
     assert.deepEqual(report, { downloaded: 5, failed: 0, removed: 0 });
-    assert.deepEqual([files.maxInFlight, files.downloads[0]], [3, uriFor('e')]);
+    assert.deepEqual([files.maxInFlight, files.downloads[0]], [3, fileOf('e')]);
     assert.deepEqual([...store.fileUris().keys()].sort(), ['a', 'b', 'c', 'd', 'e']);
   });
 
@@ -85,11 +87,49 @@ describe('thumb sync', () => {
   it('removes files of deleted items and stray files nobody recorded', async () => {
     seedReady(db, ['kept']);
     const files = fakeFiles();
-    ['kept', 'purged'].forEach((id) => (store.record(id, uriFor(id)), files.onDisk.add(uriFor(id))));
-    files.onDisk.add(uriFor('from-another-account'));
+    ['kept', 'purged'].forEach((id) => (store.record({ itemId: id, fileUri: fileOf(id), thumbPath: pathOf(id) }), files.onDisk.add(fileOf(id))));
+    files.onDisk.add(fileOf('from-another-account'));
     const report = await createThumbSync(deps(files)).run();
-    assert.deepEqual([...files.onDisk], [uriFor('kept')]);
+    assert.deepEqual([...files.onDisk], [fileOf('kept')]);
     assert.deepEqual(report, { downloaded: 0, failed: 0, removed: 2 });
+  });
+
+  it('fetches a replaced thumbnail into a new file and then removes the old one (#107)', async () => {
+    seedReady(db, ['v']);
+    const files = fakeFiles();
+    store.record({ itemId: 'v', fileUri: fileOf('v'), thumbPath: pathOf('v') });
+    files.onDisk.add(fileOf('v'));
+    db.update(items).set({ thumbPath: 'u/thumbs/v-abc.webp' }).run();
+    await createThumbSync(deps(files)).run();
+    assert.deepEqual([...files.onDisk], ['file:///thumbs/v-abc.webp']);
+    assert.deepEqual(store.fileUris().get('v'), 'file:///thumbs/v-abc.webp');
+  });
+
+  it('keeps showing the old thumbnail when its replacement fails to download', async () => {
+    seedReady(db, ['v']);
+    const files = fakeFiles(new Set(['v-abc']));
+    store.record({ itemId: 'v', fileUri: fileOf('v'), thumbPath: pathOf('v') });
+    files.onDisk.add(fileOf('v'));
+    db.update(items).set({ thumbPath: 'u/thumbs/v-abc.webp' }).run();
+    await createThumbSync(deps(files)).run();
+    assert.deepEqual([[...files.onDisk], store.fileUris().get('v')], [[fileOf('v')], fileOf('v')]);
+  });
+
+  it('waits for a running download before clearing strays, so a file not yet recorded survives', async () => {
+    seedReady(db, ['a']);
+    const base = fakeFiles();
+    const files: FakeFiles = {
+      ...base,
+      download: async (_url, uri) => {
+        base.onDisk.add(uri);
+        await new Promise((resolve) => setTimeout(resolve, 5));
+      },
+    };
+    const thumbs = createThumbSync(deps(files));
+    const running = thumbs.run();
+    await new Promise((resolve) => setTimeout(resolve, 1));
+    await Promise.all([running, thumbs.reconcile()]);
+    assert.deepEqual([...files.onDisk], [fileOf('a')]);
   });
 
   it('runs once at a time; a call during a run gets one follow-up run', async () => {

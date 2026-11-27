@@ -57,6 +57,7 @@ interface GuardedRequest {
   readonly opts: Resolved;
   readonly signal: AbortSignal;
   readonly accept: string;
+  readonly method?: 'GET' | 'HEAD';
 }
 
 /**
@@ -64,11 +65,12 @@ interface GuardedRequest {
  * and the body read, so the whole fetch honours a single deadline.
  */
 async function guardedFetch(start: string, request: GuardedRequest): Promise<{ res: Response; finalUrl: string }> {
-  const { opts, signal, accept } = request;
+  const { opts, signal, accept, method = 'GET' } = request;
   let current = new URL(start);
   for (let hop = 0; hop <= DEFAULTS.maxRedirects; hop += 1) {
     await assertFetchableUrl(current, opts.lookup, signal);
     const res = await opts.fetchImpl(current.toString(), {
+      method,
       redirect: 'manual',
       signal,
       headers: { 'user-agent': DEFAULTS.userAgent, accept },
@@ -102,6 +104,13 @@ async function fetchJson(url: string, opts: Resolved): Promise<unknown> {
   return JSON.parse(page.body) as unknown;
 }
 
+async function imageExists(url: string, opts: Resolved): Promise<boolean> {
+  const signal = AbortSignal.timeout(opts.timeoutMs);
+  const { res } = await guardedFetch(url, { opts, signal, accept: DEFAULTS.imageAccept, method: 'HEAD' });
+  await res.body?.cancel();
+  return res.ok;
+}
+
 function resolve(options: FetcherOptions): Resolved {
   return {
     lookup: options.lookup,
@@ -119,7 +128,14 @@ export function makeFetchContext(url: string, options: FetcherOptions): ExtractC
     url: new URL(url),
     page: () => (pagePromise ??= fetchPage(url, opts)),
     fetchJson: (jsonUrl) => fetchJson(jsonUrl, opts),
+    imageExists: (imageUrl) => imageExists(imageUrl, opts),
   };
+}
+
+/** The context's HEAD check on its own, for scripts that only need to know whether an image is there (#107). */
+export function makeImageChecker(options: FetcherOptions): (url: string) => Promise<boolean> {
+  const opts = resolve(options);
+  return (url) => imageExists(url, opts);
 }
 
 /** Same guard, cap and single deadline as pages, but returns raw bytes (SPEC §4 media step). */

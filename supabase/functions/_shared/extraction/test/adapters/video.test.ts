@@ -43,12 +43,20 @@ describe('youtube adapter', () => {
     expect(result?.durationSeconds).toBeUndefined();
   });
 
-  it('drops non-http thumbnail urls from oEmbed', async () => {
+  it('asks YouTube for a 16:9 picture instead of the letterboxed oEmbed one', async () => {
     const ctx = makeContext(YT_URL, {
-      json: { 'https://www.youtube.com/oembed': { ...YT_OEMBED, thumbnail_url: 'javascript:alert(1)' } },
+      json: { 'https://www.youtube.com/oembed': YT_OEMBED },
       page: new Error('skip'),
+      images: ['https://i.ytimg.com/vi/abc123XYZ_0/maxresdefault.jpg'],
     });
-    expect((await youtube.extract(ctx))?.imageUrl).toBeUndefined();
+    const result = await youtube.extract(ctx);
+    expect(result).toMatchObject({ imageUrl: 'https://i.ytimg.com/vi/abc123XYZ_0/maxresdefault.jpg', imageWidth: 1280 });
+    expect(result?.imageHeight).toBe(720);
+  });
+
+  it('uses the medium 16:9 picture when the large one is missing', async () => {
+    const ctx = makeContext(YT_URL, { json: { 'https://www.youtube.com/oembed': YT_OEMBED }, page: new Error('skip') });
+    expect((await youtube.extract(ctx))?.imageUrl).toBe('https://i.ytimg.com/vi/abc123XYZ_0/mqdefault.jpg');
   });
 
   it('throws when oEmbed returns an invalid shape', async () => {

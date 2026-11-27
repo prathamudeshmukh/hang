@@ -98,7 +98,7 @@ describe('readHome', () => {
     s.collections.create({ id: 'c1', name: 'Reading' });
     s.collections.create({ id: 'c2', name: 'Watch' });
     ['i1', 'i2'].forEach((id) => s.save(id, 'c1'));
-    ['i1', 'i2'].forEach((id) => s.thumbs.record(id, `file:///thumbs/${id}.webp`));
+    ['i1', 'i2'].forEach((id) => s.thumbs.record({ itemId: id, fileUri: `file:///thumbs/${id}.webp`, thumbPath: `u/thumbs/${id}.webp` }));
     const pictures = readHome(s.sources, AT).collections.map(({ pictures }) => pictures);
     assert.deepEqual(pictures, [['file:///thumbs/i2.webp', 'file:///thumbs/i1.webp'], []]);
   });
@@ -153,7 +153,7 @@ describe('readPlace', () => {
   it('gives each card its downloaded thumbnail, if any', () => {
     s.items.save({ id: 'with', sourceUrl: URL });
     s.markReady('with', { thumbW: 100, thumbH: 100 });
-    s.thumbs.record('with', 'file:///thumbs/with.webp');
+    s.thumbs.record({ itemId: 'with', fileUri: 'file:///thumbs/with.webp', thumbPath: 'u/thumbs/with.webp' });
     const cards = readPlace(s.sources, { kind: 'inbox' }, CARD_NOW)?.cards ?? [];
     assert.deepEqual(cards[0].media, { ratio: 1, naturalRatio: 1, uri: 'file:///thumbs/with.webp' });
   });

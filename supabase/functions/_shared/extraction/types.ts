@@ -48,6 +48,8 @@ export interface ExtractContext {
   /** Title the sharing app sent along (SPEC §4); a hint for when the page itself can't be read. */
   readonly sharedTitle?: string;
   readonly fetchJson: (url: string) => Promise<unknown>;
+  /** Asks whether an image is there without downloading it; false on an error status, rejects on a network error. */
+  readonly imageExists: (url: string) => Promise<boolean>;
   /** Fetches the shared URL once; memoised across adapters. */
   readonly page: () => Promise<FetchedPage>;
 }

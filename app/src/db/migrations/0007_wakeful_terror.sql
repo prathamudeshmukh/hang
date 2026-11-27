@@ -1,0 +1,1 @@
+ALTER TABLE `thumb_files` ADD `thumb_path` text;

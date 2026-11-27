@@ -120,7 +120,9 @@ sync); `appSession.ts` wires the real ones and is the only file that imports nat
 
 Thumbnails (`src/thumbs/`, #27): after every sync, `thumbSync` drops files whose item is gone and downloads missing
 ones (signed links, 3 at a time, newest first) into `documentDirectory/thumbs/`; the local-only `thumb_files` table
-records them and is wiped with the account. Each thumbnail is fetched once and never re-checked (see #37).
+records them (with the `thumb_path` each was made from) and is wiped with the account. `media` names a thumbnail
+after its image (`{user}/thumbs/{id}-{hash(image_url)}.webp`, #107) and removes the earlier one, so a new picture is a
+new path: the phone downloads it into a new local file (expo-image caches by uri) and only then drops the old one.
 
 Home (`src/home/`, #30): `readHome(sources, now)` builds the strip prints, the Inbox count, today's Rediscover
 pick (`rediscover.ts`, pure) and the collection rows with their covers; `homeCopy.ts` holds the greeting, date and
@@ -195,6 +197,11 @@ Post pictures (#110): the mirror keeps a video's or GIF's frame as the post's pi
 no thumbnail says *the picture didn't come through* (`card.pictureLost`). Posts saved before get theirs from
 `supabase/functions/scripts/backfill-post-pictures/run.ts` (re-extracts, writes `post` and `image_url`; dry run unless
 `--apply`; service-role key). The scripts share `scripts/_shared/supabaseScript.ts`.
+
+YouTube pictures (#107): the `youtube` adapter asks for 16:9 `maxresdefault` (checked with the context's
+`imageExists` HEAD port), else `mqdefault`; oEmbed's `hqdefault` is 4:3 with the frame letterboxed. Items saved before
+get theirs from `supabase/functions/scripts/backfill-youtube-thumbs/run.ts` (rewrites `image_url` only; dry run unless
+`--apply`; service-role key).
 
 Room colour input (#85): `media`'s palette has `vibrant` (most saturated colour covering ≥ 3%, or null), since
 `dominant` is often the background. Palettes made before it get it from `supabase/functions/scripts/backfill-palette/run.ts`

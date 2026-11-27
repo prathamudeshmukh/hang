@@ -1,6 +1,7 @@
 import { videoOEmbedSchema } from '../schemas.ts';
 import type { ContentSource, ExtractContext } from '../types.ts';
 import { youTubeVideoId } from '../url.ts';
+import { youTubeThumbnail } from '../youTubeThumbnail.ts';
 
 const OEMBED = 'https://www.youtube.com/oembed?format=json&url=';
 const LENGTH_SECONDS = /"lengthSeconds":"(\d+)"/;
@@ -24,6 +25,7 @@ export const youtube: ContentSource = {
     if (!videoId) return null;
     const watchUrl = `https://www.youtube.com/watch?v=${videoId}`;
     const oembed = videoOEmbedSchema.parse(await ctx.fetchJson(`${OEMBED}${encodeURIComponent(watchUrl)}`));
+    const thumbnail = await youTubeThumbnail(videoId, ctx.imageExists);
     return {
       kind: 'video',
       adapter: 'youtube',
@@ -31,9 +33,9 @@ export const youtube: ContentSource = {
       title: oembed.title,
       author: oembed.author_name,
       siteName: 'YouTube',
-      imageUrl: oembed.thumbnail_url,
-      imageWidth: oembed.thumbnail_width,
-      imageHeight: oembed.thumbnail_height,
+      imageUrl: thumbnail.url,
+      imageWidth: thumbnail.width,
+      imageHeight: thumbnail.height,
       durationSeconds: await readDuration(ctx),
       embed: { provider: 'youtube', videoId, playableInline: true },
     };

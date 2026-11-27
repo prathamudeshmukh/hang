@@ -6,6 +6,8 @@ export interface MediaSource {
   readonly id: string;
   readonly userId: string;
   readonly imageUrl: string;
+  /** The thumbnail made from an earlier image, if any; removed once a new one is saved (#107). */
+  readonly thumbPath: string | null;
 }
 
 /** The media columns of `items` (SPEC §5). Written only by this function. */
@@ -19,8 +21,8 @@ export interface MediaPatch {
 export interface MediaStore {
   /** The item's image source, or null when it's deleted, not ready, or has no `image_url`. */
   readonly load: (id: string) => Promise<MediaSource | null>;
-  /** Writes the patch only while `image_url` still matches, so a newer image is never overwritten. */
-  readonly save: (source: MediaSource, patch: MediaPatch) => Promise<void>;
+  /** Writes the patch only while `image_url` still matches, so a newer image is never overwritten; false if it didn't. */
+  readonly save: (source: MediaSource, patch: MediaPatch) => Promise<boolean>;
   /** Clears an unusable `image_url` and any earlier thumbnail (same guard as save), so the app stops waiting (#34). */
   readonly dropImage: (source: MediaSource) => Promise<void>;
 }
@@ -28,6 +30,7 @@ export interface MediaStore {
 export interface ThumbStorage {
   /** Stores (or replaces) a WebP at a path inside the private `media` bucket. */
   readonly upload: (path: string, webp: Uint8Array) => Promise<void>;
+  readonly remove: (path: string) => Promise<void>;
 }
 
 export type FetchImage = (url: string) => Promise<Uint8Array>;

@@ -2,7 +2,8 @@ import type { MissingThumb, ThumbStore } from './thumbStore.ts';
 
 /** Where thumbnail files live on the device. */
 export interface ThumbFilesPort {
-  uriFor(itemId: string): string;
+  /** Named after the server file, so a new thumbnail gets a new local file (the image cache keys on the uri, #107). */
+  uriFor(thumbPath: string): string;
   /** Every file in the thumbnails folder. */
   list(): Promise<readonly string[]>;
   download(url: string, uri: string): Promise<void>;
@@ -45,10 +46,19 @@ async function inPool<T>(tasks: readonly T[], worker: (task: T) => Promise<void>
 
 /**
  * Keeps `thumbs/` in step with the items (SPEC §4, #27): drop files whose item is gone, then download the
- * missing ones. Each thumbnail is fetched once and never re-checked. Failures wait for the next run.
+ * missing ones. A thumbnail is fetched again only when the server makes a new one (a new path, #107); the old file
+ * stays on screen until then. Failures wait for the next run.
  */
 export function createThumbSync({ store, files, signer, log }: ThumbSyncDeps) {
-  async function reconcile(): Promise<number> {
+  // Passes and clean-ups take turns: a clean-up during a download would take a file not yet recorded for a stray.
+  let turn: Promise<unknown> = Promise.resolve();
+  function inTurn<T>(work: () => Promise<T>): Promise<T> {
+    const next = turn.catch(() => undefined).then(work);
+    turn = next;
+    return next;
+  }
+
+  async function removeGoneFiles(): Promise<number> {
     const stale = store.stale();
     store.forget(stale.map(({ itemId }) => itemId));
     const known = new Set(store.all().map(({ fileUri }) => fileUri));
@@ -60,16 +70,17 @@ export function createThumbSync({ store, files, signer, log }: ThumbSyncDeps) {
 
   async function downloadOne(thumb: MissingThumb, url: string | undefined): Promise<boolean> {
     if (!url) return false;
-    const uri = files.uriFor(thumb.itemId);
+    const uri = files.uriFor(thumb.thumbPath);
     try {
       await files.download(url, uri);
-      store.record(thumb.itemId, uri);
-      return true;
+      store.record({ itemId: thumb.itemId, fileUri: uri, thumbPath: thumb.thumbPath });
     } catch (error) {
       log(`thumbnail for ${thumb.itemId} failed: ${error instanceof Error ? error.name : 'unknown'}`);
-      await files.remove(uri).catch(() => undefined);
+      if (uri !== thumb.fileUri) await files.remove(uri).catch(() => undefined);
       return false;
     }
+    if (thumb.fileUri && thumb.fileUri !== uri) await files.remove(thumb.fileUri).catch(() => undefined);
+    return true;
   }
 
   async function signed(batch: readonly MissingThumb[]): Promise<ReadonlyMap<string, string>> {
@@ -93,7 +104,7 @@ export function createThumbSync({ store, files, signer, log }: ThumbSyncDeps) {
   }
 
   async function pass(): Promise<ThumbReport> {
-    const removed = await reconcile();
+    const removed = await removeGoneFiles();
     const before = store.missing().length;
     const downloaded = await download();
     return { downloaded, failed: before - downloaded, removed };
@@ -104,7 +115,7 @@ export function createThumbSync({ store, files, signer, log }: ThumbSyncDeps) {
 
   function run(): Promise<ThumbReport> {
     if (!running) {
-      running = pass().finally(() => {
+      running = inTurn(pass).finally(() => {
         running = null;
       });
       return running;
@@ -115,6 +126,8 @@ export function createThumbSync({ store, files, signer, log }: ThumbSyncDeps) {
     });
     return followUp;
   }
+
+  const reconcile = (): Promise<number> => inTurn(removeGoneFiles);
 
   return { run, reconcile };
 }

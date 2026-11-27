@@ -3,12 +3,15 @@ import type { ThumbFilesPort } from './thumbSync';
 
 const FOLDER = 'thumbs';
 
+/** `{user}/thumbs/{item}-{key}.webp` → `{item}-{key}.webp`. */
+const fileName = (thumbPath: string) => thumbPath.slice(thumbPath.lastIndexOf('/') + 1);
+
 /** Thumbnails in the app's documents folder: kept until Hang deletes them (unlike the cache folder). */
 export function createExpoThumbFiles(): ThumbFilesPort {
   const folder = new Directory(Paths.document, FOLDER);
   const ensureFolder = () => folder.create({ intermediates: true, idempotent: true });
   return {
-    uriFor: (itemId) => new File(folder, `${itemId}.webp`).uri,
+    uriFor: (thumbPath) => new File(folder, fileName(thumbPath)).uri,
     list: async () => (folder.exists ? folder.list().map((entry) => entry.uri) : []),
     download: async (url, uri) => {
       ensureFolder();

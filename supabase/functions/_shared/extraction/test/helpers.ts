@@ -12,6 +12,8 @@ interface ContextStubs {
   readonly page?: FetchedPage | Error;
   readonly json?: Record<string, unknown>;
   readonly sharedTitle?: string;
+  /** Image URLs that exist; every other image is missing. */
+  readonly images?: readonly string[];
 }
 
 /** Builds an ExtractContext with canned responses; unknown JSON URLs reject. */
@@ -29,5 +31,6 @@ export function makeContext(url: string, stubs: ContextStubs = {}): ExtractConte
       const value = stubs.json?.[key];
       return value instanceof Error ? Promise.reject(value) : Promise.resolve(value);
     },
+    imageExists: (imageUrl: string) => Promise.resolve(stubs.images?.includes(imageUrl) ?? false),
   };
 }
